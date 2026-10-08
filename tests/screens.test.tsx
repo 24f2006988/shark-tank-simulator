@@ -6,7 +6,7 @@ import { Debrief } from "@/components/Debrief";
 import { OfferCard } from "@/components/OfferCard";
 import { SeatedPanel, SharkCard } from "@/components/SharkCard";
 import { Stage, seatCentre } from "@/components/Stage";
-import { useScript } from "@/components/useScript";
+import { LINGER_MS, useScript } from "@/components/useScript";
 import type { Talk } from "@/lib/session";
 import { SHARK_LIST } from "@/lib/sharks";
 import type { Debrief as DebriefData, Offer } from "@/lib/types";
@@ -184,7 +184,7 @@ describe("useScript", () => {
     );
     expect(result.current.current?.text).toBe("First.");
     expect(result.current.shown).toBe(6);
-    act(() => void vi.advanceTimersByTime(700));
+    act(() => void vi.advanceTimersByTime(LINGER_MS + 50));
     expect(result.current.current?.text).toBe("Second.");
     act(() => result.current.skip());
     expect(result.current.playing).toBe(false);

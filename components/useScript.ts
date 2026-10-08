@@ -18,6 +18,11 @@ export type LineInput = Omit<Line, "id">;
 
 const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/** Letters revealed per tick: fast enough for a live demo, still visibly typed. One blip per tick. */
+export const LETTERS_PER_TICK = 3;
+/** Pause on a finished line so the room can read it before the next shark speaks. */
+export const LINGER_MS = 900;
+
 /**
  * Plays queued lines one at a time: the text types out in the speech bubble while the shark "mumbles" one
  * blip per letter, Animal Crossing style. `skip` clears the queue so the founder can get straight to answering.
@@ -55,15 +60,14 @@ export function useScript(soundOn: boolean) {
     };
 
     const type = () => {
-      n = instant ? total : Math.min(total, n + 1);
+      n = instant ? total : Math.min(total, n + LETTERS_PER_TICK);
       progress.current = { id: current.id, n };
       setShown(n);
       if (mumble) {
         const blip = blipFor(sharkId, text[n - 1] ?? "", n - 1, text);
         if (blip) playBlip(blip);
       }
-      // Linger a moment on the finished line so it can be read before the next shark speaks.
-      timer = n >= total ? setTimeout(advance, 650) : setTimeout(type, mumble ? 42 : 24);
+      timer = n >= total ? setTimeout(advance, LINGER_MS) : setTimeout(type, mumble ? 42 : 24);
     };
     type();
 
