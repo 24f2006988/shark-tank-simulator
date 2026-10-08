@@ -19,6 +19,7 @@ import {
 } from "./game";
 import { fallbackDebrief, fallbackEvaluation, fallbackOffers, fallbackQuestion } from "./fallback";
 import { generateJson } from "./gemini";
+import { SHARKS } from "./sharks";
 import { debriefPrompt, negotiatePrompt, offersPrompt, openingPrompt, systemPrompt, turnPrompt } from "./prompts";
 import {
   LIMITS,
@@ -35,90 +36,105 @@ import {
   offersRequestSchema,
   turnRequestSchema,
 } from "./schemas";
-import type { Debrief, Evaluation, NegotiateResult, OffersResult, Question, Source, TurnResult } from "./types";
+import type { Debrief, Evaluation, NegotiateResult, OffersResult, Question, SharkId, Sharks, Source, Turn, TurnResult } from "./types";
 
 type Result<T> = Promise<{ data: T; source: Source }>;
 
 const tidy = (s: string, max: number = LIMITS.line.max) => cleanText(s).slice(0, max);
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(n)));
 
-export async function runTurn({ pitch, sharks, turns }: z.output<typeof turnRequestSchema>): Result<TurnResult> {
-  const system = systemPrompt(pitch.difficulty);
+type TurnRequest = z.output<typeof turnRequestSchema>;
+type AiEvaluation = z.output<typeof aiTurnSchema>["evaluation"];
+type AiQuestion = z.output<typeof aiTurnSchema>["next"];
 
-  if (turns.length === 0) {
-    const { sharkId } = pickNextAsker(sharks, turns, false);
-    try {
-      const { data } = await generateJson(aiOpeningSchema, { system, prompt: openingPrompt(pitch, sharkId), temperature: 0.8, maxTokens: 400 });
-      const next = { sharkId, question: tidy(data.next.question, LIMITS.question.max), probing: data.next.probing, isFollowUp: false };
-      return { data: { evaluation: null, sharks, next, over: false }, source: "ai" };
-    } catch {
-      return { data: { evaluation: null, sharks, next: fallbackQuestion(sharkId, turns, false), over: false }, source: "fallback" };
-    }
-  }
-
-  const last = turns[turns.length - 1];
-  const isFinal = answeredCount(turns) >= DIFFICULTY[pitch.difficulty].maxAnswers;
+export async function runTurn(request: TurnRequest): Result<TurnResult> {
+  if (request.turns.length === 0) return openingTurn(request);
+  const { pitch, sharks, turns } = request;
   const followUp = followUpCandidate(sharks, turns);
-  const nextAsker = isFinal ? null : pickNextAsker(sharks, turns, false).sharkId;
+  const { raw, aiNext, source } = await judgeAnswer(request, followUp);
+  const { evaluation, after } = applyEvaluation(raw, request);
+  const over = isQuestioningOver(after, turns, pitch.difficulty);
+  const next = over ? null : chooseNext(aiNext, after, turns, raw.vague, followUp);
+  return { data: { evaluation, sharks: after, next, over }, source };
+}
 
-  let source: Source = "ai";
-  let raw: { quality: number; vague: boolean; reactions: { sharkId: (typeof SHARK_IDS)[number]; delta: number; line: string }[] };
-  let aiNext: z.output<typeof aiTurnSchema>["next"] | null = null;
+async function openingTurn({ pitch, sharks, turns }: TurnRequest): Result<TurnResult> {
+  const { sharkId } = pickNextAsker(sharks, turns, false);
   try {
-    const opts = { system, prompt: turnPrompt({ pitch, sharks, turns, followUp, next: nextAsker }), temperature: 0.7, maxTokens: 1200 };
-    if (isFinal) {
-      raw = (await generateJson(aiFinalTurnSchema, opts)).data.evaluation;
-    } else {
-      const { data } = await generateJson(aiTurnSchema, opts);
-      raw = data.evaluation;
-      aiNext = data.next;
-    }
+    const { data } = await generateJson(aiOpeningSchema, {
+      system: systemPrompt(pitch.difficulty),
+      prompt: openingPrompt(pitch, sharkId),
+      temperature: 0.8,
+      maxTokens: 400,
+    });
+    const next = { sharkId, question: tidy(data.next.question, LIMITS.question.max), probing: data.next.probing, isFollowUp: false };
+    return { data: { evaluation: null, sharks, next, over: false }, source: "ai" };
   } catch {
-    raw = fallbackEvaluation(last.answer ?? "", sharks, last.sharkId);
-    source = "fallback";
+    return { data: { evaluation: null, sharks, next: fallbackQuestion(sharkId, turns, false), over: false }, source: "fallback" };
   }
+}
 
-  // One reaction per shark still in; each delta is reported as the change actually applied.
+/** One Gemini call judges the latest answer and, unless this was the last answer, drafts the next question. */
+async function judgeAnswer(
+  { pitch, sharks, turns }: TurnRequest,
+  followUp: SharkId | null,
+): Promise<{ raw: AiEvaluation; aiNext: AiQuestion | null; source: Source }> {
+  const isFinal = answeredCount(turns) >= DIFFICULTY[pitch.difficulty].maxAnswers;
+  const nextAsker = isFinal ? null : pickNextAsker(sharks, turns, false).sharkId;
+  const opts = {
+    system: systemPrompt(pitch.difficulty),
+    prompt: turnPrompt({ pitch, sharks, turns, followUp, next: nextAsker }),
+    temperature: 0.7,
+    maxTokens: 1200,
+  };
+  try {
+    if (isFinal) return { raw: (await generateJson(aiFinalTurnSchema, opts)).data.evaluation, aiNext: null, source: "ai" };
+    const { data } = await generateJson(aiTurnSchema, opts);
+    return { raw: data.evaluation, aiNext: data.next, source: "ai" };
+  } catch {
+    const last = turns[turns.length - 1];
+    return { raw: fallbackEvaluation(last.answer ?? "", sharks, last.sharkId), aiNext: null, source: "fallback" };
+  }
+}
+
+/** Applies one capped reaction per shark still in, then walkouts; each delta is reported as the change actually applied. */
+function applyEvaluation(raw: AiEvaluation, { pitch, sharks, turns }: TurnRequest): { evaluation: Evaluation; after: Sharks } {
+  const askerId = turns[turns.length - 1].sharkId;
   const proposed = capBystanders(
     activeSharks(sharks).map((id) => {
       const r = raw.reactions.find((x) => x.sharkId === id);
       return { sharkId: id, delta: r?.delta ?? 0, line: tidy(r?.line ?? "") };
     }),
-    last.sharkId,
+    askerId,
   );
   const applied = applyReactions(sharks, proposed, pitch.difficulty);
   const reactions = proposed.map((r) => ({ ...r, delta: applied[r.sharkId].interest - sharks[r.sharkId].interest }));
   const reasons = Object.fromEntries(reactions.map((r) => [r.sharkId, r.line]));
   const { sharks: after, walkouts } = applyWalkouts(applied, turns, pitch.difficulty, reasons);
-  const evaluation: Evaluation = {
-    quality: clamp(raw.quality, 1, 5) as Evaluation["quality"],
-    vague: raw.vague,
-    reactions,
-    walkouts,
-  };
+  const quality = clamp(raw.quality, 1, 5) as Evaluation["quality"];
+  return { evaluation: { quality, vague: raw.vague, reactions, walkouts }, after };
+}
 
-  const over = isQuestioningOver(after, turns, pitch.difficulty);
-  let next: Question | null = null;
-  if (!over) {
-    // Any shark still in may ask; the shark who just asked may press on only within the follow-up streak cap.
-    const usable =
-      aiNext &&
-      aiNext.question.trim() &&
-      after[aiNext.sharkId].status === "in" &&
-      (aiNext.sharkId !== last.sharkId || followUp === last.sharkId || activeSharks(after).length === 1);
-    if (aiNext && usable) {
-      next = {
-        sharkId: aiNext.sharkId,
-        question: tidy(aiNext.question, LIMITS.question.max),
-        probing: aiNext.probing,
-        isFollowUp: aiNext.sharkId === last.sharkId && raw.vague,
-      };
-    } else {
-      const pick = pickNextAsker(after, turns, raw.vague);
-      next = fallbackQuestion(pick.sharkId, turns, pick.isFollowUp);
-    }
+/**
+ * Prefers the AI's question, which is shaped by the founder's answers, over a scripted one.
+ * Any shark still in may ask; the shark who just asked may press on only within the follow-up
+ * streak cap. A question drafted for a shark who has just walked out passes to a shark still in,
+ * preferring the one whose lens matches its topic.
+ */
+function chooseNext(aiNext: AiQuestion | null, sharks: Sharks, turns: Turn[], vague: boolean, followUp: SharkId | null): Question {
+  const lastId = turns[turns.length - 1].sharkId;
+  const pick = pickNextAsker(sharks, turns, vague);
+  if (!aiNext?.question.trim()) return fallbackQuestion(pick.sharkId, turns, pick.isFollowUp);
+
+  const question = tidy(aiNext.question, LIMITS.question.max);
+  const active = activeSharks(sharks);
+  if (sharks[aiNext.sharkId].status === "out") {
+    const heir = active.find((id) => id !== lastId && SHARKS[id].lens === aiNext.probing) ?? pick.sharkId;
+    return { sharkId: heir, question, probing: aiNext.probing, isFollowUp: false };
   }
-  return { data: { evaluation, sharks: after, next, over }, source };
+  const mayAsk = aiNext.sharkId !== lastId || followUp === lastId || active.length === 1;
+  if (!mayAsk) return fallbackQuestion(pick.sharkId, turns, pick.isFollowUp);
+  return { sharkId: aiNext.sharkId, question, probing: aiNext.probing, isFollowUp: aiNext.sharkId === lastId && vague };
 }
 
 export async function runOffers({ pitch, sharks, turns }: z.output<typeof offersRequestSchema>): Result<OffersResult> {

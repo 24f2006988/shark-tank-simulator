@@ -98,6 +98,20 @@ describe("POST /api/turn", () => {
     expect(body.data.next.isFollowUp).toBe(false);
   });
 
+  it("hands a question drafted for a shark who just walked out to the shark still in who covers its topic", async () => {
+    generateJson.mockResolvedValue({
+      data: {
+        evaluation: { quality: 1, vague: true, reactions: [{ sharkId: "vikram", delta: -20, line: "I'm out." }] },
+        next: { sharkId: "vikram", question: "Who renews after the first month?", probing: "customer" },
+      },
+      model: "m",
+    });
+    const turns = [makeTurn("meera", "Rs 400 CAC"), makeTurn("vikram", "dunno")];
+    const body = await (await post(turnRoute.POST, { ...session, sharks: makeSharks("realistic", { vikram: 25 }), turns })).json();
+    expect(body.data.sharks.vikram.status).toBe("out");
+    expect(body.data.next).toEqual({ sharkId: "meera", question: "Who renews after the first month?", probing: "customer", isFollowUp: false });
+  });
+
   it("falls back to scripted content when Gemini fails, never a 5xx", async () => {
     generateJson.mockImplementation(async () => {
       throw new Error("503");
