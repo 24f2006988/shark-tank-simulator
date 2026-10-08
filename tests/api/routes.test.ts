@@ -81,7 +81,7 @@ describe("POST /api/turn", () => {
     });
     const body = await (await post(turnRoute.POST, { ...session, turns: [makeTurn("vikram", "dunno")] })).json();
     expect(body.data.sharks.vikram.interest).toBe(30);
-    expect(body.data.sharks.zara.interest).toBe(44);
+    expect(body.data.sharks.zara.interest).toBe(46);
   });
 
   it("replaces a question from a shark past the follow-up streak cap", async () => {

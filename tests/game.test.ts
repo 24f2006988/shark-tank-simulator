@@ -41,7 +41,7 @@ describe("applyReactions", () => {
   it("scales negative deltas by difficulty", () => {
     expect(clampDelta(-10, "explore")).toBe(-2);
     expect(clampDelta(-10, "friendly")).toBe(-6);
-    expect(clampDelta(-10, "ruthless")).toBe(-14);
+    expect(clampDelta(-10, "ruthless")).toBe(-12);
     expect(clampDelta(10, "ruthless")).toBe(10);
   });
 
@@ -55,13 +55,13 @@ describe("applyReactions", () => {
 });
 
 describe("capBystanders", () => {
-  it("limits only the reactions of sharks who did not ask", () => {
+  it("limits only the reactions of sharks who did not ask, and drops more tightly than gains", () => {
     const capped = capBystanders([
       { sharkId: "vikram", delta: -20, line: "" },
       { sharkId: "meera", delta: -20, line: "" },
       { sharkId: "zara", delta: 15, line: "" },
     ], "vikram");
-    expect(capped.map((r) => r.delta)).toEqual([-20, -6, 6]);
+    expect(capped.map((r) => r.delta)).toEqual([-20, -4, 6]);
   });
 });
 
@@ -142,7 +142,7 @@ describe("end of questioning and offers", () => {
   });
 
   it("only sharks above the offer threshold may offer", () => {
-    const sharks = makeSharks("realistic", { vikram: 80, meera: 54, arjun: 55, zara: 90 });
+    const sharks = makeSharks("realistic", { vikram: 80, meera: 59, arjun: 60, zara: 90 });
     sharks.zara.status = "out";
     expect(eligibleForOffer(sharks, "realistic")).toEqual(["vikram", "arjun"]);
   });

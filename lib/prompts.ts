@@ -10,7 +10,7 @@ const TONE: Record<Difficulty, string> = {
   explore: "Exploratory and mentor-like: engage in an open, curious conversation about the vision, market possibilities, and potential financial returns. Treat this as an encouraging brainstorming session with minimal rigidity; guide and help the pitcher rather than grilling them.",
   friendly: "Encouraging but honest: point out gaps kindly and reward partial answers.",
   realistic: "Like a real seed-stage partner meeting: fair, sharp and unimpressed by buzzwords.",
-  ruthless: "Sceptical with little patience: punish vagueness hard and demand evidence for every claim.",
+  ruthless: "Sceptical with little patience: demand evidence for every claim and punish dodges, hand-waving and numbers that do not add up hard. A precise, evidenced answer still earns full credit, even from this panel.",
 };
 
 export function systemPrompt(difficulty: Difficulty, customPanels?: Partial<Record<SharkId, SharkCustomization>>): string {
@@ -63,6 +63,7 @@ export const HARD_QUESTION_RULES = [
   "Ask for something checkable: a number, a named customer, a date or a cost.",
   "Target the asker's lens and the weakest unresolved point in it.",
   "If the last answer was vague, dodged the question or contradicted an earlier answer, the same shark follows up and names exactly what was missing.",
+  "A shark asking a new (not follow-up) question moves to an open point in its own lens; never reopen a point another shark has already pressed.",
   "One question only, at most 40 words, no preamble, no lists.",
   "Never repeat a question already asked in the transcript.",
 ];
@@ -126,7 +127,7 @@ export function turnPrompt({ pitch, sharks, turns, followUp, next }: TurnPromptI
     `Latest question from ${SHARKS[last.sharkId].name} (${last.sharkId}): ${last.question}`,
     `<answer>\n${last.answer ?? ""}\n</answer>`,
     `Current interest: ${interestLine(sharks)}.`,
-    `Step 1, evaluation. Judge the answer to the latest question. quality is 1 (dodged) to 5 (excellent). vague is true if the answer avoids the specific thing asked. Give one reaction per shark still in, with delta from this rubric:\n${rules(activeRubric)}\nEach line is that shark's in-character reaction, at most 20 words, specific to what the founder said. A shark whose interest is collapsing should sound like they are close to leaving.`,
+    `Step 1, evaluation. Judge the answer to the latest question. quality is 1 (dodged) to 5 (excellent) and rates how well the question was answered, not how attractive the business is. vague is true only if the answer avoids or blurs the specific thing asked (no number, name or date where one was asked for); an answer that gives the requested specifics is not vague even when the numbers are weak, so judge weak numbers through quality and delta instead. Give one reaction per shark still in, with delta from this rubric:\n${rules(activeRubric)}\nEach line is that shark's in-character reaction, at most 20 words, specific to what the founder said. A shark whose interest is collapsing should sound like they are close to leaving.`,
   ];
   if (next) {
     const allowed = followUp && followUp !== next

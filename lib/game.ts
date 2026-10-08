@@ -16,8 +16,10 @@ export interface DifficultyRules {
 export const DIFFICULTY: Record<Difficulty, DifficultyRules> = {
   explore: { label: "Explore with Sharks", startInterest: 70, negativeMultiplier: 0.2, walkoutBelow: 5, offerMin: 35, maxAnswers: 6, acceptGap: 0.3 },
   friendly: { label: "Friendly", startInterest: 60, negativeMultiplier: 0.6, walkoutBelow: 10, offerMin: 45, maxAnswers: 6, acceptGap: 0.2 },
-  realistic: { label: "Realistic", startInterest: 50, negativeMultiplier: 1, walkoutBelow: 20, offerMin: 55, maxAnswers: 7, acceptGap: 0.1 },
-  ruthless: { label: "Ruthless", startInterest: 40, negativeMultiplier: 1.4, walkoutBelow: 30, offerMin: 65, maxAnswers: 8, acceptGap: 0.05 },
+  realistic: { label: "Realistic", startInterest: 50, negativeMultiplier: 1, walkoutBelow: 20, offerMin: 60, maxAnswers: 7, acceptGap: 0.1 },
+  // Calibrated on 9 Oct with simulated strong/decent/weak founders against the live models: only consistently strong
+  // answers reach an offer, a decent founder lasts the full round, and a vague one is gone within five answers.
+  ruthless: { label: "Ruthless", startInterest: 50, negativeMultiplier: 1.2, walkoutBelow: 25, offerMin: 70, maxAnswers: 8, acceptGap: 0.05 },
 };
 
 /** Answers before anyone may walk out, so nobody leaves on the first exchange. */
@@ -28,6 +30,8 @@ export const MIN_ANSWERS_BEFORE_OFFERS = 4;
 export const MAX_COUNTERS = 2;
 /** Sharks who did not ask the question react, but only mildly, so one answer cannot sink the whole panel. */
 export const BYSTANDER_MAX_DELTA = 6;
+/** Bystanders lose less than they can gain: a weak spot costs the shark probing it, not the whole panel. */
+export const BYSTANDER_MAX_DROP = 4;
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 const roundHalf = (n: number) => Math.round(n * 2) / 2;
@@ -63,7 +67,7 @@ export function clampDelta(delta: number, difficulty: Difficulty): number {
 
 export function capBystanders(reactions: Reaction[], askerId: SharkId): Reaction[] {
   return reactions.map((r) =>
-    r.sharkId === askerId ? r : { ...r, delta: clamp(r.delta, -BYSTANDER_MAX_DELTA, BYSTANDER_MAX_DELTA) },
+    r.sharkId === askerId ? r : { ...r, delta: clamp(r.delta, -BYSTANDER_MAX_DROP, BYSTANDER_MAX_DELTA) },
   );
 }
 

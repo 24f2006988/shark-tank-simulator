@@ -23,6 +23,16 @@ describe("prompts", () => {
     expect(sys).toContain("Ruthless");
   });
 
+  it("Ruthless punishes dodges but still credits precise answers, and vague means the asked specifics are missing", () => {
+    expect(systemPrompt("ruthless")).toMatch(/precise, evidenced answer still earns full credit/);
+    const prompt = turnPrompt({ pitch, sharks: makeSharks(), turns: [makeTurn("vikram", "Rs 14 a bag")], followUp: null, next: "meera" });
+    expect(prompt).toMatch(/not vague even when the numbers are weak/);
+  });
+
+  it("a new asker moves on instead of piling onto a point another shark pressed", () => {
+    expect(HARD_QUESTION_RULES.join(" ")).toMatch(/never reopen a point another shark has already pressed/);
+  });
+
   it("system prompt in explore mode sets exploratory tone", () => {
     const sys = systemPrompt("explore");
     expect(sys).toContain("Explore with Sharks");
