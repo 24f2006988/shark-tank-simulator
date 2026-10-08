@@ -66,6 +66,24 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - Deployed URL (Cloud Run, asia-south1, GCP project project-49ab7bea-3f18-4f37-868): https://shark-tank-simulator-888217860739.asia-south1.run.app
 - GitHub repo: https://github.com/24f2006988/shark-tank-simulator (submit as https://github.com/24f2006988/shark-tank-simulator.git)
 
+### Current state (11:10, 8 Oct): infrastructure done, NO app features yet
+- **Live site is only a placeholder** (`app/page.tsx`: title, tagline, 4 shark names, "The tank opens soon"). No pitch form, no questioning, no Gemini calls, no debrief. 0 of 5 required features work.
+- Done: Next.js scaffold, `output: "standalone"` + `Dockerfile` + `.dockerignore`, deploy pipeline verified (HTTP 200 on the live URL), `GEMINI_API_KEY` set as a Cloud Run env var, docs/rules/checklist, repo-size pre-commit hook, gcloud installed and logged in.
+- Not started: everything in `PLAN.md` section 7 (`lib/`, API routes, `/tank`, `/debrief`, components), tests (no Vitest yet), accessibility, README "Google services used" section, LinkedIn post.
+
+### Next steps (follow `PLAN.md` timeline; behind schedule by ~15 min)
+1. `lib/types.ts` (agree on shapes first), `lib/sharks.ts`, `lib/gemini.ts` (timeout, retry, schema validation), `lib/prompts.ts`, `lib/fallback.ts`, `lib/validate.ts`.
+2. `POST /api/turn` (evaluate answer + next question, one Gemini call) + Vitest tests for `lib/` and input validation.
+3. Landing pitch form + `/tank` page (panel, interest meters, chat, answer box). **Redeploy.**
+4. `/api/debrief` + `/debrief` page (scorecard, improved pitch, copy). **Redeploy. All required features live by ~15:00.**
+5. Extras (walkouts, offers/negotiation, voice), then a11y pass, README, LinkedIn post, checklist, submit 17:45-18:00.
+
+### Deploy how-to (for any AI)
+- gcloud is NOT on this session's PATH: use `"$env:LOCALAPPDATA\gcloud-cli\google-cloud-sdk\bin\gcloud.cmd"` (PowerShell). Account xalphanoscruiser@gmail.com, project `project-49ab7bea-3f18-4f37-868` (only project with billing), region `asia-south1` (both set as gcloud defaults).
+- Redeploy: `gcloud.cmd run deploy shark-tank-simulator --source . --region asia-south1 --quiet` (about 3-4 min; env vars persist across deploys). Then `curl` the URL to confirm 200.
+- Run `npm run build` locally before deploying; a failed Cloud Build leaves the previous revision serving.
+- Changing the Gemini key: `gcloud.cmd run services update shark-tank-simulator --region asia-south1 --update-env-vars GEMINI_API_KEY=...` (never commit it).
+
 ## Progress log (append one line per change: time, which AI, what)
 - 2026-10-08, Claude Code: chose GitHub Roast and Rescue; created `chosen problem statement.txt`; updated Project status.
 - 2026-10-08, Claude Code: added HARD LIMITS (repo < 10 MB, deployment must work), `.gitignore`, `scripts/check-repo-size.sh`.
@@ -77,3 +95,4 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08, Claude Code: added rules from the official briefing deck: Cloud Run ONLY (replaces Vercel), 3 required links (.git GitHub URL, Cloud Run URL, LinkedIn post), exactly one branch, scoring rubric (incl. testing + accessibility), latest score counts.
 - 2026-10-08, Claude Code: added AI-evaluator scoring details (7 categories incl. Google Services) from briefing screenshot to HARD rules context and PLAN.md rubric.
 - 2026-10-08, Claude Code: installed gcloud (%LOCALAPPDATA%\gcloud-cli), deployed hello-world to Cloud Run: https://shark-tank-simulator-888217860739.asia-south1.run.app. Redeploy: `gcloud run deploy shark-tank-simulator --source . --region asia-south1` (env vars persist).
+- 2026-10-08 11:10, Claude Code: added "Current state", "Next steps" and "Deploy how-to" to Project status (live site is a placeholder; no features yet).
