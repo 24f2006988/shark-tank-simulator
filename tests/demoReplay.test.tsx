@@ -36,6 +36,14 @@ describe("recorded demo scripts", () => {
     expect(Object.values(weak.beats.at(-1)!.interests).every((v) => v === null)).toBe(true);
     expect(weak.summary.overall).toBeLessThan(strong.summary.overall);
   });
+
+  it("show a deal on the Ruthless panel with every shark still in and every shark offering", () => {
+    const win = DEMO_SCRIPTS.find((s) => s.id === "ruthless")!;
+    expect(win.pitch.difficulty).toBe("ruthless");
+    expect(Object.values(win.beats.at(-1)!.interests).every((v) => v !== null)).toBe(true);
+    expect(new Set(win.beats.filter((b) => b.kind === "offer").map((b) => b.sharkId)).size).toBe(4);
+    expect(win.summary.outcome).toMatch(/^Deal:/);
+  });
 });
 
 describe("beatDelayMs", () => {

@@ -24,8 +24,8 @@ describe("DemoEntry", () => {
     const { container } = render(<DemoEntry />);
     const details = container.querySelector("details")!;
     expect(details.open).toBe(false);
-    expect(screen.getByText(/Watch a 60-second demo/)).toBeTruthy();
-    expect(screen.queryByText(/Recorded demo/i)).toBeNull();
+    expect(screen.getByText(/Watch a recorded demo/)).toBeTruthy();
+    expect(screen.queryByText(/Recorded demo: not live AI output/)).toBeNull();
   });
 
   it("shows the labelled recording once opened, without autoplaying", async () => {
@@ -33,8 +33,28 @@ describe("DemoEntry", () => {
     const details = container.querySelector("details")!;
     details.open = true;
     fireEvent(details, new Event("toggle"));
-    expect(await screen.findByText(/Recorded demo/i)).toBeTruthy();
+    expect(await screen.findByText(/Recorded demo: not live AI output/)).toBeTruthy();
     expect(screen.getAllByRole("button", { name: /play|start/i }).length).toBeGreaterThan(0);
+  });
+});
+
+describe("DemoEntry 'Watch a win on Ruthless'", () => {
+  it("opens the replay on the Ruthless recording, already playing, and brings it into view", async () => {
+    const { container } = render(<DemoEntry />);
+    const details = container.querySelector("details")!;
+    details.scrollIntoView = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Watch a win on Ruthless" }));
+
+    expect(details.open).toBe(true);
+    expect((await screen.findByRole("button", { name: "Ruthless win" })).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText(/ChaiCart: Rs 50 lakh for 10% \(ruthless\)/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Pause" })).toBeTruthy();
+    expect(details.scrollIntoView).toHaveBeenCalled();
   });
 });
 
@@ -53,7 +73,7 @@ describe("DemoEntry 'try it live'", () => {
 
     expect(document.activeElement).toBe(field);
     expect(field.scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "center" });
-    expect(screen.queryByText(/Recorded demo/i)).toBeNull();
+    expect(screen.queryByText(/Recorded demo: not live AI output/)).toBeNull();
     field.remove();
   });
 });

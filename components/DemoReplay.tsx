@@ -26,14 +26,16 @@ const KIND_LABEL: Record<DemoBeat["kind"], string> = {
 
 interface Props {
   scripts?: DemoScript[];
+  /** Recording to open on; it starts playing straight away. */
+  startWith?: DemoScript["id"];
   onTryLive?: () => void;
 }
 
 /** Plays back recorded sessions of the real panel. It makes no API calls and is labelled as a recording. */
-export function DemoReplay({ scripts = DEMO_SCRIPTS, onTryLive }: Props) {
-  const [scriptId, setScriptId] = useState(scripts[0].id);
+export function DemoReplay({ scripts = DEMO_SCRIPTS, startWith, onTryLive }: Props) {
+  const [scriptId, setScriptId] = useState(startWith ?? scripts[0].id);
   const [index, setIndex] = useState(0);
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(startWith !== undefined);
 
   const script = scripts.find((s) => s.id === scriptId) ?? scripts[0];
   const last = script.beats.length - 1;

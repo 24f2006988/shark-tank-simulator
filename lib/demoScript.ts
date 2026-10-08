@@ -1,7 +1,8 @@
 import type { Difficulty, SharkId } from "./types";
 
 /**
- * Two real sessions recorded from the live app (Gemini panel, 8 Oct 2026) and trimmed to the key lines.
+ * Real sessions recorded from the live app (Gemini panel; strong and weak on 8 Oct 2026, trimmed to the key lines;
+ * the Ruthless win on 9 Oct 2026, verbatim, showing the asker's reaction and the most moved other shark, as the tank does).
  * The replay in components/DemoReplay.tsx plays them back with no API calls.
  */
 type BeatKind = "question" | "answer" | "reaction" | "walkout" | "offer";
@@ -28,7 +29,7 @@ interface DemoSummary {
 }
 
 export interface DemoScript {
-  id: "strong" | "weak";
+  id: "strong" | "weak" | "ruthless";
   label: string;
   hint: string;
   pitch: { ideaName: string; oneLiner: string; askLakh: number; equityPct: number; difficulty: Difficulty };
@@ -652,6 +653,373 @@ export const DEMO_SCRIPTS: DemoScript[] = [
       ],
       "fix": "Calculate your exact monthly burn rate, fixed costs, and remaining runway before pitching to anyone.",
       "outcome": "No deal: every shark is out"
+    }
+  },
+  {
+    "id": "ruthless",
+    "label": "Ruthless win",
+    "hint": "ChaiCart on the hardest panel: every answer backed by numbers",
+    "pitch": {
+      "ideaName": "ChaiCart",
+      "oneLiner": "Subscription tea carts for office parks, paid per cup through UPI.",
+      "askLakh": 50,
+      "equityPct": 10,
+      "difficulty": "ruthless"
+    },
+    "beats": [
+      {
+        "kind": "question",
+        "sharkId": "vikram",
+        "text": "You claim 58 percent gross margin per cup at Rs 15; what is your fully loaded delivery and staffing cost per cup, and what is your current monthly net burn?",
+        "interests": {
+          "vikram": 40,
+          "meera": 40,
+          "arjun": 40,
+          "zara": 40
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "Fully loaded cost is Rs 6.30 a cup: Rs 3.10 for tea, milk, sugar and the cup, Rs 2.20 for the cart lead's salary with PF, and Rs 1.00 for delivery from our central kitchen. That leaves Rs 8.70, the 58 percent. We are not burning: last month we sold 2.34 lakh cups, Rs 35.1 lakh revenue. After the parks' 15 percent revenue share of Rs 5.3 lakh and Rs 11.6 lakh for supervisors, the kitchen lease and head office, we made Rs 3.5 lakh net profit. The Rs 50 lakh is for growth, not survival.",
+        "interests": {
+          "vikram": 40,
+          "meera": 40,
+          "arjun": 40,
+          "zara": 40
+        }
+      },
+      {
+        "kind": "reaction",
+        "sharkId": "vikram",
+        "text": "Good, the math actually checks out and you are net profitable. Let us see the books.",
+        "delta": 15,
+        "interests": {
+          "vikram": 55,
+          "meera": 40,
+          "arjun": 40,
+          "zara": 40
+        }
+      },
+      {
+        "kind": "question",
+        "sharkId": "meera",
+        "text": "You claim 9000 cups a day across 22 carts, which is over 400 cups per cart. Name the exact tech park where you hit peak volume and how many carts are stationed there.",
+        "interests": {
+          "vikram": 55,
+          "meera": 46,
+          "arjun": 40,
+          "zara": 46
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "Manyata Tech Park in Hebbal. We have 7 carts there, one per floor across Blocks D and G, selling about 2,900 cups a day, so roughly 415 a cart. Peak is 3:30 to 5 pm, when 38 percent of the day's cups go. The pantry is the competition and we still win: the pantry machine is free but sits a floor away with a queue, our cart comes to the desk row in under 2 minutes. 62 percent of our weekly payers at Manyata buy at least 4 days out of 5, and that repeat rate is what the park's facility manager, Ramesh Nair, cited when he renewed us in July.",
+        "interests": {
+          "vikram": 55,
+          "meera": 46,
+          "arjun": 40,
+          "zara": 46
+        }
+      },
+      {
+        "kind": "reaction",
+        "sharkId": "meera",
+        "text": "Naming Manyata, Ramesh Nair, and the 415-cup breakdown is stellar. You actually know your ground.",
+        "delta": 15,
+        "interests": {
+          "vikram": 55,
+          "meera": 61,
+          "arjun": 40,
+          "zara": 46
+        }
+      },
+      {
+        "kind": "question",
+        "sharkId": "arjun",
+        "text": "What stops a well-funded competitor from placing identical carts next to yours in Manyata tomorrow?",
+        "interests": {
+          "vikram": 60,
+          "meera": 61,
+          "arjun": 40,
+          "zara": 51
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "Three things. First, the contract: our Manyata agreement gives us exclusive beverage-cart rights on the floors we serve for 24 months, with a 6-month notice period, so a rival cannot park next to us without the landlord breaching it. Second, the employer wallet: at 4 parks the employer subsidy is loaded through our UPI wallet and reconciled into their HR payroll export every month. Ripping that out means redoing finance approvals, and nobody has churned from it. Third, cost: one central kitchen serves 22 carts, so our cost per cup is Rs 6.30. A newcomer with 3 carts pays closer to Rs 9 and loses money at Rs 15. A copier can try, but they start with no floors, no wallet and worse margins.",
+        "interests": {
+          "vikram": 60,
+          "meera": 61,
+          "arjun": 40,
+          "zara": 51
+        }
+      },
+      {
+        "kind": "reaction",
+        "sharkId": "arjun",
+        "text": "Addressed exclusivity, switching costs, and cost disadvantage of copycats directly.",
+        "delta": 10,
+        "interests": {
+          "vikram": 60,
+          "meera": 61,
+          "arjun": 50,
+          "zara": 51
+        }
+      },
+      {
+        "kind": "question",
+        "sharkId": "zara",
+        "text": "You want Rs 50 lakh to expand to Pune and Hyderabad; who is running those new regions and what is your founder-market background in scaling outside Bengaluru?",
+        "interests": {
+          "vikram": 65,
+          "meera": 65,
+          "arjun": 50,
+          "zara": 56
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "I ran city launches for four years at a food delivery company, including Pune, where I took us from zero to 300 restaurant partners in 9 months. My co-founder Priya built our central kitchen and the cart training manual. For the new cities we promote from inside: Suresh, our best Manyata cart lead, has already moved to Pune and signed a letter of intent with one tech park in Hinjewadi for 8 carts starting in January. Hyderabad follows in month 6, only after Pune hits 350 cups a cart, so we never open a city on hope. I will spend the first 90 days in Pune myself.",
+        "interests": {
+          "vikram": 65,
+          "meera": 65,
+          "arjun": 50,
+          "zara": 56
+        }
+      },
+      {
+        "kind": "reaction",
+        "sharkId": "zara",
+        "text": "Promoting Suresh and moving yourself to Pune shows operational maturity and real grit. I like this execution.",
+        "delta": 15,
+        "interests": {
+          "vikram": 65,
+          "meera": 65,
+          "arjun": 50,
+          "zara": 71
+        }
+      },
+      {
+        "kind": "question",
+        "sharkId": "arjun",
+        "text": "You claim Suresh signed a letter of intent in Hinjewadi; what exact penalty clauses protect you if the park reneges before January?",
+        "interests": {
+          "vikram": 70,
+          "meera": 70,
+          "arjun": 50,
+          "zara": 71
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "None, and I would not pretend otherwise: an LOI is not binding. So we structured the risk instead. We spend nothing on Hinjewadi carts until the 24-month exclusive agreement is signed; the LOI converts to that agreement after a 2-week free pilot with 2 carts we move from Bengaluru, so our exposure is about Rs 40,000 in transport and staff. Carts take 3 weeks to build, so we never hold idle inventory. And Hinjewadi is not our only shot: we have a second Pune park, in Kharadi, in pilot talks. If one park walks away we lose two weeks, not the round.",
+        "interests": {
+          "vikram": 70,
+          "meera": 70,
+          "arjun": 50,
+          "zara": 71
+        }
+      },
+      {
+        "kind": "reaction",
+        "sharkId": "arjun",
+        "text": "Fair admission on the LOI, but your pilot structure limits deployment risk effectively.",
+        "delta": 10,
+        "interests": {
+          "vikram": 70,
+          "meera": 70,
+          "arjun": 60,
+          "zara": 71
+        }
+      },
+      {
+        "kind": "question",
+        "sharkId": "vikram",
+        "text": "You claim each cart pays back its Rs 1.2 lakh setup cost in 4 months; what is the exact depreciation schedule and replacement rate for carts over a 12-month period?",
+        "interests": {
+          "vikram": 75,
+          "meera": 74,
+          "arjun": 60,
+          "zara": 77
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "We depreciate each cart straight-line over 36 months, so Rs 3,333 a month, and that is already inside the Rs 30,000 monthly net per cart I quoted. In 14 months of running, we fully replaced 2 of 22 carts after a wheel-base failure, about 9 percent a year, and we spend roughly Rs 1,500 per cart per month on maintenance: urn seals, wheels and the UPI display. The cart body is steel, so the real wear part is the urn, which costs Rs 8,000 to replace. Even with a full replacement every 3 years, a cart earns back its cost about 9 times over its life.",
+        "interests": {
+          "vikram": 75,
+          "meera": 74,
+          "arjun": 60,
+          "zara": 77
+        }
+      },
+      {
+        "kind": "reaction",
+        "sharkId": "vikram",
+        "text": "Good, straight to the point. Depreciation and maintenance are factored in, real replacement rate is 9 percent.",
+        "delta": 15,
+        "interests": {
+          "vikram": 90,
+          "meera": 74,
+          "arjun": 60,
+          "zara": 77
+        }
+      },
+      {
+        "kind": "question",
+        "sharkId": "meera",
+        "text": "You claim 62 percent of weekly payers at Manyata buy 4 out of 5 days; exactly how many unique corporate employees does that represent out of the total footfall on those floors?",
+        "interests": {
+          "vikram": 90,
+          "meera": 74,
+          "arjun": 65,
+          "zara": 82
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "About 1,300 people. The 7 floors we serve at Manyata badge in around 6,000 employees a day, and 2,100 unique UPI IDs paid us last week, so 35 percent of the floor buys from us weekly. 62 percent of those 2,100, about 1,300 employees, bought on 4 or 5 days. They average 1.8 cups on the days they buy, which is roughly 10,500 of our 14,500 cups a week there. So two thirds of our volume comes from 1,300 habitual buyers, and the other 65 percent of the floor, who have never bought, is our headroom without adding a single cart.",
+        "interests": {
+          "vikram": 90,
+          "meera": 74,
+          "arjun": 65,
+          "zara": 82
+        }
+      },
+      {
+        "kind": "reaction",
+        "sharkId": "meera",
+        "text": "Precise math and employee badge data. You know your floor-level penetration cold. I am impressed.",
+        "delta": 15,
+        "interests": {
+          "vikram": 90,
+          "meera": 89,
+          "arjun": 65,
+          "zara": 82
+        }
+      },
+      {
+        "kind": "question",
+        "sharkId": "zara",
+        "text": "You plan to enter Pune and Hyderabad with Rs 50 lakh; exactly how much of that capital is allocated to inventory versus hiring, and how long does it last if both cities miss their month-6 targets?",
+        "interests": {
+          "vikram": 96,
+          "meera": 89,
+          "arjun": 65,
+          "zara": 88
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "Rs 30 lakh goes to 25 carts, Rs 8 lakh to the Pune kitchen and opening stock, Rs 7 lakh to hiring and paying 2 city leads and 30 cart staff through 6 weeks of training, and Rs 5 lakh to the employer dashboard. The other 15 carts come from our own profits. If both cities miss month 6, the new cities cost us Rs 4 lakh a month in fixed overhead, and Bengaluru makes Rs 3.5 lakh, so the round still lasts more than 2 years. But we would not wait that long: the carts are on wheels. If Pune misses, we roll them into the 3 Bengaluru parks that have a waitlist, where each one earns Rs 30,000 a month from day one. The downside is a slower plan, not a dead company.",
+        "interests": {
+          "vikram": 96,
+          "meera": 89,
+          "arjun": 65,
+          "zara": 88
+        }
+      },
+      {
+        "kind": "reaction",
+        "sharkId": "zara",
+        "text": "Fantastic clarity on resource deployment and downside management. I am completely in.",
+        "delta": 12,
+        "interests": {
+          "vikram": 96,
+          "meera": 89,
+          "arjun": 65,
+          "zara": 100
+        }
+      },
+      {
+        "kind": "offer",
+        "sharkId": "vikram",
+        "text": "The unit economics hold up, and making Rs 3.5 lakh net profit on Rs 35 lakh revenue shows discipline, so I am in at your Rs 5 crore valuation. Rs 50 lakh for 10%. Plus 2 percent royalty until Rs 1.5 crore is returned.",
+        "interests": {
+          "vikram": 100,
+          "meera": 95,
+          "arjun": 70,
+          "zara": 100
+        }
+      },
+      {
+        "kind": "offer",
+        "sharkId": "meera",
+        "text": "Your repeat rate and deep penetration at Manyata prove the customer demand is real, so I want in. Rs 50 lakh for 12%.",
+        "interests": {
+          "vikram": 100,
+          "meera": 95,
+          "arjun": 70,
+          "zara": 100
+        }
+      },
+      {
+        "kind": "offer",
+        "sharkId": "arjun",
+        "text": "You have managed the supply chain and cart replacement rates well, but hardware in office parks has execution risks. Rs 50 lakh for 14%. Tied to completing the employer dashboard and scaling Pune successfully.",
+        "interests": {
+          "vikram": 100,
+          "meera": 95,
+          "arjun": 70,
+          "zara": 100
+        }
+      },
+      {
+        "kind": "offer",
+        "sharkId": "zara",
+        "text": "Your city launch background from food delivery gives me total conviction in your founder-market fit. Rs 50 lakh for 10%. With an advisor seat.",
+        "interests": {
+          "vikram": 100,
+          "meera": 95,
+          "arjun": 70,
+          "zara": 100
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "Meera, I'll take Rs 50 lakh for 10%.",
+        "interests": {
+          "vikram": 100,
+          "meera": 95,
+          "arjun": 70,
+          "zara": 100
+        }
+      },
+      {
+        "kind": "offer",
+        "sharkId": "meera",
+        "text": "Eleven percent and my retail distribution network helps you scale Pune and Hyderabad instantly. Take it or I walk. Rs 50 lakh for 11%.",
+        "interests": {
+          "vikram": 100,
+          "meera": 95,
+          "arjun": 70,
+          "zara": 100
+        }
+      },
+      {
+        "kind": "answer",
+        "text": "Zara, you matched my ask: Rs 50 lakh for 10% with you as an advisor. Deal.",
+        "interests": {
+          "vikram": 100,
+          "meera": 95,
+          "arjun": 70,
+          "zara": 100
+        }
+      }
+    ],
+    "summary": {
+      "overall": 92,
+      "verdict": "An exceptional pitch backed by bulletproof unit economics, clear moats, and a battle-tested founder who thoroughly dismantled every skeptical attack.",
+      "strengths": [
+        "Impeccable unit economics with transparent fully loaded cost breakdowns, positive net profit, and proven 4-month cart payback periods.",
+        "Unshakable founder-market fit demonstrated through direct execution experience in city launches and rigorous risk-managed expansion plans."
+      ],
+      "weaknesses": [
+        "Reliance on non-binding letters of intent for early-stage regional expansion into Pune.",
+        "Low gross margin cushion if raw material inflation hits milk, tea, and sugar simultaneously."
+      ],
+      "fix": "Convert current letters of intent for Pune into binding lease or exclusivity addendums prior to capital deployment.",
+      "outcome": "Deal: Rs 50 lakh for 10% with Zara"
     }
   }
 ];
