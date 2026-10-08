@@ -6,6 +6,8 @@ Everyone thinks their idea is brilliant, and nobody tells them the truth: real i
 
 **Live app (Google Cloud Run):** https://shark-tank-simulator-888217860739.asia-south1.run.app
 
+**Try it in 3 minutes:** [`DEMO.md`](DEMO.md) has a tested walkthrough for a pitch that gets a deal and one that gets torn apart.
+
 Built for PromptWars (8-hour Build With AI hackathon, Pondicherry University), problem statement **"Shark Tank Simulator"**.
 
 ---
