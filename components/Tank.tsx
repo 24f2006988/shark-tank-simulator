@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { ApiError, api } from "@/lib/api-client";
-import { DIFFICULTY, MIN_ANSWERS_BEFORE_OFFERS, formatInr } from "@/lib/game";
+import { DIFFICULTY, MIN_ANSWERS_BEFORE_OFFERS, activeSharks, formatInr } from "@/lib/game";
 import { answeredTurns, loadSession, saveSession, savePrefill, sessionReducer, type GameSession } from "@/lib/session";
 import { SHARKS } from "@/lib/sharks";
 import type { OffersResult, Question, SharkId, Source, Stage, Terms, TurnResult } from "@/lib/types";
@@ -14,6 +14,7 @@ import { Debrief } from "./Debrief";
 import { greetingScript } from "./greeting";
 import { OfferCard } from "./OfferCard";
 import { PanelList } from "./PanelList";
+import { QuestionsDone } from "./QuestionsDone";
 import { Shell } from "./Shell";
 import { Stage as PanelStage } from "./Stage";
 import { canMumble } from "./mumble";
@@ -284,14 +285,12 @@ function TankGame({ initial }: { initial: GameSession }) {
             {stage}
 
             {s.over && !script.playing ? (
-              <div className={`${card} flex flex-col gap-3 p-5`}>
-                <p className="font-semibold">The panel has heard enough. Time to see who wants in.</p>
-                <div className="flex flex-wrap gap-2">
-                  <button type="button" onClick={goToOffers} disabled={!!busy} className={btn.primary}>
-                    Hear the offers
-                  </button>
-                </div>
-              </div>
+              <QuestionsDone
+                noneLeft={activeSharks(s.sharks).length === 0}
+                busy={!!busy}
+                onOffers={goToOffers}
+                onDebrief={() => dispatch({ type: "toDebrief" })}
+              />
             ) : awaitingAnswer ? (
               <AnswerBox sharkName={SHARKS[current.sharkId].name} busy={!!busy} onSubmit={submitAnswer} inputRef={answerRef} />
             ) : null}
