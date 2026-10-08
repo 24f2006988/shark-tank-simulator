@@ -11,6 +11,7 @@ import type { OffersResult, Question, SharkId, Source, Stage, Terms, TurnResult 
 import { AnswerBox } from "./AnswerBox";
 import { ChatLog } from "./ChatLog";
 import { Debrief } from "./Debrief";
+import { greetingScript } from "./greeting";
 import { OfferCard } from "./OfferCard";
 import { Stage as PanelStage } from "./Stage";
 import { canSpeak, useScript, type LineInput } from "./useScript";
@@ -130,6 +131,8 @@ function TankGame({ initial }: { initial: GameSession }) {
     if (!need || kicked.current === need) return;
     kicked.current = need;
     if (need === "opening") {
+      // The panel greets while the first question is being written.
+      script.play(greetingScript(s.pitch));
       void run("The panel is reading your pitch…", async () => {
         const res = await api.turn({ pitch: s.pitch, sharks: s.sharks, turns: [] });
         setSource(res.source);
@@ -220,7 +223,7 @@ function TankGame({ initial }: { initial: GameSession }) {
   return (
     <>
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[1100px] flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="font-display text-lg font-extrabold">
             Shark Tank <span className="text-accent">Simulator</span>
           </Link>
@@ -241,7 +244,7 @@ function TankGame({ initial }: { initial: GameSession }) {
         </div>
       </header>
 
-      <main id="main" className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-5 px-4 py-6">
+      <main id="main" className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col gap-5 px-4 py-6">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 ref={headingRef} tabIndex={-1} className="font-display text-2xl font-extrabold sm:text-3xl">
             {s.stage === "questioning" ? `Pitching ${s.pitch.ideaName}` : s.stage === "deal" ? "The offers" : "Your debrief"}

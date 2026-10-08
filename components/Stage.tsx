@@ -34,7 +34,7 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
       <h2 id="stage-h" className="sr-only">
         The panel
       </h2>
-      <ul className="grid grid-cols-4 gap-2 sm:gap-4">
+      <ul className="grid grid-cols-4 gap-1 sm:gap-4">
         {SHARK_IDS.map((id) => {
           const shark = SHARKS[id];
           const state = sharks[id];
@@ -43,9 +43,9 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
           const delta = deltas[id];
           return (
             <li key={id} className="relative flex flex-col items-center gap-1 text-center">
-              <div aria-hidden="true" className={`seat-spot absolute inset-x-0 top-0 h-28 transition-opacity duration-500 sm:h-36 ${active ? "opacity-100" : "opacity-0"}`} />
+              <div aria-hidden="true" className={`seat-spot absolute inset-x-0 top-0 aspect-square transition-opacity duration-500 ${active ? "opacity-100" : "opacity-0"}`} />
               <div
-                className={`relative w-16 transition duration-500 sm:w-24 lg:w-28 ${active ? "scale-110" : "scale-95"} ${out ? "opacity-50 grayscale" : active || !speaker ? "" : "opacity-70"}`}
+                className={`relative w-full max-w-72 transition duration-500 ${active ? "scale-105" : "scale-95"} ${out ? "opacity-50 grayscale" : active || !speaker ? "" : "opacity-70"}`}
               >
                 <SharkFace
                   shark={shark}
@@ -61,9 +61,9 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
                   </span>
                 ) : null}
               </div>
-              <h3 className={`text-sm leading-tight font-semibold sm:text-base ${shark.color.text}`}>{shark.name.split(" ")[0]}</h3>
-              <p className="hidden text-xs text-slate-400 sm:block">{shark.title}</p>
-              <div className="w-full max-w-28">
+              <h3 className={`font-display text-sm leading-tight font-semibold sm:text-xl ${shark.color.text}`}>{shark.name.split(" ")[0]}</h3>
+              <p className="hidden text-sm text-slate-400 sm:block">{shark.title}</p>
+              <div className="w-full max-w-56">
                 <InterestMeter name={shark.name.split(" ")[0]} value={state.interest} delta={delta} barClass={shark.color.bar} compact />
               </div>
             </li>

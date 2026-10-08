@@ -8,7 +8,7 @@ export interface Line {
   id: number;
   sharkId: SharkId;
   text: string;
-  kind: "question" | "reaction" | "out" | "offer";
+  kind: "greeting" | "question" | "reaction" | "out" | "offer";
   followUp?: boolean;
   probing?: Dimension;
 }
