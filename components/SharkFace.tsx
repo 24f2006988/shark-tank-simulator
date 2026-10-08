@@ -42,14 +42,15 @@ interface Look {
   hair: string;
   hairLight: string;
   iris: string;
+  irisGlow: string;
   delay: string;
 }
 
 const LOOKS: Record<SharkId, Look> = {
-  vikram: { skin: "#d39a6c", skinShade: "#b27650", hair: "#3f3f46", hairLight: "#a1a1aa", iris: "#3b2416", delay: "0s" },
-  meera: { skin: "#e0a77c", skinShade: "#c2855c", hair: "#1c1412", hairLight: "#4a302a", iris: "#2a160c", delay: "1.7s" },
-  arjun: { skin: "#c08a5f", skinShade: "#9c6a45", hair: "#151313", hairLight: "#3a3330", iris: "#24150d", delay: "3.1s" },
-  zara: { skin: "#ebbb94", skinShade: "#cf9670", hair: "#3a2233", hairLight: "#8b6aa8", iris: "#3a2030", delay: "4.4s" },
+  vikram: { irisGlow: "#8a5a35", skin: "#d39a6c", skinShade: "#b27650", hair: "#3f3f46", hairLight: "#a1a1aa", iris: "#3b2416", delay: "0s" },
+  meera: { irisGlow: "#8a4f2a", skin: "#e0a77c", skinShade: "#c2855c", hair: "#1c1412", hairLight: "#4a302a", iris: "#2a160c", delay: "1.7s" },
+  arjun: { irisGlow: "#7a4a2a", skin: "#c08a5f", skinShade: "#9c6a45", hair: "#151313", hairLight: "#3a3330", iris: "#24150d", delay: "3.1s" },
+  zara: { irisGlow: "#9a5a86", skin: "#ebbb94", skinShade: "#cf9670", hair: "#3a2233", hairLight: "#8b6aa8", iris: "#3a2030", delay: "4.4s" },
 };
 
 const OUTLINE = "#4a3326";
@@ -217,30 +218,28 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
   }, [reactionKey, delta]);
 
   const live = animated && mood !== "out";
-  const skin = `skin-${uid}`;
   const hair = `hair-${uid}`;
   const sparkle = mood === "hooked";
-  const eye = (cx: number): ReactNode => (
+  // Large glossy irises under a heavy upper lash with a small outer flick: the film look, not the emoji look.
+  const eye = (cx: number, side: -1 | 1): ReactNode => (
     <g>
-      <ellipse cx={cx} cy="50" rx="5.4" ry="4.4" fill="#fffaf2" stroke={OUTLINE} strokeWidth="0.7" />
+      <ellipse cx={cx} cy="50" rx="5.3" ry="4.7" fill="#fffaf2" stroke={OUTLINE} strokeWidth="0.4" />
       <g className={live ? "face-glance" : undefined} style={live ? { animationDelay: look.delay } : undefined}>
-        <circle cx={cx} cy="50.3" r="3.7" fill={look.iris} />
-        <circle cx={cx} cy="50.3" r="1.7" fill="#0b0705" />
-        <circle cx={cx - 1.3} cy="48.9" r="1.3" fill="white" />
-        <circle cx={cx + 1.3} cy="51.6" r={sparkle ? 0.9 : 0.55} fill="white" />
+        <ellipse cx={cx} cy="50.4" rx="3.7" ry="4.4" fill={look.iris} />
+        <ellipse cx={cx} cy="51.2" rx="2.4" ry="2.6" fill={look.irisGlow} opacity="0.55" />
+        <ellipse cx={cx} cy="50.4" rx="1.5" ry="2.1" fill="#0b0705" />
+        <circle cx={cx - 1.4} cy="48.6" r="1.5" fill="white" />
+        <circle cx={cx + 1.4} cy="52" r={sparkle ? 1 : 0.6} fill="white" />
       </g>
-      <path d={`M${cx - 5.8} 47.6 Q${cx} 44 ${cx + 5.8} 47.6`} fill="none" stroke={OUTLINE} strokeWidth="1.3" strokeLinecap="round" />
+      <path d={`M${cx - 5.8} 47.8 Q${cx} 43.4 ${cx + 5.8} 47.8`} fill="none" stroke={OUTLINE} strokeWidth="1.9" strokeLinecap="round" />
+      <path d={`M${cx + side * 5.8} 47.8 l${side * 1.7} -1.3`} fill="none" stroke={OUTLINE} strokeWidth="1.3" strokeLinecap="round" />
     </g>
   );
 
   return (
-    <div ref={ref} aria-hidden="true" className="inline-block shrink-0" style={{ width: size, height: size }}>
+    <div ref={ref} aria-hidden="true" className="inline-block shrink-0" style={typeof size === "number" ? { width: size, height: size } : { width: size, aspectRatio: "1" }}>
       <svg viewBox="0 0 100 100" width="100%" height="100%" className="face overflow-visible">
         <defs>
-          <radialGradient id={skin} cx="42%" cy="38%" r="70%">
-            <stop offset="0%" stopColor={look.skin} />
-            <stop offset="100%" stopColor={look.skinShade} />
-          </radialGradient>
           <linearGradient id={hair} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={look.hairLight} stopOpacity="0.9" />
             <stop offset="35%" stopColor={look.hair} />
@@ -255,7 +254,8 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
             <HairBack id={shark.id} fill={`url(#${hair})`} />
             <ellipse cx="24" cy="53" rx="3.6" ry="6" fill={look.skinShade} />
             <ellipse cx="76" cy="53" rx="3.6" ry="6" fill={look.skinShade} />
-            <path d="M24 46 Q24 16 50 16 Q76 16 76 46 Q76 70 50 80 Q24 70 24 46Z" fill={`url(#${skin})`} stroke={OUTLINE} strokeWidth="0.9" />
+            <path d="M25 46 Q25 16 50 16 Q75 16 75 46 Q74 67 50 83 Q26 67 25 46Z" fill={look.skin} stroke={OUTLINE} strokeWidth="0.7" />
+            <path d="M63 21 Q75 29 75 46 Q74 67 50 83 Q66 66 67 46 Q67 31 63 21Z" fill={look.skinShade} opacity="0.3" />
 
             <g className="face-part" style={{ opacity: e.blush }}>
               <ellipse cx="32.5" cy="61" rx="5.5" ry="3" fill="#f08a8a" opacity="0.55" />
@@ -264,8 +264,8 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
 
             <g className="face-part" style={{ transform: `scaleY(${e.eyes})` }}>
               <g className={live ? "face-blink" : undefined} style={live ? { animationDelay: look.delay } : undefined}>
-                {eye(39)}
-                {eye(61)}
+                {eye(39, -1)}
+                {eye(61, 1)}
               </g>
             </g>
 
@@ -274,7 +274,7 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
               <path d="M56 41 Q61.5 39.5 67 41.5" fill="none" className="face-part" style={{ transform: e.brows[1] }} />
             </g>
 
-            <path d="M50.5 54 Q49 58.5 51.5 59" fill="none" stroke={look.skinShade} strokeWidth="1.3" strokeLinecap="round" />
+            <path d="M50.7 57 Q49.7 59 51.5 59.5" fill="none" stroke={look.skinShade} strokeWidth="0.9" strokeLinecap="round" />
 
             {talking && mood !== "out" ? (
               <g className="face-talk">
@@ -282,7 +282,7 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
                 <ellipse cx="50" cy="68.6" rx="2.2" ry="1" fill="#e07a7a" />
               </g>
             ) : (
-              <path d={e.mouth} className="face-part" style={{ d: `path("${e.mouth}")` }} fill="none" stroke="#8a3b32" strokeWidth="1.7" strokeLinecap="round" />
+              <path d={e.mouth} className="face-part" style={{ d: `path("${e.mouth}")` }} fill="none" stroke="#8a3b32" strokeWidth="1.3" strokeLinecap="round" />
             )}
 
             <Extras id={shark.id} hair={look.hair} light={look.hairLight} />

@@ -26,7 +26,7 @@ interface Props {
 export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSkip }: Props) {
   const speaker = line?.sharkId ?? (thinking ? null : idle?.sharkId) ?? null;
   const bubble = line ?? (thinking ? null : idle);
-  const pointer = thinking ?? bubble?.sharkId ?? null;
+  const barShark = thinking ?? bubble?.sharkId ?? null;
   const typing = line !== null && shown < line.text.length;
 
   return (
@@ -45,7 +45,7 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
             <li key={id} className="relative flex flex-col items-center gap-1 text-center">
               <div aria-hidden="true" className={`seat-spot absolute inset-x-0 top-0 aspect-square transition-opacity duration-500 ${active ? "opacity-100" : "opacity-0"}`} />
               <div
-                className={`relative w-full max-w-72 transition duration-500 ${active ? "scale-105" : "scale-95"} ${out ? "opacity-50 grayscale" : active || !speaker ? "" : "opacity-70"}`}
+                className={`relative w-full max-w-72 transition duration-500 ${active ? "scale-105" : "scale-95"} ${out ? "opacity-50 grayscale" : active || !speaker ? "" : "opacity-80"}`}
               >
                 <SharkFace
                   shark={shark}
@@ -61,9 +61,9 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
                   </span>
                 ) : null}
               </div>
-              <h3 className={`font-display text-sm leading-tight font-semibold sm:text-xl ${shark.color.text}`}>{shark.name.split(" ")[0]}</h3>
+              <h3 className={`font-display text-sm leading-tight font-semibold sm:text-xl ${active ? "underline decoration-2 underline-offset-4" : ""} ${shark.color.text}`}>{shark.name.split(" ")[0]}</h3>
               <p className="hidden text-sm text-slate-400 sm:block">{shark.title}</p>
-              <div className="w-full max-w-56">
+              <div className="w-full max-w-56 md:hidden">
                 <InterestMeter name={shark.name.split(" ")[0]} value={state.interest} delta={delta} barClass={shark.color.bar} compact />
               </div>
             </li>
@@ -72,15 +72,9 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
       </ul>
 
       <div className="relative">
-        {pointer && (bubble || thinking) ? (
-          <span
-            aria-hidden="true"
-            className="absolute -top-2 size-4 rotate-45 border-t border-l border-slate-600 bg-slate-900 transition-[left] duration-500"
-            style={{ left: `calc(${(SHARK_IDS.indexOf(pointer) + 0.5) * 25}% - 8px)` }}
-          />
-        ) : null}
         {/* Hidden when nobody is speaking (e.g. on the offers stage once the announcements end). */}
-        <div className={`min-h-28 rounded-lg border border-slate-600 bg-slate-900 px-5 py-4 ${bubble || thinking ? "" : "hidden"}`}>
+        <div className={`relative min-h-28 overflow-hidden rounded-md border border-slate-800 bg-accent/10 py-4 pr-5 pl-6 ${bubble || thinking ? "" : "hidden"}`}>
+          {barShark ? <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1.5 ${SHARKS[barShark].color.bar}`} /> : null}
           {thinking && !line ? (
             <p className="flex items-center gap-3 text-slate-300">
               <span className={`font-semibold ${SHARKS[thinking].color.text}`}>{SHARKS[thinking].name}</span>
@@ -105,7 +99,7 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
                   </button>
                 ) : null}
               </div>
-              <p aria-hidden="true" className={`mt-2 text-lg leading-relaxed text-slate-50 sm:text-xl ${typing ? "type-caret" : ""}`}>
+              <p aria-hidden="true" className={`mt-2 text-lg leading-relaxed text-slate-100 sm:text-xl ${typing ? "type-caret" : ""}`}>
                 {line ? line.text.slice(0, shown) : bubble.text}
               </p>
             </>

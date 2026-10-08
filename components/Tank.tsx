@@ -13,6 +13,8 @@ import { ChatLog } from "./ChatLog";
 import { Debrief } from "./Debrief";
 import { greetingScript } from "./greeting";
 import { OfferCard } from "./OfferCard";
+import { PanelList } from "./PanelList";
+import { Shell } from "./Shell";
 import { Stage as PanelStage } from "./Stage";
 import { canMumble } from "./mumble";
 import { useScript, type LineInput } from "./useScript";
@@ -75,13 +77,15 @@ export default function Tank() {
 
 function NoSession() {
   return (
-    <main id="main" className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center gap-4 px-4 py-20 text-center">
-      <h1 className="font-display text-3xl font-extrabold">The tank is empty</h1>
-      <p className="text-slate-300">There is no pitch in progress. Start one and the sharks will be waiting.</p>
-      <Link href="/" className={btn.primary}>
-        Write a pitch
-      </Link>
-    </main>
+    <Shell crumbs={[{ label: "Shark Tank Simulator", href: "/" }, { label: "Tank" }]} sidebar={<PanelList />}>
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 py-16 text-center">
+        <h1 className="font-display text-3xl font-bold">The tank is empty</h1>
+        <p className="text-slate-300">There is no pitch in progress. Start one and the sharks will be waiting.</p>
+        <Link href="/" className={btn.primary}>
+          Write a pitch
+        </Link>
+      </div>
+    </Shell>
   );
 }
 
@@ -222,32 +226,30 @@ function TankGame({ initial }: { initial: GameSession }) {
   );
 
   return (
-    <>
-      <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" className="font-display text-lg font-extrabold">
-            Shark Tank <span className="text-accent">Simulator</span>
-          </Link>
-          <nav aria-label="Progress">
-            <ol className="flex gap-1 text-sm sm:gap-3">
-              {STEPS.map((step, i) => (
-                <li
-                  key={step.stage}
-                  aria-current={i === stepIndex ? "step" : undefined}
-                  className={`rounded-full px-2 py-1 ${i === stepIndex ? "bg-accent font-semibold text-slate-950" : i < stepIndex ? "text-slate-200" : "text-slate-400"}`}
-                >
-                  <span className="sr-only">{i < stepIndex ? "Done: " : ""}</span>
-                  {step.label}
-                </li>
-              ))}
-            </ol>
-          </nav>
-        </div>
-      </header>
-
-      <main id="main" className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col gap-5 px-4 py-6">
+    <Shell
+      wide
+      crumbs={[{ label: "Shark Tank Simulator", href: "/" }, { label: "Pitch", href: "/" }, { label: s.pitch.ideaName }]}
+      sidebar={<PanelList sharks={s.sharks} deltas={s.stage === "questioning" ? deltas : {}} speaker={script.current?.sharkId ?? thinking} />}
+      actions={s.stage !== "debrief" ? <VoiceToggle on={voiceOn} onChange={setVoiceOn} /> : null}
+      toolbar={
+        <nav aria-label="Progress">
+          <ol className="flex items-center gap-1 text-sm">
+            {STEPS.map((step, i) => (
+              <li
+                key={step.stage}
+                aria-current={i === stepIndex ? "step" : undefined}
+                className={`rounded-md px-2.5 py-1 ${i === stepIndex ? "bg-accent/15 font-semibold text-accent-hover" : i < stepIndex ? "text-slate-200" : "text-slate-400"}`}
+              >
+                <span className="sr-only">{i < stepIndex ? "Done: " : ""}</span>
+                {step.label}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      }
+    >
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h1 ref={headingRef} tabIndex={-1} className="font-display text-2xl font-extrabold sm:text-3xl">
+          <h1 ref={headingRef} tabIndex={-1} className="font-display text-3xl font-bold">
             {s.stage === "questioning" ? `Pitching ${s.pitch.ideaName}` : s.stage === "deal" ? "The offers" : "Your debrief"}
           </h1>
           <p className="text-sm text-slate-300">
@@ -268,7 +270,6 @@ function TankGame({ initial }: { initial: GameSession }) {
               </span>
             ) : null}
           </div>
-          {s.stage !== "debrief" ? <VoiceToggle on={voiceOn} onChange={setVoiceOn} /> : null}
         </div>
 
         {error ? (
@@ -320,12 +321,12 @@ function TankGame({ initial }: { initial: GameSession }) {
             ) : null}
 
             {answered.length > 0 ? (
-              <details className={`${card} p-4`}>
-                <summary className="min-h-6 cursor-pointer font-semibold text-slate-200">Transcript ({answered.length} answered)</summary>
-                <div className="mt-4">
-                  <ChatLog turns={s.turns} walkouts={s.walkouts} />
-                </div>
-              </details>
+              <section aria-labelledby="transcript-h" className="border-t border-slate-800 pt-6">
+                <h2 id="transcript-h" className="mb-4 font-display text-xl font-semibold">
+                  Transcript <span className="text-base font-normal text-slate-400">({answered.length} answered)</span>
+                </h2>
+                <ChatLog turns={s.turns} walkouts={s.walkouts} />
+              </section>
             ) : null}
           </div>
         ) : null}
@@ -372,8 +373,7 @@ function TankGame({ initial }: { initial: GameSession }) {
         {source === "fallback" ? (
           <p className="text-xs text-slate-400">The AI panel is busy, so the last reply came from scripted backup sharks.</p>
         ) : null}
-      </main>
-    </>
+    </Shell>
   );
 }
 

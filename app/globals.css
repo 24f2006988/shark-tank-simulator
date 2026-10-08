@@ -1,43 +1,129 @@
 @import "tailwindcss";
 
-/* Palette and type borrowed from the sumigaki notebook: calm neutrals, one blue accent, serif headings. */
-@theme inline {
+/*
+ * Design tokens, borrowed from the sumigaki notebook: paper-white surfaces, thin borders, one blue accent,
+ * serif headings. The utilities used across the app (slate-*, accent, status colours) read these variables,
+ * so a theme is just a different set of values: light by default, dark by system preference or the toggle.
+ */
+@theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
   --font-display: var(--font-serif), "Iowan Old Style", Georgia, serif;
 
-  --color-accent: #7ea2ff;
-  --color-accent-hover: #a3bcff;
+  --color-accent: var(--t-accent);
+  --color-accent-hover: var(--t-accent-hover);
 
-  --color-slate-50: #f3f4f6;
-  --color-slate-100: #e6e8eb;
-  --color-slate-200: #d3d8de;
-  --color-slate-300: #bcc3cc;
-  --color-slate-400: #a0a7b1;
-  --color-slate-500: #6e7681;
-  --color-slate-600: #444c56;
-  --color-slate-700: #353b44;
-  --color-slate-800: #30363d;
-  --color-slate-900: #1c1f24;
-  --color-slate-950: #16181c;
+  --color-slate-50: var(--t-50);
+  --color-slate-100: var(--t-100);
+  --color-slate-200: var(--t-200);
+  --color-slate-300: var(--t-300);
+  --color-slate-400: var(--t-400);
+  --color-slate-500: var(--t-500);
+  --color-slate-600: var(--t-600);
+  --color-slate-700: var(--t-700);
+  --color-slate-800: var(--t-800);
+  --color-slate-900: var(--t-900);
+  --color-slate-950: var(--t-950);
+
+  --color-rose-100: var(--t-rose-100);
+  --color-rose-200: var(--t-rose-200);
+  --color-rose-300: var(--t-rose-300);
+  --color-rose-400: var(--t-rose-400);
+  --color-emerald-300: var(--t-emerald);
+  --color-amber-300: var(--t-amber);
+  --color-cyan-300: var(--t-cyan);
+  --color-violet-300: var(--t-violet);
 }
 
 :root {
+  color-scheme: light;
+  --t-accent: #2f5bd3;
+  --t-accent-hover: #2247ad;
+  --t-50: #0d1117;
+  --t-100: #1f2328;
+  --t-200: #2f353d;
+  --t-300: #424a53;
+  --t-400: #59636e;
+  --t-500: #8c959f;
+  --t-600: #c4cad1;
+  --t-700: #d5dae0;
+  --t-800: #e1e4e8;
+  --t-900: #f6f7f9;
+  --t-950: #ffffff;
+  --t-rose-100: #82071e;
+  --t-rose-200: #a40e26;
+  --t-rose-300: #cf222e;
+  --t-rose-400: #cf222e;
+  --t-emerald: #1a7f37;
+  --t-amber: #9a6700;
+  --t-cyan: #0a7389;
+  --t-violet: #6f42c1;
+  --shadow: 0 6px 24px rgb(0 0 0 / 0.1), 0 1px 3px rgb(0 0 0 / 0.08);
+  --spot: rgb(47 91 211 / 0.16);
+}
+
+/* Dark: the sumigaki dark palette. Applied by the system setting unless the user chose light, or by the toggle. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --t-accent: #7ea2ff;
+    --t-accent-hover: #a3bcff;
+    --t-50: #f3f4f6;
+    --t-100: #e6e8eb;
+    --t-200: #d3d8de;
+    --t-300: #bcc3cc;
+    --t-400: #a0a7b1;
+    --t-500: #6e7681;
+    --t-600: #444c56;
+    --t-700: #353b44;
+    --t-800: #30363d;
+    --t-900: #1c1f24;
+    --t-950: #16181c;
+    --t-rose-100: #ffe4e6;
+    --t-rose-200: #fecdd3;
+    --t-rose-300: #fda4af;
+    --t-rose-400: #fb7185;
+    --t-emerald: #6ee7b7;
+    --t-amber: #fcd34d;
+    --t-cyan: #67e8f9;
+    --t-violet: #c4b5fd;
+    --shadow: 0 6px 24px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.4);
+    --spot: rgb(126 162 255 / 0.3);
+  }
+}
+
+:root[data-theme="dark"] {
   color-scheme: dark;
+  --t-accent: #7ea2ff;
+  --t-accent-hover: #a3bcff;
+  --t-50: #f3f4f6;
+  --t-100: #e6e8eb;
+  --t-200: #d3d8de;
+  --t-300: #bcc3cc;
+  --t-400: #a0a7b1;
+  --t-500: #6e7681;
+  --t-600: #444c56;
+  --t-700: #353b44;
+  --t-800: #30363d;
+  --t-900: #1c1f24;
+  --t-950: #16181c;
+  --t-rose-100: #ffe4e6;
+  --t-rose-200: #fecdd3;
+  --t-rose-300: #fda4af;
+  --t-rose-400: #fb7185;
+  --t-emerald: #6ee7b7;
+  --t-amber: #fcd34d;
+  --t-cyan: #67e8f9;
+  --t-violet: #c4b5fd;
+  --shadow: 0 6px 24px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.4);
+  --spot: rgb(126 162 255 / 0.3);
 }
 
 html,
 body {
-  background-color: #16181c;
-  color: #e6e8eb;
+  background-color: var(--color-slate-950);
+  color: var(--color-slate-100);
   font-size: 15px;
-}
-
-/* Barely-there lift behind the panel, in the accent colour. */
-.stage-glow {
-  background-image: radial-gradient(ellipse 70% 40% at 50% -5%, rgb(126 162 255 / 0.1), transparent 70%);
-  background-repeat: no-repeat;
-  background-size: 100% 700px;
 }
 
 /* High-contrast focus ring for keyboard users. */
@@ -96,7 +182,7 @@ body {
 
 /* Spotlight under the shark who is speaking. */
 .seat-spot {
-  background: radial-gradient(ellipse 50% 60% at 50% 70%, rgb(126 162 255 / 0.3), transparent 72%);
+  background: radial-gradient(ellipse 50% 60% at 50% 70%, var(--spot), transparent 72%);
 }
 
 .type-caret::after {

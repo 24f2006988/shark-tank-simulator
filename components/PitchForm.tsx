@@ -8,7 +8,7 @@ import { SAMPLE_PITCHES } from "@/lib/samples";
 import { clearPrefill, createSession, parsePrefill, readPrefillRaw, saveSession } from "@/lib/session";
 import type { Difficulty, Pitch } from "@/lib/types";
 import { MicButton } from "./MicButton";
-import { btn, card, field } from "./ui";
+import { btn, field } from "./ui";
 
 interface Values {
   ideaName: string;
@@ -99,7 +99,7 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
     ) : null;
 
   return (
-    <form onSubmit={onSubmit} noValidate className={`${card} flex flex-col gap-5 p-5 sm:p-6`} aria-labelledby="pitch-form-h">
+    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5 border-t border-slate-800 pt-8" aria-labelledby="pitch-form-h">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h2 id="pitch-form-h" className="font-display text-2xl font-semibold">
           Step into the tank
