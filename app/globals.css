@@ -10,6 +10,9 @@
   --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
   --font-display: var(--font-serif), "Iowan Old Style", Georgia, serif;
 
+  /* The root is 15px; keep the smallest text at 12px so it stays legible on phones. */
+  --text-xs: 0.8rem;
+
   --color-accent: var(--t-accent);
   --color-accent-hover: var(--t-accent-hover);
 
