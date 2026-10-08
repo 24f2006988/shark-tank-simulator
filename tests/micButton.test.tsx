@@ -153,6 +153,39 @@ describe("MicButton", () => {
       expect(onTranscript).toHaveBeenCalledWith("last minute thoughts");
     });
 
+    it("does not type the same words twice when the engine finalises them after Stop", () => {
+      const onTranscript = vi.fn();
+      render(<MicButton onTranscript={onTranscript} />);
+      fireEvent.click(screen.getByRole("button", { name: "Speak your answer" }));
+      const instance = MockSpeechRecognition.lastInstance!;
+      const result = (isFinal: boolean) => ({ resultIndex: 0, results: { length: 1, 0: { isFinal, length: 1, 0: { transcript: "we break even in March" } } } });
+
+      act(() => instance.onresult?.(result(false)));
+      fireEvent.click(screen.getByRole("button", { name: "Stop listening" }));
+      // The browser delivers the final result and the end event after stop().
+      act(() => {
+        instance.onresult?.(result(true));
+        instance.onend?.();
+      });
+
+      expect(onTranscript).toHaveBeenCalledTimes(1);
+      expect(instance.onresult).toBeNull();
+    });
+
+    it("stops listening, without committing half-heard words, once the answer is sent", () => {
+      const onTranscript = vi.fn();
+      const { rerender } = render(<MicButton onTranscript={onTranscript} />);
+      fireEvent.click(screen.getByRole("button", { name: "Speak your answer" }));
+      const instance = MockSpeechRecognition.lastInstance!;
+      act(() => instance.onresult?.({ resultIndex: 0, results: { length: 1, 0: { isFinal: false, length: 1, 0: { transcript: "and another" } } } }));
+
+      rerender(<MicButton onTranscript={onTranscript} disabled />);
+
+      expect(instance.abort).toHaveBeenCalledTimes(1);
+      expect(onTranscript).not.toHaveBeenCalled();
+      expect(screen.getByRole("button", { name: "Speak your answer" }).getAttribute("aria-pressed")).toBe("false");
+    });
+
     it("displays accessible alert when microphone access is denied", () => {
       const onTranscript = vi.fn();
       render(<MicButton onTranscript={onTranscript} />);

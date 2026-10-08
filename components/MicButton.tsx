@@ -97,19 +97,37 @@ export function MicButton({ onTranscript, disabled, label = "Speak your answer",
     onTranscriptRef.current = onTranscript;
   }, [onTranscript]);
 
-  // Cleanup on unmount: abort active recognition
+  /** Stops listening for good: results still in flight are dropped, so nothing is typed in twice or later. */
+  const halt = (commitInterim: boolean) => {
+    const r = rec.current;
+    rec.current = null;
+    if (commitInterim && interimRef.current.trim()) onTranscriptRef.current(interimRef.current.trim());
+    interimRef.current = "";
+    setInterim("");
+    setListening(false);
+    if (!r) return;
+    r.onresult = null;
+    r.onend = null;
+    r.onerror = null;
+    try {
+      if (commitInterim) r.stop();
+      else r.abort();
+    } catch {
+      // already stopped
+    }
+  };
+  const haltRef = useRef(halt);
   useEffect(() => {
-    return () => {
-      if (rec.current) {
-        try {
-          rec.current.abort();
-        } catch {
-          // ignore cleanup abort
-        }
-        rec.current = null;
-      }
-    };
-  }, []);
+    haltRef.current = halt;
+  });
+
+  // Unmount, or the router hiding the page: release the microphone and reset the button.
+  useEffect(() => () => haltRef.current(false), []);
+
+  // An answer was sent while dictating: stop, so the panel's turn is not typed into the next answer.
+  useEffect(() => {
+    if (disabled) haltRef.current(false);
+  }, [disabled]);
 
   // Auto-dismiss errors after 7 seconds
   useEffect(() => {
@@ -122,18 +140,7 @@ export function MicButton({ onTranscript, disabled, label = "Speak your answer",
 
   const toggle = () => {
     if (listening) {
-      // Commit any lingering interim text before stopping
-      if (interimRef.current.trim()) {
-        onTranscriptRef.current(interimRef.current.trim());
-        interimRef.current = "";
-      }
-      setInterim("");
-      try {
-        rec.current?.stop();
-      } catch {
-        // ignore stop error
-      }
-      setListening(false);
+      halt(true);
       return;
     }
 
@@ -289,7 +296,7 @@ export function MicButton({ onTranscript, disabled, label = "Speak your answer",
           <button
             type="button"
             onClick={() => setErrorMessage(null)}
-            className="ml-1 text-rose-400 hover:text-rose-100 focus:outline-none"
+            className="ml-1 rounded text-rose-400 hover:text-rose-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Dismiss error"
           >
             &times;

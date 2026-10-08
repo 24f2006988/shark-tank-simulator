@@ -26,6 +26,8 @@ export function useScript(soundOn: boolean) {
   const [queue, setQueue] = useState<Line[]>([]);
   const [shown, setShown] = useState(0);
   const nextId = useRef(1);
+  /** Letters already typed for a line, so toggling sound mid-line carries on instead of starting over. */
+  const progress = useRef({ id: 0, n: 0 });
   const current = queue[0] ?? null;
 
   const play = useCallback((lines: LineInput[]) => {
@@ -45,7 +47,7 @@ export function useScript(soundOn: boolean) {
     const instant = prefersReducedMotion();
     const mumble = soundOn && canMumble() && !instant;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    let n = 0;
+    let n = progress.current.id === current.id ? progress.current.n : 0;
 
     const advance = () => {
       setQueue((q) => q.slice(1));
@@ -54,6 +56,7 @@ export function useScript(soundOn: boolean) {
 
     const type = () => {
       n = instant ? total : Math.min(total, n + 1);
+      progress.current = { id: current.id, n };
       setShown(n);
       if (mumble) {
         const blip = blipFor(sharkId, text[n - 1] ?? "", n - 1, text);
