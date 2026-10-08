@@ -4,6 +4,8 @@ import { SHARK_IDS } from "@/lib/schemas";
 import { DIMENSION_LABELS, SHARKS } from "@/lib/sharks";
 import type { SharkId, Sharks } from "@/lib/types";
 import { InterestMeter } from "./InterestMeter";
+import { reactionFor } from "./emotes";
+import { PixelEmote } from "./PixelEmote";
 import { SharkFace, moodFor } from "./SharkFace";
 import type { Line, LineInput } from "./useScript";
 import { btn } from "./ui";
@@ -41,6 +43,12 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
           const out = state.status === "out";
           const active = speaker === id || thinking === id;
           const delta = deltas[id];
+          // Faces react while the panel performs its reactions (and while weighing an answer), then settle back to their interest.
+          const reacting = line !== null;
+          const reaction =
+            out || !(reacting || thinking === id)
+              ? null
+              : reactionFor({ id, delta: reacting ? delta : 0, thinking: thinking === id, leaving: line?.sharkId === id && line.kind === "out", round });
           return (
             <li key={id} className="relative flex flex-col items-center gap-1 text-center">
               <div aria-hidden="true" className={`seat-spot absolute inset-x-0 top-0 aspect-square transition-opacity duration-500 ${active ? "opacity-100" : "opacity-0"}`} />
@@ -49,12 +57,13 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
               >
                 <SharkFace
                   shark={shark}
-                  mood={moodFor(state.interest, state.status)}
+                  mood={reaction?.mood ?? moodFor(state.interest, state.status)}
                   size="100%"
                   talking={line?.sharkId === id}
                   reactionKey={round}
                   delta={delta}
                 />
+                {reaction?.emote ? <PixelEmote key={`${round}-${id}-${reaction.emote.kind}`} emote={reaction.emote} /> : null}
                 {out ? (
                   <span className="absolute top-1/3 left-1/2 -translate-x-1/2 -rotate-12 rounded border-2 border-rose-300 bg-slate-950/80 px-1.5 font-display text-xs font-extrabold tracking-widest text-rose-300 sm:text-sm">
                     OUT

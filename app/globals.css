@@ -150,37 +150,32 @@ body {
   animation: rise 0.25s ease-out both;
 }
 
-/* Shark faces: expressions morph, eyes blink, the asker's mouth moves. */
-.face .face-part {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition:
-    transform 0.45s ease,
-    d 0.45s ease,
-    ry 0.3s ease,
-    opacity 0.4s ease;
+/* Pixel sharks: the eyes blink and the mouth flaps by swapping pre-drawn pixel layers (no tweening, like a sprite). */
+.px-eyes-open {
+  animation: px-blink-open 5.5s steps(1, end) infinite;
 }
 
-.face .face-tilt {
-  transform-box: view-box;
-  transform-origin: 50px 52px;
-  transition: transform 0.6s ease;
+.px-eyes-shut {
+  opacity: 0;
+  animation: px-blink-shut 5.5s steps(1, end) infinite;
 }
 
-.face-blink {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: blink 5.5s infinite;
+.px-talk-shut {
+  animation: px-talk-shut 0.34s steps(1, end) infinite;
+}
+
+.px-talk-open {
+  opacity: 0;
+  animation: px-talk-open 0.34s steps(1, end) infinite;
 }
 
 .face-bob {
-  animation: bob 4s ease-in-out infinite;
+  animation: bob 1.8s steps(1, end) infinite;
 }
 
-.face-talk {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: talk 0.18s ease-in-out infinite alternate;
+/* The exclamation icon pops in over a shark's head. */
+.emote-pop {
+  animation: emote-pop 0.35s steps(5, end) both;
 }
 
 /* Spotlight under the shark who is speaking. */
@@ -216,66 +211,68 @@ body {
   }
 }
 
-/* Ghibli-style idle life: eyes wander, hair drifts in a breeze. */
-.face-glance {
-  animation: glance 9s ease-in-out infinite;
-}
-
-.hair-sway {
-  transform-box: fill-box;
-  transform-origin: 50% 0%;
-  animation: sway 5s ease-in-out infinite;
-}
-
-@keyframes glance {
+@keyframes px-blink-open {
   0%,
-  30%,
+  92%,
+  96%,
   100% {
-    transform: translate(0, 0);
+    opacity: 1;
   }
-  38%,
-  52% {
-    transform: translate(1.2px, -0.3px);
-  }
-  60%,
-  72% {
-    transform: translate(-1px, 0.2px);
-  }
-}
-
-@keyframes sway {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(2.2deg);
-  }
-}
-
-@keyframes blink {
-  0%,
   93%,
-  100% {
-    transform: scaleY(1);
+  95% {
+    opacity: 0;
   }
-  96% {
-    transform: scaleY(0.1);
+}
+
+@keyframes px-blink-shut {
+  0%,
+  92%,
+  96%,
+  100% {
+    opacity: 0;
+  }
+  93%,
+  95% {
+    opacity: 1;
+  }
+}
+
+@keyframes px-talk-open {
+  0%,
+  49% {
+    opacity: 0;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes px-talk-shut {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
   }
 }
 
 @keyframes bob {
   50% {
-    transform: translateY(-1.5px);
+    transform: translateY(-1px);
   }
 }
 
-@keyframes talk {
+@keyframes emote-pop {
   from {
-    transform: scaleY(0.35);
+    opacity: 0;
+    transform: translateY(8px) scale(0.4);
   }
   to {
-    transform: scaleY(1.1);
+    opacity: 1;
+    transform: none;
   }
 }
 
