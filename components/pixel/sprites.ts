@@ -383,7 +383,7 @@ export function buildBase(id: SharkId): Base {
   return base;
 }
 
-export interface Features {
+interface Features {
   brows: Run[];
   blush: Run[];
   eyesOpen: Run[];
@@ -508,6 +508,24 @@ export function buildFeatures(id: SharkId, mood: PixelMood): Features {
   };
   featureCache.set(key, features);
   return features;
+}
+
+export interface PixelPath {
+  c: string;
+  d: string;
+}
+
+const pathCache = new WeakMap<Run[], PixelPath[]>();
+
+/** One SVG path per colour (runs never overlap, so order does not matter). Cached per run list. */
+export function runsToPaths(runs: Run[]): PixelPath[] {
+  const hit = pathCache.get(runs);
+  if (hit) return hit;
+  const byColour = new Map<string, string>();
+  for (const r of runs) byColour.set(r.c, `${byColour.get(r.c) ?? ""}M${r.x} ${r.y}h${r.w + 0.04}v1.04h-${r.w + 0.04}z`);
+  const paths = [...byColour].map(([c, d]) => ({ c, d }));
+  pathCache.set(runs, paths);
+  return paths;
 }
 
 // ---------- Emotes: little pixel icons the sharks "pop" above their heads ----------

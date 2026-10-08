@@ -1,9 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
-import { DemoReplay } from "./DemoReplay";
 
-/** Collapsed by default: nothing loads, plays or moves until the visitor opens it. */
+// The recording and its script are only downloaded once the visitor opens the demo.
+const DemoReplay = dynamic(() => import("./DemoReplay").then((m) => m.DemoReplay), {
+  ssr: false,
+  loading: () => <p className="text-slate-400">Loading the demo…</p>,
+});
+
+/** Collapsed by default: the replay is not downloaded, mounted, played or moved until the visitor opens it. */
 export function DemoEntry() {
   const [open, setOpen] = useState(false);
 

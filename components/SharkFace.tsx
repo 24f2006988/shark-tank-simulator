@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import type { Shark } from "@/lib/sharks";
 import type { SharkId } from "@/lib/types";
-import { SIZE, buildBase, buildFeatures, type PixelMood, type Run } from "./pixel/sprites";
+import { Pixels } from "./pixel/Pixels";
+import { SIZE, buildBase, buildFeatures, type PixelMood } from "./pixel/sprites";
 
 export type Mood = PixelMood;
 
@@ -19,16 +20,6 @@ export function moodFor(interest: number, status: "in" | "out" = "in"): Mood {
 
 /** Staggered so the four sharks never blink in unison. */
 const DELAY: Record<SharkId, string> = { vikram: "0s", meera: "1.7s", arjun: "3.1s", zara: "4.4s" };
-
-function Pixels({ runs }: { runs: Run[] }) {
-  return (
-    <>
-      {runs.map((r) => (
-        <rect key={`${r.x}-${r.y}`} x={r.x} y={r.y} width={r.w + 0.04} height={1.04} fill={r.c} />
-      ))}
-    </>
-  );
-}
 
 interface Props {
   shark: Shark;

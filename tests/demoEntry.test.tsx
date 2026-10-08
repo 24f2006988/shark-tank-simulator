@@ -2,6 +2,11 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DemoEntry } from "@/components/DemoEntry";
+import { DemoReplay } from "@/components/DemoReplay";
+
+vi.mock("next/dynamic", () => ({
+  default: () => DemoReplay,
+}));
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({ matches: true, media: query, addEventListener() {}, removeEventListener() {} }));
@@ -21,12 +26,12 @@ describe("DemoEntry", () => {
     expect(screen.queryByText(/Recorded demo/i)).toBeNull();
   });
 
-  it("shows the labelled recording once opened, without autoplaying", () => {
+  it("shows the labelled recording once opened, without autoplaying", async () => {
     const { container } = render(<DemoEntry />);
     const details = container.querySelector("details")!;
     details.open = true;
     fireEvent(details, new Event("toggle"));
-    expect(screen.getByText(/Recorded demo/i)).toBeTruthy();
+    expect(await screen.findByText(/Recorded demo/i)).toBeTruthy();
     expect(screen.getAllByRole("button", { name: /play|start/i }).length).toBeGreaterThan(0);
   });
 });
