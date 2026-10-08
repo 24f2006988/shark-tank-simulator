@@ -74,7 +74,12 @@ export function AnswerBox({ sharkName, busy, onSubmit, inputRef }: Props) {
         <button type="submit" disabled={busy} className={btn.primary}>
           {busy ? "The panel is listening…" : "Send answer"}
         </button>
-        <MicButton disabled={busy} onTranscript={(t) => setValue((v) => (v ? `${v} ${t}` : t).slice(0, max))} />
+        <MicButton
+          disabled={busy}
+          onTranscript={(t) =>
+            setValue((v) => (v.trimEnd() ? `${v.trimEnd()} ${t.trim()}` : t.trim()).slice(0, max))
+          }
+        />
       </div>
     </form>
   );

@@ -260,7 +260,18 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
           <span id="description-hint">
             At least {LIMITS.description.min} characters. <span className="font-mono">{values.description.length}/{LIMITS.description.max}</span>
           </span>
-          <MicButton label="Dictate pitch" onTranscript={(t) => set("description", (values.description ? `${values.description} ${t}` : t).slice(0, LIMITS.description.max))} />
+          <MicButton
+            label="Dictate pitch"
+            onTranscript={(t) =>
+              set(
+                "description",
+                (values.description.trimEnd() ? `${values.description.trimEnd()} ${t.trim()}` : t.trim()).slice(
+                  0,
+                  LIMITS.description.max,
+                ),
+              )
+            }
+          />
         </div>
         {fieldError("description")}
       </div>
