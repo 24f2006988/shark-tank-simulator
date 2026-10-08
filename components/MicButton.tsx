@@ -222,7 +222,7 @@ export function MicButton({ onTranscript, disabled, label = "Speak your answer",
         disabled={disabled}
         aria-pressed={listening}
         aria-label={listening ? "Stop listening" : label}
-        className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 py-1.5 text-xs sm:text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed ${
+        className={`inline-flex min-h-10 items-center gap-2 rounded-(--radius-control) border px-3 py-1.5 text-xs sm:text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed ${
           listening
             ? "border-rose-400/80 bg-rose-500/20 text-rose-200 shadow-sm shadow-rose-950/50 hover:bg-rose-500/30"
             : "border-slate-700 bg-slate-800/80 text-slate-200 hover:border-slate-500 hover:bg-slate-800 hover:text-white"
@@ -267,7 +267,7 @@ export function MicButton({ onTranscript, disabled, label = "Speak your answer",
         <div
           role="status"
           aria-live="polite"
-          className="inline-flex max-w-xs sm:max-w-md items-center gap-1.5 rounded-md border border-accent/40 bg-accent/15 px-2.5 py-1 text-xs text-accent-light"
+          className="inline-flex max-w-xs sm:max-w-md items-center gap-1.5 rounded-full border border-accent/40 bg-accent/15 px-2.5 py-1 text-xs text-accent-light"
         >
           <span className="font-semibold text-accent shrink-0">Hearing:</span>
           <span className="italic truncate">&ldquo;{interim}&rdquo;</span>
@@ -278,7 +278,7 @@ export function MicButton({ onTranscript, disabled, label = "Speak your answer",
         <div
           role="alert"
           aria-live="assertive"
-          className="inline-flex items-center gap-2 rounded-md border border-rose-500/50 bg-rose-950/80 px-2.5 py-1 text-xs text-rose-200 shadow"
+          className="inline-flex items-center gap-2 rounded-full border border-rose-500/50 bg-rose-950/80 px-2.5 py-1 text-xs text-rose-200 shadow"
         >
           <svg
             aria-hidden="true"

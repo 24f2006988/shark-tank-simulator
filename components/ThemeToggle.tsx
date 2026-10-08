@@ -52,7 +52,7 @@ export function ThemeToggle() {
       aria-pressed={theme === "dark"}
       aria-label="Dark theme"
       title="Switch between light and dark"
-      className="inline-flex size-9 items-center justify-center rounded-md text-slate-300 hover:bg-slate-800 hover:text-slate-100"
+      className="inline-flex size-9 items-center justify-center rounded-(--radius-control) text-slate-300 hover:bg-slate-800 hover:text-slate-100"
     >
       <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="8.5" />

@@ -6,6 +6,11 @@ import { SharkAvatar } from "./SharkCard";
 
 const QUALITY_WORDS = ["", "Weak", "Shaky", "Okay", "Solid", "Excellent"];
 
+/** How the panel rated an answer, e.g. "Okay (3/5)". */
+export function ratingText(quality: NonNullable<Turn["quality"]>, vague?: boolean): string {
+  return `${QUALITY_WORDS[quality]} (${quality}/5)${vague ? " · the panel found it vague" : ""}`;
+}
+
 interface Props {
   turns: Turn[];
   walkouts: Walkout[];
@@ -29,7 +34,7 @@ export const ChatLog = memo(function ChatLog({ turns, walkouts, pendingAnswer }:
           const said = (turn.reactions ?? []).filter((r) => r.line && r.sharkId !== turn.sharkId).slice(0, 2);
           return (
             <li key={i} className="flex flex-col gap-3">
-              <div className="animate-rise relative flex gap-3 overflow-hidden rounded-md border border-slate-800 bg-slate-900 py-3 pr-4 pl-5">
+              <div className="animate-rise relative flex gap-3 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 py-3 pr-4 pl-5">
                 <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1 ${shark.color.bar}`} />
                 <SharkAvatar shark={shark} size="sm" />
                 <div className="min-w-0">
@@ -47,9 +52,7 @@ export const ChatLog = memo(function ChatLog({ turns, walkouts, pendingAnswer }:
                   <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">You</p>
                   <p className="whitespace-pre-wrap text-slate-100">{answer}</p>
                   {turn.quality ? (
-                    <p className="mt-1 text-xs text-slate-400">
-                      Rated {QUALITY_WORDS[turn.quality]} ({turn.quality}/5){turn.vague ? " · the panel found it vague" : ""}
-                    </p>
+                    <p className="mt-1 text-xs text-slate-400">Rated {ratingText(turn.quality, turn.vague)}</p>
                   ) : null}
                 </div>
               ) : null}
@@ -65,7 +68,7 @@ export const ChatLog = memo(function ChatLog({ turns, walkouts, pendingAnswer }:
               ) : null}
 
               {leaving.map((w) => (
-                <p key={w.sharkId} role="note" className="animate-rise rounded-md border border-rose-300/50 border-l-4 border-l-rose-300 bg-rose-300/10 px-4 py-2 text-sm text-slate-100">
+                <p key={w.sharkId} role="note" className="animate-rise rounded-2xl border border-rose-300/50 bg-rose-300/10 px-4 py-2 text-sm text-slate-100">
                   <span className="font-semibold text-rose-300">{SHARKS[w.sharkId].name} is out.</span> “{w.reason}”
                 </p>
               ))}

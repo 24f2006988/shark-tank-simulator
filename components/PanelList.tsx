@@ -2,11 +2,10 @@ import { memo } from "react";
 import { SHARK_LIST } from "@/lib/sharks";
 import type { SharkId, Sharks } from "@/lib/types";
 import { InterestMeter } from "./InterestMeter";
-import { SharkFace, moodFor, type Mood } from "./SharkFace";
+import { RESTING_MOOD } from "./SharkCard";
+import { SharkFace, moodFor } from "./SharkFace";
 
 const NO_DELTAS: Partial<Record<SharkId, number>> = {};
-
-const RESTING: Record<SharkId, Mood> = { vikram: "neutral", meera: "warm", arjun: "doubtful", zara: "hooked" };
 
 interface Props {
   /** Live state in the tank; without it the list is a plain directory of the panel. */
@@ -30,10 +29,10 @@ export const PanelList = memo(function PanelList({ sharks, deltas = NO_DELTAS, s
           return (
             <li
               key={shark.id}
-              className={`rounded-md px-2 py-2 ${speaker === shark.id ? "bg-accent/10" : ""} ${out ? "opacity-60" : ""}`}
+              className={`rounded-(--radius-control) px-2 py-2 ${speaker === shark.id ? "bg-accent/10" : ""} ${out ? "opacity-60" : ""}`}
             >
               <div className="flex items-center gap-2.5">
-                <SharkFace shark={shark} mood={state ? moodFor(state.interest, state.status) : RESTING[shark.id]} size={40} animated={false} />
+                <SharkFace shark={shark} mood={state ? moodFor(state.interest, state.status) : RESTING_MOOD[shark.id]} size={40} animated={false} />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-100">
                     {shark.name}

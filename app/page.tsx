@@ -1,83 +1,77 @@
 import { DemoEntry } from "@/components/DemoEntry";
-import { PanelList } from "@/components/PanelList";
+import { LandingPreview } from "@/components/LandingPreview";
+import { PanelPicker } from "@/components/PanelPicker";
 import { PitchForm } from "@/components/PitchForm";
 import { Shell } from "@/components/Shell";
-import { SeatedPanel, SharkCard } from "@/components/SharkCard";
-import { btn } from "@/components/ui";
 import { SHARK_LIST } from "@/lib/sharks";
 
-const STEPS = [
-  { title: "Pitch", text: "Your idea, your ask and the equity you'll give up." },
-  { title: "Get grilled", text: "Each shark probes their own lens. Dodge a question and they dig in." },
-  { title: "Negotiate", text: "Sharks still in make offers. Accept, counter or walk." },
-  { title: "Improve", text: "A scorecard, your weakest answer rewritten and a stronger pitch." },
+const PAGE_LINKS = [
+  { href: "#panel-h", label: "The panel" },
+  { href: "#demo-h", label: "Watch a game" },
+  { href: "#pitch-form-h", label: "Pitch" },
 ];
-
-const FACTS = ["4 AI investors", "Follow-ups on vague answers", "Offers you can counter", "A rewritten pitch"];
 
 export default function Home() {
   return (
-    <Shell wide crumbs={[{ label: "Shark Tank Simulator", href: "/" }, { label: "New pitch" }]} sidebar={<PanelList />}>
-      <header className="hero relative flex flex-col gap-8 overflow-hidden rounded-2xl border border-slate-800 px-4 py-8 sm:px-10 sm:py-12">
-        <div className="text-center">
-          <p className="text-sm font-semibold tracking-wide text-accent uppercase">Practice before the real room</p>
-          <h1 className="mx-auto mt-2 max-w-3xl font-display text-4xl font-bold tracking-tight text-balance sm:text-6xl">Pitch to four AI investors</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-pretty text-slate-300">
-            They ask hard, specific questions, walk out when you lose them, and send you home with a stronger pitch.
-          </p>
-        </div>
-        <SeatedPanel sharks={SHARK_LIST} />
-        <div className="flex flex-wrap justify-center gap-3">
-          <a href="#pitch-form-h" className={`${btn.primary} text-lg`}>
-            Start your pitch
-          </a>
-          <a href="#panel-h" className={btn.secondary}>
-            Meet the panel
-          </a>
-        </div>
-        <ul aria-label="What you get" className="flex flex-wrap justify-center gap-2">
-          {FACTS.map((f) => (
-            <li key={f} className="rounded-full border border-slate-700 bg-slate-950/70 px-3 py-1 text-sm text-slate-200">
-              {f}
-            </li>
+    <Shell
+      wide
+      crumbs={[{ label: "Shark Tank Simulator", href: "/" }, { label: "New pitch" }]}
+      actions={
+        <nav aria-label="On this page" className="mr-2 hidden items-center gap-1 lg:flex">
+          {PAGE_LINKS.map((l) => (
+            <a key={l.href} href={l.href} className="rounded-(--radius-control) px-3 py-2 text-slate-300 hover:bg-slate-800 hover:text-slate-100">
+              {l.label}
+            </a>
           ))}
-        </ul>
+        </nav>
+      }
+    >
+      <header className="dot-grid -mx-4 flex flex-col items-center gap-12 px-4 pt-10 pb-6 text-center sm:-mx-8 sm:px-8 sm:pt-16">
+        <div className="flex flex-col items-center">
+          <h1 className="max-w-4xl font-display text-5xl leading-[1.04] font-bold tracking-tight text-balance sm:text-7xl">
+            Pitch to four AI investors. <span className="text-slate-400">Before the real room.</span>
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg text-pretty text-slate-300">
+            They ask hard questions, walk out when you lose them, make offers you can counter, and send you home with a stronger pitch.
+          </p>
+          <div className="mt-9 flex flex-wrap justify-center gap-4">
+            <a
+              href="#demo-h"
+              className="inline-flex min-h-12 items-center rounded-(--radius-control) border-2 border-accent px-6 text-lg font-semibold text-slate-100 transition hover:bg-accent/10"
+            >
+              Watch a game
+            </a>
+            <a
+              href="#pitch-form-h"
+              className="inline-flex min-h-12 items-center rounded-(--radius-control) bg-slate-50 px-6 text-lg font-semibold text-slate-950 ring-2 ring-slate-50 ring-offset-4 ring-offset-slate-950 transition hover:bg-slate-200"
+            >
+              Start your pitch
+            </a>
+          </div>
+        </div>
+        <LandingPreview />
       </header>
 
-      <section aria-labelledby="how-h">
-        <h2 id="how-h" className="font-display text-2xl font-semibold">
-          How it works
-        </h2>
-        <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s, i) => (
-            <li key={s.title} className="flex flex-col gap-2 rounded-xl border border-slate-800 bg-slate-900 p-4">
-              <span aria-hidden="true" className="grid size-8 place-items-center rounded-full bg-accent font-semibold text-slate-950">
-                {i + 1}
-              </span>
-              <span className="font-semibold text-slate-100">
-                <span className="sr-only">Step {i + 1}: </span>
-                {s.title}
-              </span>
-              <span className="text-sm text-slate-300">{s.text}</span>
-            </li>
-          ))}
-        </ol>
+      <section aria-labelledby="panel-h" className="grid items-center gap-8 lg:grid-cols-[1fr_1.2fr]">
+        <div>
+          <h2 id="panel-h" className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            Four investors, four lenses
+          </h2>
+          <p className="mt-3 max-w-md text-lg text-pretty text-slate-300">
+            Each shark covers one part of a real investment memo, so no weak spot goes unchecked. Pick one to see what they look for.
+          </p>
+        </div>
+        <PanelPicker sharks={SHARK_LIST} />
       </section>
 
-      <DemoEntry />
-
-      <section aria-labelledby="panel-h" className="scroll-mt-16">
-        <h2 id="panel-h" className="font-display text-2xl font-semibold">
-          Meet the panel
-        </h2>
-        <p className="mt-1 text-slate-300">Each shark covers one part of a real investment memo, so no weak spot goes unchecked.</p>
-        <ul className="mt-5 grid gap-3 md:grid-cols-2">
-          {SHARK_LIST.map((shark) => (
-            <li key={shark.id}>
-              <SharkCard shark={shark} />
-            </li>
-          ))}
-        </ul>
+      <section aria-labelledby="demo-h" className="flex flex-col gap-4">
+        <div>
+          <h2 id="demo-h" className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            Watch a full game
+          </h2>
+          <p className="mt-2 max-w-2xl text-pretty text-slate-300">A real session recorded from the live app and played back here, with no AI call.</p>
+        </div>
+        <DemoEntry />
       </section>
 
       <PitchForm />

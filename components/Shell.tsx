@@ -9,7 +9,7 @@ export interface Crumb {
 
 interface Props {
   crumbs: Crumb[];
-  /** Left rail under the brand (the panel list). Hidden on narrow screens, where the stage shows the same sharks. */
+  /** Left rail under the brand (the panel list). Hidden on narrow screens. Without it the brand moves into the top bar. */
   sidebar?: ReactNode;
   /** Small status text and buttons at the right of the top bar. */
   status?: ReactNode;
@@ -30,25 +30,27 @@ function BrandMark() {
   );
 }
 
-/** The app frame: a quiet sidebar, a breadcrumb bar and a content column, the same structure as the sumigaki notebook. */
+const DISCLAIMER = "Built with Gemini on Vertex AI · hosted on Google Cloud Run. The sharks are AI characters; their offers are practice, not investment advice.";
+
+/** The app frame: an optional sidebar, a breadcrumb bar and a content column. */
 export function Shell({ crumbs, sidebar, status, actions, toolbar, wide = false, children }: Props) {
   return (
     <div className="flex min-h-dvh">
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-900 md:flex">
-        <Link href="/" className="flex items-center gap-2.5 px-4 pt-3.5 pb-3 font-semibold text-slate-100">
-          <BrandMark />
-          Shark Tank
-        </Link>
-        <div className="flex-1 overflow-y-auto px-2 pb-4">{sidebar}</div>
-        <p className="border-t border-slate-800 px-4 py-3 text-xs leading-relaxed text-slate-400">
-          Built with Gemini on Vertex AI · hosted on Google Cloud Run. The sharks are AI characters; their offers are practice, not investment advice.
-        </p>
-      </aside>
+      {sidebar ? (
+        <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-900 md:flex">
+          <Link href="/" className="flex items-center gap-2.5 px-4 pt-3.5 pb-3 font-semibold text-slate-100">
+            <BrandMark />
+            Shark Tank
+          </Link>
+          <div className="flex-1 overflow-y-auto px-2 pb-4">{sidebar}</div>
+          <p className="border-t border-slate-800 px-4 py-3 text-xs leading-relaxed text-slate-400">{DISCLAIMER}</p>
+        </aside>
+      ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950">
           <div className="flex min-h-12 items-center gap-3 px-4">
-            <Link href="/" className="flex items-center gap-2 font-semibold md:hidden">
+            <Link href="/" className={`flex items-center gap-2 font-semibold ${sidebar ? "md:hidden" : ""}`}>
               <BrandMark />
               <span className="sr-only">Shark Tank Simulator home</span>
             </Link>
@@ -86,9 +88,7 @@ export function Shell({ crumbs, sidebar, status, actions, toolbar, wide = false,
           {children}
         </main>
 
-        <footer className="border-t border-slate-800 px-4 py-4 text-center text-xs text-slate-400 md:hidden">
-          Built with Gemini on Vertex AI · hosted on Google Cloud Run. The sharks are AI characters; their offers are practice, not investment advice.
-        </footer>
+        <footer className={`border-t border-slate-800 px-4 py-4 text-center text-xs text-slate-400 ${sidebar ? "md:hidden" : ""}`}>{DISCLAIMER}</footer>
       </div>
     </div>
   );

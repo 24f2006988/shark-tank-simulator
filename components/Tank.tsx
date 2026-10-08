@@ -9,7 +9,8 @@ import { answeredTurns, loadSession, readSessionId, saveSession, savePrefill, se
 import { SHARKS } from "@/lib/sharks";
 import type { SharkId, Source, Stage, Terms } from "@/lib/types";
 import { AnswerBox } from "./AnswerBox";
-import { ChatLog } from "./ChatLog";
+import { ChatLog, ratingText } from "./ChatLog";
+import { DealMoment } from "./DealMoment";
 import { Debrief } from "./Debrief";
 import { greetingScript } from "./greeting";
 import { OfferCard } from "./OfferCard";
@@ -186,7 +187,8 @@ function TankGame({ initial }: { initial: GameSession }) {
   };
 
   // Stable between typed letters, so the memoised sidebar and transcript skip the typewriter's re-renders.
-  const lastReactions = answered.at(-1)?.reactions;
+  const lastAnswered = answered.at(-1);
+  const lastReactions = lastAnswered?.reactions;
   const deltas = useMemo(() => Object.fromEntries((lastReactions ?? []).map((r) => [r.sharkId, r.delta])), [lastReactions]);
   const openOffers = s.offers.filter((o) => s.talks[o.sharkId]?.status === "open");
   const stepIndex = STEPS.findIndex((x) => x.stage === s.stage);
@@ -208,7 +210,6 @@ function TankGame({ initial }: { initial: GameSession }) {
     <Shell
       wide
       crumbs={[{ label: "Shark Tank Simulator", href: "/" }, { label: "Pitch", href: "/" }, { label: s.pitch.ideaName }]}
-      sidebar={<PanelList sharks={s.sharks} deltas={s.stage === "questioning" ? deltas : NO_DELTAS} speaker={script.current?.sharkId ?? thinking} />}
       actions={s.stage !== "debrief" ? <VoiceToggle on={voiceOn} onChange={setVoiceOn} /> : null}
       toolbar={
         <nav aria-label="Progress">
@@ -217,7 +218,7 @@ function TankGame({ initial }: { initial: GameSession }) {
               <li
                 key={step.stage}
                 aria-current={i === stepIndex ? "step" : undefined}
-                className={`rounded-md px-2.5 py-1 ${i === stepIndex ? "bg-accent/15 font-semibold text-accent-hover" : i < stepIndex ? "text-slate-200" : "text-slate-400"}`}
+                className={`rounded-full px-2.5 py-1 ${i === stepIndex ? "bg-accent/15 font-semibold text-accent-hover" : i < stepIndex ? "text-slate-200" : "text-slate-400"}`}
               >
                 <span className="sr-only">{i < stepIndex ? "Done: " : ""}</span>
                 {i < stepIndex ? (
@@ -261,7 +262,7 @@ function TankGame({ initial }: { initial: GameSession }) {
         </div>
 
         {error ? (
-          <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-rose-400 bg-rose-400/10 p-4">
+          <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-rose-400 bg-rose-400/10 p-4">
             <p>{error.message}</p>
             <button type="button" onClick={error.retry} className={btn.secondary}>
               Try again
@@ -281,7 +282,14 @@ function TankGame({ initial }: { initial: GameSession }) {
                 onDebrief={() => dispatch({ type: "toDebrief" })}
               />
             ) : awaitingAnswer ? (
-              <AnswerBox sharkName={SHARKS[current.sharkId].name} busy={!!busy} onSubmit={submitAnswer} inputRef={answerRef} />
+              <div className="flex flex-col gap-3">
+                {lastAnswered?.quality ? (
+                  <p className="text-sm text-slate-300">
+                    Your last answer was rated {ratingText(lastAnswered.quality, lastAnswered.vague)}.
+                  </p>
+                ) : null}
+                <AnswerBox sharkName={SHARKS[current.sharkId].name} busy={!!busy} onSubmit={submitAnswer} inputRef={answerRef} />
+              </div>
             ) : null}
 
             {!s.over ? (
@@ -357,7 +365,9 @@ function TankGame({ initial }: { initial: GameSession }) {
           </div>
         ) : null}
 
-        {s.stage === "debrief" && s.debrief ? <Debrief debrief={s.debrief} pitch={s.pitch} deal={s.deal} offerCount={s.offers.length} onPitchAgain={pitchAgain} /> : null}
+        {s.stage === "debrief" && !s.debrief && s.deal ? <DealMoment deal={s.deal} /> : null}
+
+        {s.stage === "debrief" && s.debrief ? <Debrief debrief={s.debrief} pitch={s.pitch} deal={s.deal} offerCount={s.offers.length} turns={answered} sharks={s.sharks} onPitchAgain={pitchAgain} /> : null}
 
         {source === "fallback" ? (
           <p className="text-xs text-slate-400">The AI panel is busy, so the last reply came from scripted backup sharks.</p>

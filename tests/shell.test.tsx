@@ -29,6 +29,16 @@ describe("Shell", () => {
     expect(nav.querySelector("[aria-current=page]")?.textContent).toBe("Pitch");
     expect(screen.getByRole("main").id).toBe("main");
   });
+
+  it("puts the brand and the disclaimer in the page itself when there is no sidebar", () => {
+    const { container, rerender } = render(<Shell crumbs={[{ label: "Home" }]}>content</Shell>);
+    expect(container.querySelector("aside")).toBeNull();
+    expect(screen.getByRole("link", { name: "Shark Tank Simulator home" }).className).not.toContain("md:hidden");
+    expect(screen.getByRole("contentinfo").className).not.toContain("md:hidden");
+    rerender(<Shell crumbs={[{ label: "Home" }]} sidebar={<p>panel</p>}>content</Shell>);
+    expect(container.querySelector("aside")).not.toBeNull();
+    expect(screen.getByRole("contentinfo").className).toContain("md:hidden");
+  });
 });
 
 describe("PanelList", () => {

@@ -40,11 +40,11 @@ describe("result card text", () => {
 });
 
 describe("ResultCard", () => {
-  it("shows the ask, outcome and score as a labelled list", () => {
+  it("shows the ask and the outcome as a labelled list (the score ring beside it shows the score)", () => {
     render(<ResultCard debrief={debrief} pitch={pitch} deal={deal} offerCount={2} />);
     expect(screen.getByRole("heading", { name: "Your result card" })).toBeTruthy();
-    expect(screen.getAllByRole("term").map((t) => t.textContent)).toEqual(["The ask", "Outcome", "Score"]);
-    expect(screen.getByText("72/100")).toBeTruthy();
+    expect(screen.getAllByRole("term").map((t) => t.textContent)).toEqual(["The ask", "Outcome"]);
+    expect(screen.getByText("2 offers, 1 deal: Vikram Rao, Rs 50 lakh for 10%")).toBeTruthy();
   });
 
   it("copies the card and announces it", async () => {

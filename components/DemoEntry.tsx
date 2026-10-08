@@ -42,9 +42,9 @@ export function DemoEntry() {
           setOpen(e.currentTarget.open);
           if (!e.currentTarget.open) setStartWith(undefined);
         }}
-        className="rounded-md border border-slate-800 bg-slate-900"
+        className="rounded-2xl border border-slate-800 bg-slate-900"
       >
-        <summary className="cursor-pointer rounded-md px-5 py-3 font-semibold text-slate-100 hover:bg-slate-800">
+        <summary className="cursor-pointer rounded-2xl px-5 py-3 font-semibold text-slate-100 hover:bg-slate-800">
           Watch a recorded demo <span className="font-normal text-slate-400">(no AI call)</span>
         </summary>
         <div className="px-5 pt-2 pb-5">{open ? <DemoReplay key={startWith ?? "default"} startWith={startWith} onTryLive={tryLive} /> : null}</div>

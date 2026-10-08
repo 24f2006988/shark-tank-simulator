@@ -106,7 +106,7 @@ export function OfferCard({ offer, pitch, talk, busy, onAccept, onDecline, onCou
                 e.preventDefault();
                 void submitCounter();
               }}
-              className="flex flex-col gap-3 rounded-xl border border-slate-700 p-3"
+              className="flex flex-col gap-3 rounded-(--radius-control) border border-slate-700 p-3"
               aria-label={`Counter-offer to ${shark.name}`}
             >
               <div className="grid grid-cols-2 gap-2">

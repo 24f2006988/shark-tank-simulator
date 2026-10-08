@@ -10,15 +10,12 @@ interface Props {
   offerCount: number;
 }
 
-/** A compact result to screenshot or copy: what you asked, what the panel said, how it ended. */
+/** The result to copy and share, inside the verdict: what you asked and how it ended (the score ring sits beside it). */
 export function ResultCard({ debrief: d, pitch, deal, offerCount }: Props) {
   return (
-    <section aria-labelledby="result-h" className="rounded-md border border-slate-800 border-l-4 border-l-accent bg-accent/10 px-5 py-4">
-      <h2 id="result-h" className="text-sm font-semibold tracking-wide text-accent-hover uppercase">
-        Your result card
-      </h2>
-      <p className="mt-1 font-display text-2xl font-semibold">{pitch.ideaName}</p>
-      <dl className="mt-3 grid gap-x-8 gap-y-2 sm:grid-cols-3">
+    <div className="mt-4 border-t border-slate-800 pt-4">
+      <h3 className="sr-only">Your result card</h3>
+      <dl className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
         <div>
           <dt className="text-sm text-slate-400">The ask</dt>
           <dd className="font-semibold">
@@ -29,14 +26,10 @@ export function ResultCard({ debrief: d, pitch, deal, offerCount }: Props) {
           <dt className="text-sm text-slate-400">Outcome</dt>
           <dd className="font-semibold">{outcomeLine(deal, offerCount)}</dd>
         </div>
-        <div>
-          <dt className="text-sm text-slate-400">Score</dt>
-          <dd className="font-semibold">{d.overall}/100</dd>
-        </div>
       </dl>
       <div className="mt-4 flex flex-wrap gap-2">
         <CopyButton text={resultCardText(d, pitch, deal, offerCount)} label="Copy result card" />
       </div>
-    </section>
+    </div>
   );
 }

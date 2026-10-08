@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DIFFICULTY, formatInr, impliedValuationLakh } from "@/lib/game";
-import { DIFFICULTIES, LIMITS, SHARK_IDS } from "@/lib/constants";
+import { LIMITS, SHARK_IDS } from "@/lib/constants";
 import { pitchSchema } from "@/lib/schemas";
 import { SHARK_ARCHETYPES, resolveShark } from "@/lib/sharks";
 import { SAMPLE_PITCHES } from "@/lib/samples";
@@ -26,6 +26,9 @@ interface Values {
 type FieldName = Exclude<keyof Values, "difficulty" | "customPanels">;
 
 const EMPTY: Values = { ideaName: "", oneLiner: "", askLakh: "", equityPct: "", description: "", difficulty: "realistic", customPanels: undefined };
+
+/** Easiest to hardest, with the no-pressure mentoring mode last so the real panel leads. */
+const DIFFICULTY_ORDER: Difficulty[] = ["friendly", "realistic", "ruthless", "explore"];
 
 const DIFFICULTY_HINTS: Record<Difficulty, string> = {
   explore: "Curious mentors: explore the idea, returns, and vision together with minimal rigidity.",
@@ -145,7 +148,7 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
       </p>
 
       {errorList.length > 0 ? (
-        <div ref={summaryRef} tabIndex={-1} role="alert" aria-labelledby="error-summary-h" className="rounded-lg border border-rose-400 bg-rose-400/10 p-4">
+        <div ref={summaryRef} tabIndex={-1} role="alert" aria-labelledby="error-summary-h" className="rounded-2xl border border-rose-400 bg-rose-400/10 p-4">
           <h3 id="error-summary-h" className="font-semibold text-rose-200">
             Fix {errorList.length === 1 ? "this" : `these ${errorList.length} things`} before the sharks see it:
           </h3>
@@ -279,10 +282,10 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
         {fieldError("description")}
       </div>
 
-      <details className="rounded-lg border border-slate-700 bg-slate-900/60 p-4 transition open:border-slate-600">
+      <details className="rounded-2xl border border-slate-700 bg-slate-900/60 p-4 transition open:border-slate-600">
         <summary className="flex cursor-pointer select-none items-center justify-between font-semibold text-slate-100">
           <div className="flex items-center gap-2">
-            <span>Customize Your Shark Panel</span>
+            <span>Customize your shark panel</span>
             <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs text-accent">Optional</span>
           </div>
           <span className="text-xs text-slate-400">
@@ -301,7 +304,7 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
               const archetypes = SHARK_ARCHETYPES[id];
               const selectedId = values.customPanels?.[id]?.archetypeId ?? archetypes[0].id;
               return (
-                <div key={id} className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                <div key={id} className="flex flex-col gap-2 rounded-2xl border border-slate-800 bg-slate-950/60 p-3">
                   <div className="flex items-center gap-2.5">
                     <SharkAvatar shark={shark} size="sm" />
                     <div className="min-w-0">
@@ -359,10 +362,10 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
       <fieldset>
         <legend className="font-medium">How tough should the panel be?</legend>
         <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {DIFFICULTIES.map((d) => (
+          {DIFFICULTY_ORDER.map((d) => (
             <label
               key={d}
-              className="flex cursor-pointer gap-3 rounded-lg border border-slate-700 p-3 hover:border-slate-500 has-[:checked]:border-accent has-[:checked]:bg-accent/10 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent-hover"
+              className="flex cursor-pointer gap-3 rounded-(--radius-control) border border-slate-700 p-3 hover:border-slate-500 has-[:checked]:border-accent has-[:checked]:bg-accent/10 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent-hover"
             >
               <input
                 type="radio"

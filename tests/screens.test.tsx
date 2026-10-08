@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatLog } from "@/components/ChatLog";
 import { Debrief } from "@/components/Debrief";
 import { OfferCard } from "@/components/OfferCard";
-import { SeatedPanel, SharkCard } from "@/components/SharkCard";
+import { DealMoment } from "@/components/DealMoment";
+import { PanelPicker } from "@/components/PanelPicker";
 import { Stage, seatCentre } from "@/components/Stage";
 import { LINGER_MS, useScript } from "@/components/useScript";
 import type { Talk } from "@/lib/session";
@@ -191,21 +192,36 @@ describe("useScript", () => {
   });
 });
 
-describe("Landing panel", () => {
-  it("seats every shark behind a nameplate in a labelled list", () => {
-    render(<SeatedPanel sharks={SHARK_LIST} />);
-    const items = within(screen.getByRole("list", { name: "The panel" })).getAllByRole("listitem");
-    expect(items).toHaveLength(4);
-    expect(items[0].textContent).toContain("Vikram Rao");
-    expect(items[0].textContent).toContain("The Numbers");
+describe("Landing panel picker", () => {
+  it("lists every shark as a named toggle and shows the first shark's lens", () => {
+    render(<PanelPicker sharks={SHARK_LIST} />);
+    const buttons = within(screen.getByRole("list", { name: "The panel" })).getAllByRole("button");
+    expect(buttons.map((b) => b.getAttribute("aria-label"))).toEqual(SHARK_LIST.map((s) => `${s.name}, ${s.title}`));
+    expect(buttons[0].getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText(SHARK_LIST[0].bio)).toBeTruthy();
   });
 
-  it("gives each bio card a heading, lens and bio", () => {
-    render(<SharkCard shark={SHARK_LIST[1]} />);
-    const card = screen.getByRole("article");
-    expect(within(card).getByRole("heading", { name: "Meera Iyer" })).toBeTruthy();
-    expect(card.textContent).toContain(`Lens: ${SHARK_LIST[1].lensLabel}`);
-    expect(card.textContent).toContain(SHARK_LIST[1].bio);
+  it("switches the lens on click and on keyboard focus", () => {
+    render(<PanelPicker sharks={SHARK_LIST} />);
+    const buttons = within(screen.getByRole("list", { name: "The panel" })).getAllByRole("button");
+    fireEvent.click(buttons[2]);
+    expect(buttons[2].getAttribute("aria-pressed")).toBe("true");
+    expect(buttons[0].getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByText(`${SHARK_LIST[2].name}, ${SHARK_LIST[2].title}. Lens: ${SHARK_LIST[2].lensLabel.toLowerCase()}`)).toBeTruthy();
+    fireEvent.focus(buttons[3]);
+    expect(screen.getByText(SHARK_LIST[3].bio)).toBeTruthy();
+  });
+});
+
+describe("DealMoment", () => {
+  it("names the shark, the terms, the valuation and the condition under one heading", () => {
+    render(<DealMoment deal={{ sharkId: "zara", amountLakh: 25, equityPct: 10, condition: "Monthly advisory meetings." }} />);
+    const region = screen.getByRole("region", { name: "You have a deal" });
+    expect(region.textContent).toContain("Zara Khan, The Visionary");
+    expect(region.textContent).toContain("Rs 25 lakh for 10%");
+    expect(region.textContent).toContain("That values your company at Rs 2.5 crore.");
+    expect(region.textContent).toContain("Condition: Monthly advisory meetings.");
+    expect(region.textContent).not.toContain("meetings..");
   });
 });
 

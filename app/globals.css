@@ -1,14 +1,16 @@
 @import "tailwindcss";
 
 /*
- * Design tokens, borrowed from the sumigaki notebook: paper-white surfaces, thin borders, one blue accent,
- * serif headings. The utilities used across the app (slate-*, accent, status colours) read these variables,
+ * Design tokens: paper-white surfaces, thin borders, one cobalt accent (the finale deck's) and Funnel
+ * Display headings. Corners follow one rule: cards 16px (rounded-2xl), controls 10px, chips fully round. The utilities used across the app (slate-*, accent, status colours) read these variables,
  * so a theme is just a different set of values: light by default, dark by system preference or the toggle.
  */
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-funnel-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
-  --font-display: var(--font-serif), "Iowan Old Style", Georgia, serif;
+  --font-display: var(--font-funnel-display), var(--font-funnel-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-control: 10px;
 
   /* The root is 15px; keep the smallest text at 12px so it stays legible on phones. */
   --text-xs: 0.8rem;
@@ -40,8 +42,8 @@
 
 :root {
   color-scheme: light;
-  --t-accent: #2f5bd3;
-  --t-accent-hover: #2247ad;
+  --t-accent: #2b44f0;
+  --t-accent-hover: #1f33c9;
   --t-50: #0d1117;
   --t-100: #1f2328;
   --t-200: #2f353d;
@@ -62,15 +64,16 @@
   --t-cyan: #096a7f;
   --t-violet: #6f42c1;
   --shadow: 0 6px 24px rgb(0 0 0 / 0.1), 0 1px 3px rgb(0 0 0 / 0.08);
-  --spot: rgb(47 91 211 / 0.16);
+  --spot: rgb(43 68 240 / 0.14);
+  --dot: rgb(20 22 28 / 0.18);
 }
 
 /* Dark: the sumigaki dark palette. Applied by the system setting unless the user chose light, or by the toggle. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --t-accent: #7ea2ff;
-    --t-accent-hover: #a3bcff;
+    --t-accent: #9aa6ff;
+    --t-accent-hover: #b4bdff;
     --t-50: #f3f4f6;
     --t-100: #e6e8eb;
     --t-200: #d3d8de;
@@ -91,14 +94,15 @@
     --t-cyan: #67e8f9;
     --t-violet: #c4b5fd;
     --shadow: 0 6px 24px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.4);
-    --spot: rgb(126 162 255 / 0.3);
+    --spot: rgb(154 166 255 / 0.26);
+    --dot: rgb(255 255 255 / 0.16);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --t-accent: #7ea2ff;
-  --t-accent-hover: #a3bcff;
+  --t-accent: #9aa6ff;
+  --t-accent-hover: #b4bdff;
   --t-50: #f3f4f6;
   --t-100: #e6e8eb;
   --t-200: #d3d8de;
@@ -119,12 +123,13 @@
   --t-cyan: #67e8f9;
   --t-violet: #c4b5fd;
   --shadow: 0 6px 24px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.4);
-  --spot: rgb(126 162 255 / 0.3);
+  --spot: rgb(154 166 255 / 0.26);
+  --dot: rgb(255 255 255 / 0.16);
 }
 
 html {
-  /* Anchor jumps land below the sticky top bar. */
-  scroll-padding-top: 4.5rem;
+  /* Anchor jumps and focus scrolls land below the sticky top bar and the tank's step toolbar. */
+  scroll-padding-top: 6.5rem;
 }
 
 html,
@@ -193,12 +198,21 @@ body {
   animation: emote-pop 0.35s steps(5, end) both;
 }
 
-/* Landing hero: a lit stage behind the headline. */
-.hero {
-  background:
-    radial-gradient(ellipse 60% 90% at 100% 0%, var(--spot), transparent 70%),
-    radial-gradient(ellipse 40% 60% at 0% 100%, var(--spot), transparent 70%),
-    var(--color-slate-900);
+/* Landing hero and results grid: a faint dot grid that fades out at the edges, like a design canvas. */
+.dot-grid {
+  position: relative;
+  isolation: isolate;
+}
+
+.dot-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse 75% 70% at 50% 40%, black 30%, transparent 80%);
 }
 
 /* The tank set: a soft spotlight wash above the desk the panel sits behind. */

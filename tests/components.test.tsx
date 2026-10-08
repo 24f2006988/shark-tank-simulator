@@ -25,7 +25,7 @@ describe("InterestMeter (accessibility)", () => {
 });
 
 describe("Scorecard (accessibility)", () => {
-  it("lists every dimension as a term with its score as the definition", () => {
+  it("lists every dimension as a term with its score out of 10 as the definition", () => {
     render(<Scorecard scores={{ economics: 7.6, customer: 4, defensibility: 2, founder: 9, market: 5, answers: 3 }} />);
     const terms = screen.getAllByRole("term");
     const values = screen.getAllByRole("definition");

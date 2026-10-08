@@ -98,7 +98,7 @@ export function DemoReplay({ scripts = DEMO_SCRIPTS, startWith, onTryLive }: Pro
         })}
       </ul>
 
-      <div className="min-h-28 rounded-md border border-slate-800 bg-accent/10 py-4 pr-5 pl-6">
+      <div className="min-h-28 rounded-2xl border border-slate-800 bg-accent/10 py-4 pr-5 pl-6">
         <p className="flex flex-wrap items-center gap-2 text-sm">
           <span className={`font-semibold ${speaker ? SHARKS[speaker].color.text : "text-slate-100"}`}>{speakerName}</span>
           <span className="text-slate-300">{KIND_LABEL[beat.kind]}</span>
@@ -111,7 +111,7 @@ export function DemoReplay({ scripts = DEMO_SCRIPTS, startWith, onTryLive }: Pro
       </div>
 
       {finished ? (
-        <div className="rounded-md border border-slate-700 p-4">
+        <div className="rounded-2xl border border-slate-700 p-4">
           <h3 className="font-display text-xl font-semibold">
             {script.summary.outcome}. Debrief score: {script.summary.overall}/100
           </h3>
