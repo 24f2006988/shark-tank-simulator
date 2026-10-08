@@ -16,6 +16,23 @@ An **AI evaluator** scores the repo + live app out of 100 on these 7 metrics. Ev
 
 If a change would hurt a metric, say so in your Progress log line. When handing work to another agent, **pass this list on**.
 
+## ⚠️ YOU ARE NOT ALONE: coordinate with the other agents
+Several AI agents (Claude Code sessions, Gemini/Antigravity, others) edit this repo **at the same time**, all on the single `main` branch. Assume someone else changed something since you last looked. Follow this protocol:
+1. **Before starting a task:** run `git pull --rebase` and `git status`, re-read this file (Work board, Next steps, last 10 Progress log lines), then **claim** your task on the Work board below (agent name, task, files, time).
+2. **Stay in your lane:** only edit files you claimed or own (ownership in `PLAN.md` section 16). Need a change in someone else's file? Ask in the Progress log or the Work board instead of editing it. Never delete, revert or reformat other agents' work.
+3. **Shared files need care:** `package.json` / `package-lock.json` (only the backend owner adds dependencies; ask first), `lib/types.ts` (contracts: additive changes only and log them), `AGENTS.md` / `PLAN.md` (append or edit your own lines; don't rewrite sections), `app/layout.tsx`, `app/globals.css`.
+4. **Re-read a file right before editing it.** If it changed under you, merge with what is there rather than overwriting it.
+5. **Commit small and often, only your own files:** `git add <your paths>` (never `git add -A` / `git add .`, which sweeps up other agents' half-finished work), then `git pull --rebase`, then `npm run lint && npm test` pass, then `git push`. Never force-push, never create branches, never rewrite history.
+6. **Deploys:** only the agent that owns deploys (see Work board) runs `gcloud run deploy`, and only from a clean, pushed, passing `main`. Others ask for a redeploy in the log.
+7. **When done:** add a Progress log line (time, agent, what, which metrics it affects), then move your Work board row to "done" or remove it.
+8. **Mind the generated block:** `next dev` appends the "nextjs-agent-rules" block at the end of this file; keep Progress log lines above it.
+
+### Work board (claim before you start; one row per active task)
+| Agent | Task | Files claimed | Since | Status |
+|---|---|---|---|---|
+| Claude Code (backend/quality) | Backend, API, tests, CI, deploys, README | `lib/*` (except `session.ts`, `samples.ts`), `app/api/*`, `tests/*`, `.github/*`, `Dockerfile`, `next.config.ts`, `README.md` | 11:30 | active |
+| Frontend agent | UI pages and components | `components/*`, `app/page.tsx`, `app/tank/*`, `app/layout.tsx`, `app/globals.css`, `lib/session.ts`, `lib/samples.ts` | 11:30 | active |
+
 Organized by the Dept. of Computer Science, Pondicherry University. Part of the hack2skill/Google PromptWars program.
 Event page: https://hack2skill.com/event/promptwars-x-the-prompt-arena-pu/?sectionid=6aa90a039d38ac1eb4ddb596
 
@@ -110,6 +127,7 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08 11:10, Claude Code: added "Current state", "Next steps" and "Deploy how-to" to Project status (live site is a placeholder; no features yet).
 - 2026-10-08 11:35, Claude Code: rewrote `PLAN.md` as a detailed v2 spec (types and API contracts, game rules, prompts, a11y, security, tests, Google services, timeline from 11:30, work split). Model tests: use `gemini-3.5-flash` + fallback `gemini-3.5-flash-lite` (3.8-flash returned 503, 2.5-flash returns 404 for new users).
 - 2026-10-08, Claude Code: added "READ BEFORE EVERY CHANGE: build for the 7 scoring metrics" rule at the top of AGENTS.md (all agents must maintain it).
+- 2026-10-08, Claude Code: added "YOU ARE NOT ALONE: coordinate with the other agents" protocol and a Work board (claims) near the top of AGENTS.md.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
