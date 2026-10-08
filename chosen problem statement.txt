@@ -1,0 +1,43 @@
+CHOSEN PROBLEM STATEMENT: Shark Tank Simulator
+==============================================
+
+Title: Shark Tank Simulator: Pitch your idea to investors who will not go easy on you
+
+Problem:
+Everyone thinks their idea is brilliant, and nobody tells them the truth. Real investors are hard
+to reach, and friends are too polite.
+
+Your mission:
+Build an AI investor panel that tests an idea the way real investors do.
+
+Start here:
+The user pitches an idea and gets questioned about it.
+
+Make it yours:
+- Who sits on your panel and what do they care about?
+- What makes a question hard to answer?
+- What would help the founder walk away with a better pitch?
+
+
+REQUIRED FEATURES (must all work in the deployed app)
+-----------------------------------------------------
+[ ] User pitches an idea (text; voice is an extra)
+[ ] An AI investor PANEL (several investors, each with a distinct focus and personality)
+[ ] Investors question the founder about the idea, and the founder answers (multi-turn)
+[ ] Questions are hard the way real investors' are: follow-ups dig into weak or vague answers
+[ ] Founder walks away with a better pitch: feedback, scorecard and an improved pitch
+
+
+PLANNED EXTRAS (for jury impact, only after the required features work)
+-----------------------------------------------------------------------
+- Live interest meter per shark that moves with every answer; a shark can walk out ("I'm out")
+- Deal round: offers (Rs amount for % equity), founder counter-offers, sharks accept / counter / walk
+- Voice pitch and voice answers (browser Web Speech API, free) + sharks read aloud (speechSynthesis)
+- Difficulty: Friendly / Realistic / Ruthless
+- Shareable result card ("2 offers, 1 deal at Rs 50L for 10%")
+
+Demo plan: a judge pitches their own idea live and faces the panel.
+
+Notes:
+- Only the Gemini API is needed (free tier from aistudio.google.com/apikey); key in Vercel env vars.
+- Hosting: Vercel (user has an account).

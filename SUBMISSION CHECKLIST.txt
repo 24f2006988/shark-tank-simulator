@@ -1,0 +1,36 @@
+SUBMISSION CHECKLIST (only 2 attempts total, submit ONCE, complete)
+==================================================================
+Do NOT submit until every box is ticked. Attempt 2 is an emergency reserve only.
+
+A. REQUIRED FEATURES (test on the LIVE URL, in an incognito window)
+[ ] Founder can enter a pitch (idea, ask, description)
+[ ] A panel of several AI investors, each with a distinct focus, is shown
+[ ] Investors ask questions about THIS pitch, founder answers, multiple rounds
+[ ] Vague or weak answers get harder follow-up questions
+[ ] Debrief: scorecard, feedback and an improved pitch the founder can copy
+[ ] Tested with at least 3 pitches: a strong one, a vague one-liner, and nonsense/empty input (clean handling, no crash)
+[ ] Session still completes if Gemini errors or rate-limits (fallback path)
+[ ] Works on a phone-sized screen
+
+B. DEPLOYMENT
+[ ] Live URL opens in a fresh incognito window, with no login needed
+[ ] No errors in the browser console during the full demo
+[ ] Gemini API key set as server environment variables, and the app works with them
+[ ] Live app runs the latest code (check the deployed version matches the last commit)
+
+C. GITHUB REPO
+[ ] `sh scripts/check-repo-size.sh` passes (under 8 MB, hard cap 10 MB, history included)
+[ ] Repo is PUBLIC and opens in an incognito window
+[ ] No secrets in the repo (search for "key", "token", ".env")
+[ ] README has: project name, one-line description, LIVE LINK, how to run, tech used
+[ ] Latest code is pushed (`git status` clean, `git log origin/main` matches local)
+
+D. SUBMISSION FORM
+[ ] Deployed URL copied exactly and opened once from the copied text
+[ ] GitHub URL copied exactly and opened once from the copied text
+[ ] Submitting 30+ minutes before the deadline
+[ ] Attempt logged in AGENTS.md Progress log (time, URLs, commit hash)
+
+E. AFTER SUBMITTING
+[ ] Freeze: no risky redeploys or pushes during judging
+[ ] Sample pitch ready for the demo; plan to let a judge pitch live
