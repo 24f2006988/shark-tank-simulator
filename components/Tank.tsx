@@ -222,6 +222,7 @@ function TankGame({ initial }: { initial: GameSession }) {
       deltas={s.stage === "questioning" ? deltas : {}}
       round={answered.length}
       onSkip={script.skip}
+      customPanels={s.pitch.customPanels}
     />
   );
 
@@ -257,19 +258,17 @@ function TankGame({ initial }: { initial: GameSession }) {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div role="status" aria-live="polite" className="min-h-6 text-accent-hover">
-            {busy ? (
-              <span className="inline-flex items-center gap-2">
-                <span aria-hidden="true" className="size-2 animate-pulse rounded-full bg-accent" />
-                {busy}
-              </span>
-            ) : s.stage === "questioning" ? (
-              <span className="text-slate-300">
-                {s.over ? "Questions done" : `Question ${Math.min(answered.length + 1, rules.maxAnswers)} of ${rules.maxAnswers}`}
-              </span>
-            ) : null}
-          </div>
+        <div role="status" aria-live="polite" className="text-accent-hover empty:sr-only">
+          {busy ? (
+            <span className="inline-flex items-center gap-2">
+              <span aria-hidden="true" className="size-2 animate-pulse rounded-full bg-accent" />
+              {busy}
+            </span>
+          ) : s.stage === "questioning" ? (
+            <span className="text-slate-300">
+              {s.over ? "Questions done" : `Question ${Math.min(answered.length + 1, rules.maxAnswers)} of ${rules.maxAnswers}`}
+            </span>
+          ) : null}
         </div>
 
         {error ? (
