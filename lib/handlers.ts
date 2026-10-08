@@ -96,8 +96,13 @@ export async function runTurn({ pitch, sharks, turns }: z.output<typeof turnRequ
   const over = isQuestioningOver(after, turns, pitch.difficulty);
   let next: Question | null = null;
   if (!over) {
-    const allowed = new Set([nextAsker, raw.vague ? followUp : null]);
-    if (aiNext && allowed.has(aiNext.sharkId) && after[aiNext.sharkId].status === "in" && aiNext.question.trim()) {
+    // Any shark still in may ask, but the shark who just asked may only continue as a permitted follow-up.
+    const usable =
+      aiNext &&
+      aiNext.question.trim() &&
+      after[aiNext.sharkId].status === "in" &&
+      (aiNext.sharkId !== last.sharkId || (raw.vague && followUp === last.sharkId) || activeSharks(after).length === 1);
+    if (aiNext && usable) {
       next = {
         sharkId: aiNext.sharkId,
         question: tidy(aiNext.question, LIMITS.question.max),
