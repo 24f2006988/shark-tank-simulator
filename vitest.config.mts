@@ -18,8 +18,8 @@ export default defineConfig({
       provider: "v8",
       include: ["lib/**", "app/api/**", "components/**"],
       reporter: ["text-summary"],
-      // CI fails if the backend loses coverage; UI components are covered by targeted a11y tests plus live e2e runs.
-      thresholds: { "lib/**": { lines: 85 }, "app/api/**": { lines: 95 } },
+      // CI fails if coverage drops: backend and routes held high, UI components held at their tested floor.
+      thresholds: { "lib/**": { lines: 90 }, "app/api/**": { lines: 95 }, "components/**": { lines: 60 } },
     },
   },
 });

@@ -61,6 +61,18 @@ export const sharkCustomizationSchema = z.object({
   archetypeId: archetypeIdSchema.optional(),
 });
 
+/** Each shark accepts only its own archetypes, so an id meant for another shark is rejected with a clear path. */
+const customFor = <T extends readonly [string, ...string[]]>(ids: T) => z.object({ archetypeId: z.enum(ids).optional() }).optional();
+
+export const customPanelsSchema = z
+  .object({
+    vikram: customFor(VIKRAM_ARCHETYPES),
+    meera: customFor(MEERA_ARCHETYPES),
+    arjun: customFor(ARJUN_ARCHETYPES),
+    zara: customFor(ZARA_ARCHETYPES),
+  })
+  .optional();
+
 export const pitchSchema = z.object({
   ideaName: text("Idea name", LIMITS.ideaName.min, LIMITS.ideaName.max),
   oneLiner: text("One-liner", 0, LIMITS.oneLiner.max).default(""),
@@ -68,26 +80,7 @@ export const pitchSchema = z.object({
   equityPct: amount("Equity offered (%)", 0.5, 90),
   description: text("Pitch", LIMITS.description.min, LIMITS.description.max),
   difficulty: difficultySchema.default("realistic"),
-  customPanels: z
-    .object({
-      vikram: sharkCustomizationSchema.optional(),
-      meera: sharkCustomizationSchema.optional(),
-      arjun: sharkCustomizationSchema.optional(),
-      zara: sharkCustomizationSchema.optional(),
-    })
-    .partial()
-    .optional()
-    .refine(
-      (cp) => {
-        if (!cp) return true;
-        if (cp.vikram?.archetypeId && !VIKRAM_ARCHETYPES.includes(cp.vikram.archetypeId as (typeof VIKRAM_ARCHETYPES)[number])) return false;
-        if (cp.meera?.archetypeId && !MEERA_ARCHETYPES.includes(cp.meera.archetypeId as (typeof MEERA_ARCHETYPES)[number])) return false;
-        if (cp.arjun?.archetypeId && !ARJUN_ARCHETYPES.includes(cp.arjun.archetypeId as (typeof ARJUN_ARCHETYPES)[number])) return false;
-        if (cp.zara?.archetypeId && !ZARA_ARCHETYPES.includes(cp.zara.archetypeId as (typeof ZARA_ARCHETYPES)[number])) return false;
-        return true;
-      },
-      { message: "Invalid archetype for shark" },
-    ),
+  customPanels: customPanelsSchema,
 });
 
 export const reactionSchema = z.object({

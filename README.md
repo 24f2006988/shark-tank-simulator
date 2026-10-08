@@ -22,7 +22,8 @@ Built for PromptWars (8-hour Build With AI hackathon, Pondicherry University), p
 | The founder walks away with a **better pitch** | `app/api/debrief/route.ts` → `runDebrief`, `components/Debrief.tsx` | Scorecard per dimension, strengths and weaknesses, your toughest moment answered better, what each shark needed, a rewritten 60-second pitch (Copy / Pitch again), 3 fixes |
 | Walkouts, offers and negotiation | `lib/game.ts`, `app/api/offers`, `app/api/negotiate`, `components/OfferCard.tsx`, `components/QuestionsDone.tsx` | Sharks walk out ("I'm out") with a reason; the rest make offers with implied valuation; counter, accept or walk; Friendly / Realistic / Ruthless modes |
 | Shark archetypes | `lib/sharks.ts` (`SHARK_ARCHETYPES`), `lib/schemas.ts`, `components/PitchForm.tsx`, `components/Stage.tsx` | 3 distinct archetypes per shark (Growth Hacker, Value Investor, Systems Architect, etc.) with safe server-side enum resolution |
-| Pixel-art sharks | `components/SharkFace.tsx`, `components/pixel/sprites.ts`, `components/PixelEmote.tsx`, `components/emotes.ts` | Hand-built pixel sprites for each shark with eight expressions; an emote pops up as each shark reacts to your answer |
+| Illustrated, reactive sharks | `components/SharkFace.tsx`, `components/FaceEmote.tsx`, `components/emotes.ts` | Vector portraits with moods that follow interest; an emote pops up as each shark reacts to your answer |
+| Stage and verdict visuals | `components/Stage.tsx`, `components/Debrief.tsx`, `components/OfferCard.tsx`, `components/verdict.ts` | Lit tank set with a speech bubble pointing at the speaker, question progress bar, each offer compared with your valuation ("20% below your valuation"), a score ring with a verdict band |
 | Stage presence | `components/greeting.ts`, `components/useScript.ts`, `components/mumble.ts` | The panel greets you by idea and ask; lines type out with per-shark "mumble" sound blips (toggle in the header) |
 | Light and dark themes | `components/ThemeToggle.tsx`, `components/Shell.tsx`, `app/globals.css` | Theme toggle in the header, app shell with breadcrumbs and panel sidebar |
 | Demo replay (no network) | `components/DemoReplay.tsx`, `lib/demoScript.ts` | Two recorded real sessions (a strong and a weak pitch) that play back with zero API calls |
@@ -76,7 +77,8 @@ npm run test:coverage  # coverage report
   - the success path, invalid JSON, a reply that breaks the schema and the model fallback chain;
   - a 503/429 falling back to scripted content;
   - rate limiting, oversized bodies and invalid input.
-- **Coverage** (Vitest v8, 138 tests): **`lib/` 91% of lines, API routes 100%**, about 62% overall (UI components 38%, covered by targeted accessibility tests and live end-to-end runs). CI fails if `lib/` drops below 85% or the API routes below 95%.
+- **UI tests** (jsdom + Testing Library): the offer card (counter form validation, keyboard-reachable actions, disabled while waiting), debrief regions, the stage's screen-reader line, the transcript log, the typewriter script hook, the API client's error handling and the panel's reaction order.
+- **Coverage** (Vitest v8, 170 tests): **`lib/` 96% of lines, API routes 100%, UI components 66%, 79% overall**. CI fails if `lib/` drops below 90%, the API routes below 95% or UI components below 60%.
 - GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck and tests with coverage on every push.
 
 ### Security
@@ -86,7 +88,7 @@ npm run test:coverage  # coverage report
   - Founder text is wrapped in data tags.
   - Angle brackets are neutralised, so the text cannot close a tag.
   - The system prompt says tagged content is data, not instructions.
-- Per-IP rate limit (30 requests a minute). Generic error messages.
+- Per-IP rate limit (30 requests a minute), keyed on the address Cloud Run appends to `X-Forwarded-For`, so a client cannot dodge it by sending a fake one. Generic error messages.
 - Security headers: CSP, `frame-ancestors 'none'`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS.
 - The container runs as non-root. No `dangerouslySetInnerHTML`.
 - **Accepted trade-off:** the session lives in the browser, so a user could edit their own scores. That only affects their own game; nothing is stored or shared server-side.
@@ -128,7 +130,7 @@ To use the Gemini Developer API instead, store the key in Secret Manager (`gclou
 app/            pages (/, /tank) and API routes (/api/turn, /api/offers, /api/negotiate, /api/debrief)
 components/     UI: app shell, pitch form, stage and shark faces, interest meters, transcript, offers, debrief, demo replay
 lib/            schemas, game rules, sharks, prompts, Gemini client, fallbacks, rate limit, logging
-tests/          Vitest unit and route tests
+tests/          Vitest unit, route and component tests
 ```
 
 **Stack:** Next.js 16, React 19, TypeScript, Tailwind CSS 4, Zod, Gemini API, Google Cloud Run.

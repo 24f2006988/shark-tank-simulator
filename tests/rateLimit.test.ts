@@ -14,9 +14,15 @@ describe("createRateLimiter", () => {
 });
 
 describe("clientIp", () => {
-  it("uses the first forwarded address", () => {
-    const req = new Request("http://x", { headers: { "x-forwarded-for": "1.2.3.4, 10.0.0.1" } });
+  it("uses the address Cloud Run appended, not one the client supplied", () => {
+    const req = new Request("http://x", { headers: { "x-forwarded-for": "6.6.6.6, 1.2.3.4" } });
     expect(clientIp(req)).toBe("1.2.3.4");
+    expect(clientIp(new Request("http://x", { headers: { "x-forwarded-for": "1.2.3.4" } }))).toBe("1.2.3.4");
     expect(clientIp(new Request("http://x"))).toBe("unknown");
+  });
+
+  it("cannot be dodged by sending a fresh spoofed address each time", () => {
+    const keys = ["a", "b", "c"].map((spoof) => clientIp(new Request("http://x", { headers: { "x-forwarded-for": `${spoof}, 1.2.3.4` } })));
+    expect(new Set(keys).size).toBe(1);
   });
 });

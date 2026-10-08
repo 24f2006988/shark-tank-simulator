@@ -24,6 +24,10 @@ export function createRateLimiter(capacity: number, perMinute: number, now: () =
   };
 }
 
+/**
+ * Cloud Run's front end appends the address it saw to X-Forwarded-For, after anything the client sent.
+ * Only that last entry is trustworthy; keying on the first would let a caller pick a fresh key per request.
+ */
 export function clientIp(request: Request): string {
-  return request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  return request.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim() || "unknown";
 }
