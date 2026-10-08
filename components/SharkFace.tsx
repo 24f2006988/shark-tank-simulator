@@ -145,13 +145,21 @@ function HairFront({ id, fill, light }: { id: SharkId; fill: string; light: stri
   }
 }
 
+/** Shoulder silhouettes, shared by each outfit and the fabric shading laid over it. */
+const BODY: Record<SharkId, string> = {
+  vikram: "M5 100 Q7 83 34 81 L66 81 Q93 83 95 100Z",
+  meera: "M12 100 Q14 86 36 83 L64 83 Q86 86 88 100Z",
+  arjun: "M8 100 Q10 83 33 81 L67 81 Q90 83 92 100Z",
+  zara: "M12 100 Q14 86 36 83 L64 83 Q86 86 88 100Z",
+};
+
 /** Clothes and neckwear: each silhouette differs (broad blazer, dupatta, hoodie and headphones, lapels). */
 function Outfit({ id }: { id: SharkId }) {
   switch (id) {
     case "vikram":
       return (
         <g>
-          <path d="M5 100 Q7 83 34 81 L66 81 Q93 83 95 100Z" fill="#1e2a44" />
+          <path d={BODY.vikram} fill="#1e2a44" />
           <path d="M41 81 L50 97 L59 81Z" fill="#f1f5f9" />
           <path d="M48.5 85 L51.5 85 L53 97 L50 100 L47 97Z" fill={GOLD} />
           <path d="M34 81 L43 99 M66 81 L57 99" stroke="#131c30" strokeWidth="1.6" fill="none" />
@@ -161,7 +169,7 @@ function Outfit({ id }: { id: SharkId }) {
     case "meera":
       return (
         <g>
-          <path d="M12 100 Q14 86 36 83 L64 83 Q86 86 88 100Z" fill="#fb7185" />
+          <path d={BODY.meera} fill="#fb7185" />
           <path d="M40 83 Q50 93 60 83" fill="none" stroke="#fde68a" strokeWidth="1.6" />
           <path d="M14 90 Q40 94 62 100 L86 100 L84 94 Q50 88 14 84Z" fill="#0f766e" />
           <path d="M14 90 Q40 94 62 100" fill="none" stroke={GOLD} strokeWidth="1.4" />
@@ -170,7 +178,7 @@ function Outfit({ id }: { id: SharkId }) {
     case "arjun":
       return (
         <g>
-          <path d="M8 100 Q10 83 33 81 L67 81 Q90 83 92 100Z" fill="#0e7490" />
+          <path d={BODY.arjun} fill="#0e7490" />
           <path d="M30 81 Q50 97 70 81 Q64 73 50 75 Q36 73 30 81Z" fill="#0b5367" />
           <path d="M45 88 L44 98 M55 88 L56 98" stroke="#a5f3fc" strokeWidth="1.2" strokeLinecap="round" />
           <path d="M31 83 Q50 99 69 83" fill="none" stroke="#111827" strokeWidth="3" strokeLinecap="round" />
@@ -183,7 +191,7 @@ function Outfit({ id }: { id: SharkId }) {
     case "zara":
       return (
         <g>
-          <path d="M12 100 Q14 86 36 83 L64 83 Q86 86 88 100Z" fill="#6d28d9" />
+          <path d={BODY.zara} fill="#6d28d9" />
           <path d="M38 83 L50 96 L62 83Z" fill="#f5f3ff" />
           <path d="M36 83 L47 100 M64 83 L53 100" stroke="#a78bfa" strokeWidth="1.6" fill="none" />
           <circle cx="68" cy="92" r="2.2" fill={GOLD} />
@@ -293,18 +301,22 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
   const live = animated && mood !== "out";
   const hair = `hair-${uid}`;
   const clip = `clip-${uid}`;
+  const skin = `skin-${uid}`;
+  const cloth = `cloth-${uid}`;
   const sparkle = mood === "hooked";
   // Large glossy irises under a heavy upper lash with a small outer flick: the film look, not the emoji look.
   const eye = (cx: number, side: -1 | 1): ReactNode => (
     <g transform={`translate(${cx} 50) scale(${look.eyeScale}) translate(${-cx} -50)`}>
       <ellipse cx={cx} cy="50" rx="5.3" ry="4.7" fill="#fffaf2" stroke={OUTLINE} strokeWidth="0.4" />
       <g className={live ? "face-glance" : undefined} style={live ? { animationDelay: look.delay } : undefined}>
-        <ellipse cx={cx} cy="50.4" rx="3.7" ry="4.4" fill={look.iris} />
+        <ellipse cx={cx} cy="50.4" rx="3.7" ry="4.4" fill={look.iris} stroke="#0b0705" strokeWidth="0.35" />
         <ellipse cx={cx} cy="51.2" rx="2.4" ry="2.6" fill={look.irisGlow} opacity="0.55" />
         <ellipse cx={cx} cy="50.4" rx="1.5" ry="2.1" fill="#0b0705" />
         <circle cx={cx - 1.4} cy="48.6" r="1.5" fill="white" />
         <circle cx={cx + 1.4} cy="52" r={sparkle ? 1 : 0.6} fill="white" />
       </g>
+      <path d={`M${cx - 4.8} 44.6 Q${cx} 41.4 ${cx + 4.8} 44.6`} fill="none" stroke={look.skinShade} strokeWidth="0.7" strokeLinecap="round" />
+      <path d={`M${cx - 3.8} 54.4 Q${cx} 55.7 ${cx + 3.8} 54.4`} fill="none" stroke={OUTLINE} strokeWidth="0.5" strokeLinecap="round" opacity="0.4" />
       <path d={`M${cx - 5.8} 47.8 Q${cx} 43.4 ${cx + 5.8} 47.8`} fill="none" stroke={OUTLINE} strokeWidth="1.9" strokeLinecap="round" />
       <path d={`M${cx + side * 5.8} 47.8 l${side * 1.7} -1.3`} fill="none" stroke={OUTLINE} strokeWidth="1.3" strokeLinecap="round" />
     </g>
@@ -317,6 +329,15 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
           <clipPath id={clip}>
             <path d={look.face} />
           </clipPath>
+          <radialGradient id={skin} cx="0.44" cy="0.4" r="0.62">
+            <stop offset="0%" stopColor={look.skin} />
+            <stop offset="70%" stopColor={look.skin} />
+            <stop offset="100%" stopColor={look.skinShade} />
+          </radialGradient>
+          <linearGradient id={cloth} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#000" stopOpacity="0" />
+            <stop offset="100%" stopColor="#000" stopOpacity="0.28" />
+          </linearGradient>
           <linearGradient id={hair} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={look.hairLight} stopOpacity="0.9" />
             <stop offset="35%" stopColor={look.hair} />
@@ -325,14 +346,22 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
 
         <g className={live ? "face-bob" : undefined}>
           <Outfit id={shark.id} />
+          <path d={BODY[shark.id]} fill={`url(#${cloth})`} />
           <path d="M43 74 L43 86 Q50 89 57 86 L57 74Z" fill={look.skinShade} />
+          <path d="M43 76 Q50 81 57 76 L57 74 L43 74Z" fill="#000" opacity="0.18" />
 
           <g className="face-tilt" style={{ transform: e.tilt }}>
             <HairBack id={shark.id} fill={`url(#${hair})`} />
-            <ellipse cx={look.earX} cy="53" rx="3.6" ry="6" fill={look.skinShade} />
-            <ellipse cx={100 - look.earX} cy="53" rx="3.6" ry="6" fill={look.skinShade} />
-            <path d={look.face} fill={look.skin} stroke={OUTLINE} strokeWidth="0.7" />
+            {[look.earX, 100 - look.earX].map((x) => (
+              <g key={x}>
+                <ellipse cx={x} cy="53" rx="3.6" ry="6" fill={look.skinShade} stroke={OUTLINE} strokeWidth="0.4" />
+                <path d={`M${x} 49.5 Q${x + (x < 50 ? -1.6 : 1.6)} 53 ${x} 56.5`} fill="none" stroke={OUTLINE} strokeWidth="0.5" opacity="0.45" />
+              </g>
+            ))}
+            <path d={look.face} fill={`url(#${skin})`} stroke={OUTLINE} strokeWidth="0.7" />
             <ellipse cx="80" cy="52" rx="15" ry="42" fill={look.skinShade} opacity="0.3" clipPath={`url(#${clip})`} />
+            <ellipse cx="43" cy="33" rx="12" ry="6" fill="#fff" opacity="0.14" clipPath={`url(#${clip})`} />
+            <path d="M38 79 Q50 85 62 79" fill="none" stroke={look.skinShade} strokeWidth="1.2" opacity="0.5" strokeLinecap="round" clipPath={`url(#${clip})`} />
 
             <g className="face-part" style={{ opacity: e.blush }}>
               <ellipse cx="32.5" cy="61" rx="5.5" ry="3" fill="#f08a8a" opacity="0.55" />
@@ -351,7 +380,9 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
               <path d="M56 41 Q61.5 39.5 67 41.5" fill="none" className="face-part" style={{ transform: e.brows[1] }} />
             </g>
 
+            <path d="M51.5 50 Q52.6 55 51.2 58" fill="none" stroke={look.skinShade} strokeWidth="0.7" strokeLinecap="round" opacity="0.6" />
             <path d="M50.7 57 Q49.7 59 51.5 59.5" fill="none" stroke={look.skinShade} strokeWidth="0.9" strokeLinecap="round" />
+            <path d="M47.6 59.4 Q48.4 60.2 49.2 59.6 M51.8 59.6 Q52.6 60.2 53.4 59.4" fill="none" stroke={OUTLINE} strokeWidth="0.45" strokeLinecap="round" opacity="0.45" />
 
             {talking && mood !== "out" ? (
               <g className="face-talk">

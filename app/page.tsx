@@ -2,7 +2,7 @@ import { DemoEntry } from "@/components/DemoEntry";
 import { PanelList } from "@/components/PanelList";
 import { PitchForm } from "@/components/PitchForm";
 import { Shell } from "@/components/Shell";
-import { SharkCard } from "@/components/SharkCard";
+import { SeatedPanel, SharkCard } from "@/components/SharkCard";
 import { btn } from "@/components/ui";
 import { SHARK_LIST } from "@/lib/sharks";
 
@@ -17,14 +17,17 @@ const FACTS = ["4 AI investors", "Follow-ups on vague answers", "Offers you can 
 
 export default function Home() {
   return (
-    <Shell crumbs={[{ label: "Shark Tank Simulator", href: "/" }, { label: "New pitch" }]} sidebar={<PanelList />}>
-      <header className="hero relative overflow-hidden rounded-2xl border border-slate-800 px-6 py-10 sm:px-10 sm:py-14">
-        <p className="text-sm font-semibold tracking-wide text-accent uppercase">Practice before the real room</p>
-        <h1 className="mt-2 max-w-2xl font-display text-4xl font-bold tracking-tight text-balance sm:text-6xl">Pitch to four AI investors</h1>
-        <p className="mt-4 max-w-2xl text-lg text-pretty text-slate-300">
-          They ask hard, specific questions, walk out when you lose them, and send you home with a stronger pitch.
-        </p>
-        <div className="mt-7 flex flex-wrap gap-3">
+    <Shell wide crumbs={[{ label: "Shark Tank Simulator", href: "/" }, { label: "New pitch" }]} sidebar={<PanelList />}>
+      <header className="hero relative flex flex-col gap-8 overflow-hidden rounded-2xl border border-slate-800 px-4 py-8 sm:px-10 sm:py-12">
+        <div className="text-center">
+          <p className="text-sm font-semibold tracking-wide text-accent uppercase">Practice before the real room</p>
+          <h1 className="mx-auto mt-2 max-w-3xl font-display text-4xl font-bold tracking-tight text-balance sm:text-6xl">Pitch to four AI investors</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-pretty text-slate-300">
+            They ask hard, specific questions, walk out when you lose them, and send you home with a stronger pitch.
+          </p>
+        </div>
+        <SeatedPanel sharks={SHARK_LIST} />
+        <div className="flex flex-wrap justify-center gap-3">
           <a href="#pitch-form-h" className={`${btn.primary} text-lg`}>
             Start your pitch
           </a>
@@ -32,7 +35,7 @@ export default function Home() {
             Meet the panel
           </a>
         </div>
-        <ul aria-label="What you get" className="mt-8 flex flex-wrap gap-2">
+        <ul aria-label="What you get" className="flex flex-wrap justify-center gap-2">
           {FACTS.map((f) => (
             <li key={f} className="rounded-full border border-slate-700 bg-slate-950/70 px-3 py-1 text-sm text-slate-200">
               {f}
@@ -68,7 +71,7 @@ export default function Home() {
           Meet the panel
         </h2>
         <p className="mt-1 text-slate-300">Each shark covers one part of a real investment memo, so no weak spot goes unchecked.</p>
-        <ul className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <ul className="mt-5 grid gap-3 md:grid-cols-2">
           {SHARK_LIST.map((shark) => (
             <li key={shark.id}>
               <SharkCard shark={shark} />

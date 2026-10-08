@@ -77,8 +77,14 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
                   </span>
                 ) : null}
               </div>
-              <h3 className={`font-display text-sm leading-tight font-semibold sm:text-xl ${active ? "underline decoration-2 underline-offset-4" : ""} ${shark.color.text}`}>{shark.name.split(" ")[0]}</h3>
-              <p className="hidden text-sm text-slate-400 sm:block">{shark.title}</p>
+              <div
+                className={`relative z-10 -mt-1 w-full max-w-48 rounded-md border bg-slate-950 px-1 py-0.5 transition sm:px-3 sm:py-1.5 ${active ? `${shark.color.border} shadow-[var(--shadow)]` : "border-slate-700"}`}
+              >
+                <h3 className={`truncate font-display text-sm leading-tight font-semibold sm:text-xl ${active ? "underline decoration-2 underline-offset-4" : ""} ${shark.color.text}`}>
+                  {shark.name.split(" ")[0]}
+                </h3>
+                <p className="hidden truncate text-sm text-slate-300 sm:block">{shark.title}</p>
+              </div>
               <div className="w-full max-w-56 md:hidden">
                 <InterestMeter name={shark.name.split(" ")[0]} value={state.interest} delta={delta} barClass={shark.color.bar} compact />
               </div>

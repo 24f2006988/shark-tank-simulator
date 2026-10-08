@@ -4,9 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatLog } from "@/components/ChatLog";
 import { Debrief } from "@/components/Debrief";
 import { OfferCard } from "@/components/OfferCard";
+import { SeatedPanel, SharkCard } from "@/components/SharkCard";
 import { Stage, seatCentre } from "@/components/Stage";
 import { useScript } from "@/components/useScript";
 import type { Talk } from "@/lib/session";
+import { SHARK_LIST } from "@/lib/sharks";
 import type { Debrief as DebriefData, Offer } from "@/lib/types";
 import { makePitch, makeSharks, makeTurn } from "./helpers";
 
@@ -186,5 +188,23 @@ describe("useScript", () => {
     expect(result.current.current?.text).toBe("Second.");
     act(() => result.current.skip());
     expect(result.current.playing).toBe(false);
+  });
+});
+
+describe("Landing panel", () => {
+  it("seats every shark behind a nameplate in a labelled list", () => {
+    render(<SeatedPanel sharks={SHARK_LIST} />);
+    const items = within(screen.getByRole("list", { name: "The panel" })).getAllByRole("listitem");
+    expect(items).toHaveLength(4);
+    expect(items[0].textContent).toContain("Vikram Rao");
+    expect(items[0].textContent).toContain("The Numbers");
+  });
+
+  it("gives each bio card a heading, lens and bio", () => {
+    render(<SharkCard shark={SHARK_LIST[1]} />);
+    const card = screen.getByRole("article");
+    expect(within(card).getByRole("heading", { name: "Meera Iyer" })).toBeTruthy();
+    expect(card.textContent).toContain(`Lens: ${SHARK_LIST[1].lensLabel}`);
+    expect(card.textContent).toContain(SHARK_LIST[1].bio);
   });
 });
