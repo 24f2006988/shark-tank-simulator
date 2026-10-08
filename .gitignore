@@ -51,3 +51,11 @@ next-env.d.ts
 # Event docs (keep out of the repo)
 *.pptx
 ~$*
+
+# Team and agent working notes (kept locally, not part of the submission)
+AGENTS.md
+GEMINI.md
+CLAUDE.md
+PLAN.md
+SUBMISSION CHECKLIST.txt
+problem statements.txt
