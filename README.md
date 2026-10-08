@@ -58,12 +58,12 @@ flowchart LR
 ## Google services used
 | Service | How we use it | Where |
 |---|---|---|
-| **Gemini on Vertex AI** (`@google/genai`; `gemini-3.5-flash-lite` → `gemini-3.5-flash`) | Questions, answer scoring, shark reactions, offers, negotiation and the debrief, all via **structured JSON output** (`responseJsonSchema` generated from our Zod schemas). In production Cloud Run calls Vertex AI with its own service account (IAM role `aiplatform.user`), so no API key is needed | `lib/gemini.ts`, `lib/prompts.ts`, `lib/handlers.ts` |
+| **Gemini on Vertex AI** (`@google/genai`; `gemini-3.5-flash-lite` → `gemini-3.5-flash`) | Questions, answer scoring, shark reactions, offers, negotiation and the debrief, all via **structured JSON output** (`responseMimeType: "application/json"` plus a `responseJsonSchema` generated from the same Zod schemas that validate the reply). In production Cloud Run calls Vertex AI with its own service account (IAM role `aiplatform.user`), so no API key is needed | `lib/gemini.ts`, `lib/prompts.ts`, `lib/handlers.ts` |
 | **Google Cloud Run** | Hosts the app (asia-south1) as a non-root container; scales to zero | `Dockerfile`, live URL above |
 | **Cloud Build + Artifact Registry** | Build the container from source on every deploy | `gcloud run deploy --source .` |
 | **Secret Manager** | Stores the optional `GEMINI_API_KEY` (Gemini Developer API mode), mounted into Cloud Run at runtime; the key never touches the repo, image or browser | Deploy command below |
 | **Cloud IAM** | Least-privilege service account for Vertex AI calls | `roles/aiplatform.user` on the Cloud Run service account |
-| **Cloud Logging** | Structured JSON request logs (route, latency, model, AI vs. fallback); pitch text is never logged | `lib/log.ts`, `lib/http.ts` |
+| **Cloud Logging** | One structured JSON line per request with a `severity` field (INFO / WARNING / ERROR) that Cloud Logging indexes, plus route, latency, model and AI vs. fallback. We used it to find and fix quota and timeout fallbacks during the build. Pitch text is never logged | `lib/log.ts`, `lib/http.ts` |
 | **Google Fonts** | Typefaces via `next/font/google`, self-hosted at build time | `app/layout.tsx` |
 
 ## Quality
@@ -76,7 +76,8 @@ npm run test:coverage  # coverage report
   - the success path, invalid JSON, a reply that breaks the schema and the model fallback chain;
   - a 503/429 falling back to scripted content;
   - rate limiting, oversized bodies and invalid input.
-- GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck and tests on every push.
+- **Coverage** (Vitest v8, 138 tests): **`lib/` 91% of lines, API routes 100%**, about 62% overall (UI components 38%, covered by targeted accessibility tests and live end-to-end runs). CI fails if `lib/` drops below 85% or the API routes below 95%.
+- GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck and tests with coverage on every push.
 
 ### Security
 - **No API key in production:** Cloud Run calls Vertex AI with its own service account (least-privilege `roles/aiplatform.user`). The optional Developer API key lives in Secret Manager, and Gemini code is server-only (`server-only` guard).

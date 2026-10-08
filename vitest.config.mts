@@ -14,6 +14,12 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.{ts,tsx}"],
-    coverage: { provider: "v8", include: ["lib/**", "app/api/**", "components/**"], reporter: ["text", "text-summary"] },
+    coverage: {
+      provider: "v8",
+      include: ["lib/**", "app/api/**", "components/**"],
+      reporter: ["text-summary"],
+      // CI fails if the backend loses coverage; UI components are covered by targeted a11y tests plus live e2e runs.
+      thresholds: { "lib/**": { lines: 85 }, "app/api/**": { lines: 95 } },
+    },
   },
 });
