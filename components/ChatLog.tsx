@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Walkout } from "@/lib/session";
 import { DIMENSION_LABELS, SHARKS } from "@/lib/sharks";
 import type { Turn } from "@/lib/types";
@@ -12,7 +13,8 @@ interface Props {
   pendingAnswer?: string | null;
 }
 
-export function ChatLog({ turns, walkouts, pendingAnswer }: Props) {
+/** Memoised: the tank re-renders on every typed letter of a shark's line, but the transcript only changes per answer. */
+export const ChatLog = memo(function ChatLog({ turns, walkouts, pendingAnswer }: Props) {
   let answered = 0;
   return (
     <ol role="log" aria-live="polite" aria-label="Conversation with the panel" className="flex flex-col gap-4">
@@ -70,4 +72,4 @@ export function ChatLog({ turns, walkouts, pendingAnswer }: Props) {
       })}
     </ol>
   );
-}
+});

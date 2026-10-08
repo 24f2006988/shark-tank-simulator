@@ -1,7 +1,10 @@
+import { memo } from "react";
 import { SHARK_LIST } from "@/lib/sharks";
 import type { SharkId, Sharks } from "@/lib/types";
 import { InterestMeter } from "./InterestMeter";
 import { SharkFace, moodFor, type Mood } from "./SharkFace";
+
+const NO_DELTAS: Partial<Record<SharkId, number>> = {};
 
 const RESTING: Record<SharkId, Mood> = { vikram: "neutral", meera: "warm", arjun: "doubtful", zara: "hooked" };
 
@@ -13,7 +16,8 @@ interface Props {
 }
 
 /** The sidebar's page-tree equivalent: one row per shark, with their interest while a pitch is running. */
-export function PanelList({ sharks, deltas = {}, speaker = null }: Props) {
+/** Memoised so the sidebar skips the typewriter's per-letter re-renders of the tank. */
+export const PanelList = memo(function PanelList({ sharks, deltas = NO_DELTAS, speaker = null }: Props) {
   return (
     <section aria-labelledby="panel-list-h">
       <h2 id="panel-list-h" className="px-2 pt-2 pb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
@@ -49,4 +53,4 @@ export function PanelList({ sharks, deltas = {}, speaker = null }: Props) {
       </ul>
     </section>
   );
-}
+});

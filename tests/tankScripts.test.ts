@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { offerScript, reactionScript } from "@/components/Tank";
+import { offerScript, reactionScript } from "@/components/tankScripts";
 import type { OffersResult, TurnResult } from "@/lib/types";
 import { makeSharks } from "./helpers";
 

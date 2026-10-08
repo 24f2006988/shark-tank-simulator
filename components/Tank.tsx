@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { ApiError, api } from "@/lib/api-client";
 import { DIFFICULTY, MIN_ANSWERS_BEFORE_OFFERS, activeSharks, formatInr } from "@/lib/game";
 import { answeredTurns, loadSession, saveSession, savePrefill, sessionReducer, type GameSession } from "@/lib/session";
 import { SHARKS } from "@/lib/sharks";
-import type { OffersResult, Question, SharkId, Source, Stage, Terms, TurnResult } from "@/lib/types";
+import type { SharkId, Source, Stage, Terms } from "@/lib/types";
 import { AnswerBox } from "./AnswerBox";
 import { ChatLog } from "./ChatLog";
 import { Debrief } from "./Debrief";
@@ -18,7 +18,8 @@ import { QuestionsDone } from "./QuestionsDone";
 import { Shell } from "./Shell";
 import { Stage as PanelStage } from "./Stage";
 import { canMumble } from "./mumble";
-import { useScript, type LineInput } from "./useScript";
+import { offerScript, questionLine, reactionScript } from "./tankScripts";
+import { useScript } from "./useScript";
 import { btn, card } from "./ui";
 
 const STEPS: { stage: Stage | "pitch"; label: string }[] = [
@@ -28,47 +29,9 @@ const STEPS: { stage: Stage | "pitch"; label: string }[] = [
   { stage: "debrief", label: "Feedback" },
 ];
 
+const NO_DELTAS: Partial<Record<SharkId, number>> = {};
+
 const errorText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Please try again.");
-
-const questionLine = (q: Question): LineInput => ({
-  sharkId: q.sharkId,
-  text: q.question,
-  kind: "question",
-  followUp: q.isFollowUp,
-  probing: q.probing,
-});
-
-/**
- * After an answer the panel performs in order: the asker reacts, the most moved other shark chips in,
- * anyone leaving says why, then the next question. Short and sequential, so nothing floods the screen.
- */
-export function reactionScript(result: TurnResult, askerId: SharkId): LineInput[] {
-  const reactions = result.evaluation?.reactions ?? [];
-  const walkouts = result.evaluation?.walkouts ?? [];
-  const leaving = new Set(walkouts.map((w) => w.sharkId));
-  const lines: LineInput[] = [];
-  const asker = reactions.find((r) => r.sharkId === askerId);
-  if (asker?.line && !leaving.has(askerId)) lines.push({ sharkId: askerId, text: asker.line, kind: "reaction" });
-  const loudest = reactions
-    .filter((r) => r.sharkId !== askerId && r.line && !leaving.has(r.sharkId) && Math.abs(r.delta) >= 8)
-    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))[0];
-  if (loudest) lines.push({ sharkId: loudest.sharkId, text: loudest.line, kind: "reaction" });
-  for (const w of walkouts) lines.push({ sharkId: w.sharkId, text: w.reason, kind: "out" });
-  if (result.next) lines.push(questionLine(result.next));
-  return lines;
-}
-
-/** Each offer is announced by its shark; sharks who were still in but pass say why. */
-export function offerScript(result: OffersResult, sharks: GameSession["sharks"]): LineInput[] {
-  return [
-    ...result.offers.map(
-      (o): LineInput => ({ sharkId: o.sharkId, text: `${o.line} ${formatInr(o.amountLakh)} for ${o.equityPct} percent.`.trim(), kind: "offer" }),
-    ),
-    ...result.outs
-      .filter((o) => sharks[o.sharkId].status === "in")
-      .map((o): LineInput => ({ sharkId: o.sharkId, text: o.reason, kind: "out" })),
-  ];
-}
 
 export default function Tank() {
   const [stored] = useState(loadSession);
@@ -209,8 +172,9 @@ function TankGame({ initial }: { initial: GameSession }) {
     router.push("/");
   };
 
-  const lastReactions = answered.at(-1)?.reactions ?? [];
-  const deltas = Object.fromEntries(lastReactions.map((r) => [r.sharkId, r.delta]));
+  // Stable between typed letters, so the memoised sidebar and transcript skip the typewriter's re-renders.
+  const lastReactions = answered.at(-1)?.reactions;
+  const deltas = useMemo(() => Object.fromEntries((lastReactions ?? []).map((r) => [r.sharkId, r.delta])), [lastReactions]);
   const openOffers = s.offers.filter((o) => s.talks[o.sharkId]?.status === "open");
   const stepIndex = STEPS.findIndex((x) => x.stage === s.stage);
   const stage = (
@@ -220,7 +184,7 @@ function TankGame({ initial }: { initial: GameSession }) {
       shown={script.shown}
       idle={awaitingAnswer ? questionLine(current) : null}
       thinking={thinking}
-      deltas={s.stage === "questioning" ? deltas : {}}
+      deltas={s.stage === "questioning" ? deltas : NO_DELTAS}
       round={answered.length}
       onSkip={script.skip}
       customPanels={s.pitch.customPanels}
@@ -231,7 +195,7 @@ function TankGame({ initial }: { initial: GameSession }) {
     <Shell
       wide
       crumbs={[{ label: "Shark Tank Simulator", href: "/" }, { label: "Pitch", href: "/" }, { label: s.pitch.ideaName }]}
-      sidebar={<PanelList sharks={s.sharks} deltas={s.stage === "questioning" ? deltas : {}} speaker={script.current?.sharkId ?? thinking} />}
+      sidebar={<PanelList sharks={s.sharks} deltas={s.stage === "questioning" ? deltas : NO_DELTAS} speaker={script.current?.sharkId ?? thinking} />}
       actions={s.stage !== "debrief" ? <VoiceToggle on={voiceOn} onChange={setVoiceOn} /> : null}
       toolbar={
         <nav aria-label="Progress">
@@ -350,19 +314,22 @@ function TankGame({ initial }: { initial: GameSession }) {
                   Offers on the table
                 </h2>
                 <ul className="grid gap-4 md:grid-cols-2">
-                  {s.offers.map((o) => (
-                    <li key={o.sharkId}>
-                      <OfferCard
-                        offer={o}
-                        pitch={s.pitch}
-                        talk={s.talks[o.sharkId]!}
-                        busy={!!busy}
-                        onAccept={() => dispatch({ type: "accept", sharkId: o.sharkId })}
-                        onDecline={() => dispatch({ type: "decline", sharkId: o.sharkId })}
-                        onCounter={(t) => counter(o.sharkId, t)}
-                      />
-                    </li>
-                  ))}
+                  {s.offers.map((o) => {
+                    const talk = s.talks[o.sharkId];
+                    return talk ? (
+                      <li key={o.sharkId}>
+                        <OfferCard
+                          offer={o}
+                          pitch={s.pitch}
+                          talk={talk}
+                          busy={!!busy}
+                          onAccept={() => dispatch({ type: "accept", sharkId: o.sharkId })}
+                          onDecline={() => dispatch({ type: "decline", sharkId: o.sharkId })}
+                          onCounter={(t) => counter(o.sharkId, t)}
+                        />
+                      </li>
+                    ) : null;
+                  })}
                 </ul>
               </section>
             ) : (

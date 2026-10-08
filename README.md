@@ -78,7 +78,7 @@ npm run test:coverage  # coverage report
   - a 503/429 falling back to scripted content;
   - rate limiting, oversized bodies and invalid input.
 - **UI tests** (jsdom + Testing Library): the offer card (counter form validation, keyboard-reachable actions, disabled while waiting), debrief regions, the stage's screen-reader line, the transcript log, the typewriter script hook, the API client's error handling and the panel's reaction order.
-- **Coverage** (Vitest v8): **`lib/` 96% of lines, API routes 100%, UI components 66%, 79% overall**. CI fails if `lib/` drops below 90%, the API routes below 95% or UI components below 60%.
+- **Coverage** (Vitest v8, 186 tests): **`lib/` 96% of lines, API routes 100%, UI components 70%, 81% overall**. CI fails if `lib/` drops below 90%, the API routes below 95% or UI components below 60%.
 - GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck and tests with coverage on every push.
 
 ### Security
@@ -96,6 +96,7 @@ npm run test:coverage  # coverage report
 ### Reliability and efficiency
 - **Fallback chain:** Gemini models are tried in order (13 s per attempt, 26 s in total; the debrief gets 14 s per attempt and 35 s in total). A model that returns 429 or 503 is skipped briefly (20 s on Vertex AI). After that come deterministic scripted questions, scoring, offers and debrief (`lib/fallback.ts`). A session never dead-ends, and the API never returns a 5xx for an AI failure. Measured live: about 3 s per turn, about 4 s per debrief.
 - **Fast turns:** each turn is one call with a low thinking level and only the last 10 exchanges in the prompt.
+- **Light rendering:** the typewriter updates one letter at a time, so the transcript and the panel sidebar are memoised and skip those re-renders; the demo replay is only downloaded when opened.
 - **Lean dependencies:** Next.js, React, `@google/genai`, Zod. No UI kit, chart library or database.
 
 ### Accessibility
