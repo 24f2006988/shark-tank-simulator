@@ -136,9 +136,23 @@ describe("POST /api/offers", () => {
     expect(body.data.outs.find((o: { sharkId: string }) => o.sharkId === "vikram").reason).toBe("Your numbers scare me.");
   });
 
-  it("skips Gemini when nobody is interested enough", async () => {
-    const body = await (await post(offersRoute.POST, { ...session, sharks: makeSharks("realistic", { vikram: 10, meera: 10, arjun: 10, zara: 10 }) })).json();
+  it("asks Gemini for in-character reasons when sharks are in but none will offer", async () => {
+    generateJson.mockResolvedValue({
+      data: { offers: [{ sharkId: "vikram", amountLakh: 50, equityPct: 30, condition: "", line: "x" }], outs: [{ sharkId: "vikram", reason: "No numbers, no money." }] },
+      model: "m",
+    });
+    const sharks = makeSharks("realistic", { vikram: 30, meera: 30, arjun: 30, zara: 30 });
+    const body = await (await post(offersRoute.POST, { ...session, sharks })).json();
     expect(body.data.offers).toEqual([]);
+    expect(body.data.outs.find((o: { sharkId: string }) => o.sharkId === "vikram").reason).toBe("No numbers, no money.");
+  });
+
+  it("reuses walkout reasons without calling Gemini when everyone has left", async () => {
+    const sharks = makeSharks();
+    for (const s of Object.values(sharks)) Object.assign(s, { status: "out", outReason: `${s.id} left` });
+    const body = await (await post(offersRoute.POST, { ...session, sharks })).json();
+    expect(body.data.offers).toEqual([]);
+    expect(body.data.outs.map((o: { reason: string }) => o.reason)).toContain("zara left");
     expect(generateJson).not.toHaveBeenCalled();
   });
 });

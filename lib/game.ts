@@ -79,7 +79,8 @@ export function applyReactions(sharks: Sharks, reactions: Reaction[], difficulty
 
 /**
  * Sharks whose interest fell below the difficulty threshold walk out, after the grace period.
- * The last shark standing stays until questioning ends, so the founder always faces someone.
+ * During the first MIN_ANSWERS_BEFORE_OFFERS answers the last shark standing stays, so a founder always gets
+ * a fair hearing; after that a panel that has lost interest leaves together and questioning ends.
  */
 export function applyWalkouts(
   sharks: Sharks,
@@ -91,7 +92,7 @@ export function applyWalkouts(
   const threshold = DIFFICULTY[difficulty].walkoutBelow;
   const active = activeSharks(sharks);
   let leaving = active.filter((id) => sharks[id].interest < threshold);
-  if (leaving.length === active.length && answeredCount(turns) < DIFFICULTY[difficulty].maxAnswers) {
+  if (leaving.length === active.length && answeredCount(turns) < MIN_ANSWERS_BEFORE_OFFERS) {
     const keeper = [...leaving].sort((a, b) => sharks[b].interest - sharks[a].interest)[0];
     leaving = leaving.filter((id) => id !== keeper);
   }

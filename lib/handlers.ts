@@ -111,7 +111,7 @@ export async function runTurn({ pitch, sharks, turns }: z.output<typeof turnRequ
         sharkId: aiNext.sharkId,
         question: tidy(aiNext.question, LIMITS.question.max),
         probing: aiNext.probing,
-        isFollowUp: aiNext.sharkId === last.sharkId,
+        isFollowUp: aiNext.sharkId === last.sharkId && raw.vague,
       };
     } else {
       const pick = pickNextAsker(after, turns, raw.vague);
@@ -124,7 +124,8 @@ export async function runTurn({ pitch, sharks, turns }: z.output<typeof turnRequ
 export async function runOffers({ pitch, sharks, turns }: z.output<typeof offersRequestSchema>): Result<OffersResult> {
   const fallback = fallbackOffers(pitch, sharks);
   const eligible = eligibleForOffer(sharks, pitch.difficulty);
-  if (eligible.length === 0) return { data: fallback, source: "fallback" };
+  // Everyone already walked out: their reasons were written by Gemini during questioning, so no new call.
+  if (activeSharks(sharks).length === 0) return { data: fallback, source: "ai" };
   try {
     const { data } = await generateJson(aiOffersSchema, {
       system: systemPrompt(pitch.difficulty),

@@ -88,6 +88,16 @@ describe("applyWalkouts", () => {
   });
 });
 
+describe("applyWalkouts after the fair-hearing period", () => {
+  it("lets the whole panel leave once enough answers are in, which ends questioning", () => {
+    const sharks = makeSharks("ruthless", { vikram: 1, meera: 2, arjun: 3, zara: 4 });
+    const turns = ["a", "b", "c", "d"].map((a) => makeTurn("meera", a));
+    const result = applyWalkouts(sharks, turns, "ruthless");
+    expect(activeSharks(result.sharks)).toEqual([]);
+    expect(isQuestioningOver(result.sharks, turns, "ruthless")).toBe(true);
+  });
+});
+
 describe("pickNextAsker", () => {
   it("gives a vague answer a follow-up from the same shark", () => {
     const turns = [makeTurn("meera", "we have lots of users")];
