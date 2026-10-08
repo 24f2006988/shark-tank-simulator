@@ -77,8 +77,8 @@ npm run test:coverage  # coverage report
   - the success path, invalid JSON, a reply that breaks the schema and the model fallback chain;
   - a 503/429 falling back to scripted content;
   - rate limiting, oversized bodies and invalid input.
-- **UI tests** (jsdom + Testing Library): the offer card (counter form validation, keyboard-reachable actions, disabled while waiting), debrief regions, the stage's screen-reader line, the transcript log, the typewriter script hook, the API client's error handling and the panel's reaction order.
-- **Coverage** (Vitest v8, 186 tests): **`lib/` 96% of lines, API routes 100%, UI components 70%, 81% overall**. CI fails if `lib/` drops below 90%, the API routes below 95% or UI components below 60%.
+- **UI tests** (jsdom + Testing Library): a whole-game test of the tank with the API mocked (pitch, question, answer, offers, accept or decline, debrief, error and retry, every shark walking out), plus the pitch form (validation summary, implied valuation, samples, "Pitch again" prefill), the offer card (counter form, keyboard, disabled while waiting), the debrief and its text download, the stage's screen-reader line, the transcript log, the typewriter script, voice dictation, the Web Audio blips and the API client's error handling.
+- **Coverage** (Vitest v8, 201 tests): **96% of lines overall**: `lib/` 98%, API routes 100%, UI components 94%; every file is above 85%. CI fails if overall coverage drops below 90%, `lib/` below 95%, the API routes below 100% or UI components below 85%.
 - GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck and tests with coverage on every push.
 
 ### Security

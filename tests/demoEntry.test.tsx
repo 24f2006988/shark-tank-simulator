@@ -37,3 +37,23 @@ describe("DemoEntry", () => {
     expect(screen.getAllByRole("button", { name: /play|start/i }).length).toBeGreaterThan(0);
   });
 });
+
+describe("DemoEntry 'try it live'", () => {
+  it("closes the replay and moves focus to the pitch form's first field", async () => {
+    const field = document.createElement("input");
+    field.id = "ideaName";
+    field.scrollIntoView = vi.fn();
+    document.body.append(field);
+
+    const { container } = render(<DemoEntry />);
+    const details = container.querySelector("details")!;
+    details.open = true;
+    fireEvent(details, new Event("toggle"));
+    fireEvent.click(await screen.findByRole("button", { name: "Try it live" }));
+
+    expect(document.activeElement).toBe(field);
+    expect(field.scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "center" });
+    expect(screen.queryByText(/Recorded demo/i)).toBeNull();
+    field.remove();
+  });
+});
