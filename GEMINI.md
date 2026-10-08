@@ -49,7 +49,7 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - Chosen problem: **Shark Tank Simulator** (switched from GitHub Roast and Rescue for more interaction). Full statement, required-feature checklist and planned extras in `chosen problem statement.txt` (read it before building).
 - Tech stack: **Next.js 16 + TypeScript + Tailwind 4, Gemini API (`@google/genai`, free tier key), hosted on Vercel**. Full build plan: `PLAN.md`.
 - Deployed URL: _TBD_
-- GitHub repo: _TBD_
+- GitHub repo: https://github.com/24f2006988/shark-tank-simulator
 
 ## Progress log (append one line per change: time, which AI, what)
 - 2026-10-08, Claude Code: chose GitHub Roast and Rescue; created `chosen problem statement.txt`; updated Project status.
@@ -57,3 +57,4 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08, Claude Code: wrote `PLAN.md` (architecture, scoring, Gemini schema, UI, timeline, work split).
 - 2026-10-08, Claude Code: added HARD LIMIT 4 (only 2 submission attempts, submit complete app only) and `SUBMISSION CHECKLIST.txt`.
 - 2026-10-08, Claude Code: switched to Shark Tank Simulator; rewrote `chosen problem statement.txt`, `PLAN.md`, checklist section A; scaffolded Next.js 16 app (deps installed, not yet committed).
+- 2026-10-08, Claude Code: first commit pushed to https://github.com/24f2006988/shark-tank-simulator (hello-world page, README, .env.example, pre-commit size hook installed).
