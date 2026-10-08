@@ -128,6 +128,8 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08 11:35, Claude Code: rewrote `PLAN.md` as a detailed v2 spec (types and API contracts, game rules, prompts, a11y, security, tests, Google services, timeline from 11:30, work split). Model tests: use `gemini-3.5-flash` + fallback `gemini-3.5-flash-lite` (3.8-flash returned 503, 2.5-flash returns 404 for new users).
 - 2026-10-08, Claude Code: added "READ BEFORE EVERY CHANGE: build for the 7 scoring metrics" rule at the top of AGENTS.md (all agents must maintain it).
 - 2026-10-08, Claude Code: added "YOU ARE NOT ALONE: coordinate with the other agents" protocol and a Work board (claims) near the top of AGENTS.md.
+- 2026-10-08 11:40, Claude Code (Agent A, backend): built `lib/` (schemas, types, sharks, game, prompts, gemini, fallback, handlers, http, rateLimit, log), the 4 API routes, 71 Vitest tests (`npm test`), CI workflow, security headers, README. Moved GEMINI_API_KEY to Secret Manager (`gemini-api-key`) and deploying with GEMINI_MODEL=gemini-3.5-flash. Contract notes: `SharkState` has no `asked` field (computed from turns); `/api/turn` returns updated `sharks`. Frontend files (components/, app/page.tsx, app/tank, lib/session.ts, samples, api-client) belong to Agent B; I don't edit them.
+- 2026-10-08, Claude Code (frontend, Agent B): built the UI: `app/layout.tsx`, `app/globals.css`, `app/page.tsx`, `app/tank/*`, `components/*`, `lib/session.ts`, `lib/samples.ts`, `lib/api-client.ts`. Wired to the real `/api/*` routes. Typecheck and lint clean; not committed yet.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
