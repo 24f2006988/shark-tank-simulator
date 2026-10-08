@@ -43,6 +43,24 @@ export const sharkIdSchema = z.enum(SHARK_IDS);
 export const dimensionSchema = z.enum(DIMENSIONS);
 export const difficultySchema = z.enum(DIFFICULTIES);
 
+export const VIKRAM_ARCHETYPES = ["numbers", "growth", "value"] as const;
+export const MEERA_ARCHETYPES = ["customer", "enterprise", "community"] as const;
+export const ARJUN_ARCHETYPES = ["skeptic", "architect", "ip_hawk"] as const;
+export const ZARA_ARCHETYPES = ["visionary", "esg", "culture"] as const;
+
+export const ALL_ARCHETYPE_IDS = [
+  ...VIKRAM_ARCHETYPES,
+  ...MEERA_ARCHETYPES,
+  ...ARJUN_ARCHETYPES,
+  ...ZARA_ARCHETYPES,
+] as const;
+
+export const archetypeIdSchema = z.enum(ALL_ARCHETYPE_IDS);
+
+export const sharkCustomizationSchema = z.object({
+  archetypeId: archetypeIdSchema.optional(),
+});
+
 export const pitchSchema = z.object({
   ideaName: text("Idea name", LIMITS.ideaName.min, LIMITS.ideaName.max),
   oneLiner: text("One-liner", 0, LIMITS.oneLiner.max).default(""),
@@ -50,6 +68,26 @@ export const pitchSchema = z.object({
   equityPct: amount("Equity offered (%)", 0.5, 90),
   description: text("Pitch", LIMITS.description.min, LIMITS.description.max),
   difficulty: difficultySchema.default("realistic"),
+  customPanels: z
+    .object({
+      vikram: sharkCustomizationSchema.optional(),
+      meera: sharkCustomizationSchema.optional(),
+      arjun: sharkCustomizationSchema.optional(),
+      zara: sharkCustomizationSchema.optional(),
+    })
+    .partial()
+    .optional()
+    .refine(
+      (cp) => {
+        if (!cp) return true;
+        if (cp.vikram?.archetypeId && !VIKRAM_ARCHETYPES.includes(cp.vikram.archetypeId as (typeof VIKRAM_ARCHETYPES)[number])) return false;
+        if (cp.meera?.archetypeId && !MEERA_ARCHETYPES.includes(cp.meera.archetypeId as (typeof MEERA_ARCHETYPES)[number])) return false;
+        if (cp.arjun?.archetypeId && !ARJUN_ARCHETYPES.includes(cp.arjun.archetypeId as (typeof ARJUN_ARCHETYPES)[number])) return false;
+        if (cp.zara?.archetypeId && !ZARA_ARCHETYPES.includes(cp.zara.archetypeId as (typeof ZARA_ARCHETYPES)[number])) return false;
+        return true;
+      },
+      { message: "Invalid archetype for shark" },
+    ),
 });
 
 export const reactionSchema = z.object({

@@ -4,10 +4,13 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useSyncExternalStore } from "react";
 import { DIFFICULTY, formatInr, impliedValuationLakh } from "@/lib/game";
 import { DIFFICULTIES, LIMITS, pitchSchema } from "@/lib/schemas";
+import { SHARK_IDS } from "@/lib/schemas";
+import { SHARK_ARCHETYPES, resolveShark } from "@/lib/sharks";
 import { SAMPLE_PITCHES } from "@/lib/samples";
 import { clearPrefill, createSession, parsePrefill, readPrefillRaw, saveSession } from "@/lib/session";
-import type { Difficulty, Pitch } from "@/lib/types";
+import type { Difficulty, Pitch, SharkCustomization, SharkId } from "@/lib/types";
 import { MicButton } from "./MicButton";
+import { SharkAvatar } from "./SharkCard";
 import { btn, field } from "./ui";
 
 interface Values {
@@ -17,11 +20,12 @@ interface Values {
   equityPct: string;
   description: string;
   difficulty: Difficulty;
+  customPanels?: Partial<Record<SharkId, SharkCustomization>>;
 }
 
-type FieldName = Exclude<keyof Values, "difficulty">;
+type FieldName = Exclude<keyof Values, "difficulty" | "customPanels">;
 
-const EMPTY: Values = { ideaName: "", oneLiner: "", askLakh: "", equityPct: "", description: "", difficulty: "realistic" };
+const EMPTY: Values = { ideaName: "", oneLiner: "", askLakh: "", equityPct: "", description: "", difficulty: "realistic", customPanels: undefined };
 
 const DIFFICULTY_HINTS: Record<Difficulty, string> = {
   friendly: "Patient sharks, gentler drops in interest.",
@@ -49,7 +53,7 @@ export function PitchForm() {
 function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
   const router = useRouter();
   const [values, setValues] = useState<Values>(() =>
-    prefill ? { ...prefill, askLakh: String(prefill.askLakh), equityPct: String(prefill.equityPct) } : EMPTY,
+    prefill ? { ...prefill, askLakh: String(prefill.askLakh), equityPct: String(prefill.equityPct), customPanels: prefill.customPanels } : EMPTY,
   );
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -259,6 +263,82 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
         </div>
         {fieldError("description")}
       </div>
+
+      <details className="rounded-lg border border-slate-700 bg-slate-900/60 p-4 transition open:border-slate-600">
+        <summary className="flex cursor-pointer select-none items-center justify-between font-semibold text-slate-100">
+          <div className="flex items-center gap-2">
+            <span>Customize Your Shark Panel</span>
+            <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs text-accent">Optional</span>
+          </div>
+          <span className="text-xs text-slate-400">
+            {values.customPanels && Object.keys(values.customPanels).length > 0
+              ? `${Object.keys(values.customPanels).length} customized`
+              : "Standard 4-shark panel"}
+          </span>
+        </summary>
+        <div className="mt-4 flex flex-col gap-4">
+          <p className="text-sm text-slate-300">
+            Pick each investor&apos;s personality archetype to test specific assumptions in your pitch:
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {SHARK_IDS.map((id) => {
+              const shark = resolveShark(id, values.customPanels?.[id]);
+              const archetypes = SHARK_ARCHETYPES[id];
+              const selectedId = values.customPanels?.[id]?.archetypeId ?? archetypes[0].id;
+              return (
+                <div key={id} className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+                  <div className="flex items-center gap-2.5">
+                    <SharkAvatar shark={shark} size="sm" />
+                    <div className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-slate-100">{shark.name}</span>
+                      <span className={`block text-xs font-medium ${shark.color.text}`}>
+                        {shark.title} · {shark.lensLabel}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5 pt-1">
+                    {archetypes.map((arch) => {
+                      const active = selectedId === arch.id;
+                      return (
+                        <button
+                          key={arch.id}
+                          type="button"
+                          onClick={() => {
+                            const next = { ...(values.customPanels ?? {}) };
+                            next[id] = { archetypeId: arch.id };
+                            set("customPanels", next);
+                          }}
+                          className={`rounded p-1.5 text-left text-xs transition border ${
+                            active
+                              ? "border-accent bg-accent/15 text-slate-100 font-semibold shadow-xs"
+                              : "border-slate-800 bg-slate-900/80 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                          }`}
+                        >
+                          <span className="block truncate">{arch.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-slate-400 italic">
+                    {archetypes.find((a) => a.id === selectedId)?.tagline}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          {values.customPanels && Object.keys(values.customPanels).length > 0 ? (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => set("customPanels", undefined)}
+                className="text-xs text-slate-400 underline hover:text-slate-200"
+              >
+                Reset panel to defaults
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </details>
 
       <fieldset>
         <legend className="font-medium">How tough should the panel be?</legend>

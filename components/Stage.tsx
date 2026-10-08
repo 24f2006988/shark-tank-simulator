@@ -1,11 +1,11 @@
 "use client";
 
 import { SHARK_IDS } from "@/lib/schemas";
-import { DIMENSION_LABELS, SHARKS } from "@/lib/sharks";
-import type { SharkId, Sharks } from "@/lib/types";
+import { DIMENSION_LABELS, SHARKS, resolveShark } from "@/lib/sharks";
+import type { SharkCustomization, SharkId, Sharks } from "@/lib/types";
 import { InterestMeter } from "./InterestMeter";
 import { reactionFor } from "./emotes";
-import { PixelEmote } from "./PixelEmote";
+import { FaceEmote } from "./FaceEmote";
 import { SharkFace, moodFor } from "./SharkFace";
 import type { Line, LineInput } from "./useScript";
 import { btn } from "./ui";
@@ -22,10 +22,11 @@ interface Props {
   deltas: Partial<Record<SharkId, number>>;
   round: number;
   onSkip?: () => void;
+  customPanels?: Partial<Record<SharkId, SharkCustomization>>;
 }
 
 /** The panel seated in a row like the show, with a speech bubble pointing at whoever is talking. */
-export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSkip }: Props) {
+export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSkip, customPanels }: Props) {
   const speaker = line?.sharkId ?? (thinking ? null : idle?.sharkId) ?? null;
   const bubble = line ?? (thinking ? null : idle);
   const barShark = thinking ?? bubble?.sharkId ?? null;
@@ -38,7 +39,7 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
       </h2>
       <ul className="grid grid-cols-4 gap-1 sm:gap-4">
         {SHARK_IDS.map((id) => {
-          const shark = SHARKS[id];
+          const shark = resolveShark(id, customPanels?.[id]);
           const state = sharks[id];
           const out = state.status === "out";
           const active = speaker === id || thinking === id;
@@ -63,7 +64,7 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
                   reactionKey={round}
                   delta={delta}
                 />
-                {reaction?.emote ? <PixelEmote key={`${round}-${id}-${reaction.emote.kind}`} emote={reaction.emote} /> : null}
+                {reaction?.emote ? <FaceEmote key={`${round}-${id}-${reaction.emote.kind}`} emote={reaction.emote} /> : null}
                 {out ? (
                   <span className="absolute top-1/3 left-1/2 -translate-x-1/2 -rotate-12 rounded border-2 border-rose-300 bg-slate-950/80 px-1.5 font-display text-xs font-extrabold tracking-widest text-rose-300 sm:text-sm">
                     OUT

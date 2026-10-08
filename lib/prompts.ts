@@ -1,6 +1,7 @@
 import { DIFFICULTY, eligibleForOffer, formatInr, impliedValuationLakh } from "./game";
-import { DIMENSION_LABELS, SHARKS, SHARK_LIST } from "./sharks";
-import type { Deal, Difficulty, Offer, Pitch, SharkId, Sharks, Terms, Turn } from "./types";
+import { SHARK_IDS } from "./schemas";
+import { DIMENSION_LABELS, SHARKS, SHARK_LIST, resolveShark } from "./sharks";
+import type { Deal, Difficulty, Offer, Pitch, SharkCustomization, SharkId, Sharks, Terms, Turn } from "./types";
 
 /** Only the most recent exchanges are sent, which bounds prompt size and cost. */
 export const TRANSCRIPT_WINDOW = 10;
@@ -11,10 +12,11 @@ const TONE: Record<Difficulty, string> = {
   ruthless: "Sceptical with little patience: punish vagueness hard and demand evidence for every claim.",
 };
 
-export function systemPrompt(difficulty: Difficulty): string {
-  const panel = SHARK_LIST.map(
-    (s) => `- ${s.id}: ${s.name}, "${s.title}" (${s.role}). Lens: ${DIMENSION_LABELS[s.lens]}. ${s.style}`,
-  ).join("\n");
+export function systemPrompt(difficulty: Difficulty, customPanels?: Partial<Record<SharkId, SharkCustomization>>): string {
+  const panel = SHARK_IDS.map((id) => {
+    const s = resolveShark(id, customPanels?.[id]);
+    return `- ${s.id}: ${s.name}, "${s.title}" (${s.role}). Lens: ${DIMENSION_LABELS[s.lens]}. ${s.style}`;
+  }).join("\n");
   return [
     "You run a realistic investor pitch simulation (like Shark Tank) in an Indian startup context. Money is in Rs lakh and crore.",
     `The panel:\n${panel}`,

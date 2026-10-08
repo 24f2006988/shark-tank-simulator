@@ -223,6 +223,7 @@ function TankGame({ initial }: { initial: GameSession }) {
       deltas={s.stage === "questioning" ? deltas : {}}
       round={answered.length}
       onSkip={script.skip}
+      customPanels={s.pitch.customPanels}
     />
   );
 

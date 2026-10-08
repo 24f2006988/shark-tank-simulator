@@ -68,7 +68,7 @@ async function openingTurn({ pitch, sharks, turns }: TurnRequest): Result<TurnRe
   const { sharkId } = pickNextAsker(sharks, turns, false);
   try {
     const { data } = await generateJson(aiOpeningSchema, {
-      system: systemPrompt(pitch.difficulty),
+      system: systemPrompt(pitch.difficulty, pitch.customPanels),
       prompt: openingPrompt(pitch, sharkId),
       temperature: 0.8,
       maxTokens: 800,
@@ -88,7 +88,7 @@ async function judgeAnswer(
   const isFinal = answeredCount(turns) >= DIFFICULTY[pitch.difficulty].maxAnswers;
   const nextAsker = isFinal ? null : pickNextAsker(sharks, turns, false).sharkId;
   const opts = {
-    system: systemPrompt(pitch.difficulty),
+    system: systemPrompt(pitch.difficulty, pitch.customPanels),
     prompt: turnPrompt({ pitch, sharks, turns, followUp, next: nextAsker }),
     temperature: 0.7,
     maxTokens: 1200,
@@ -150,7 +150,7 @@ export async function runOffers({ pitch, sharks, turns }: z.output<typeof offers
   if (activeSharks(sharks).length === 0) return { data: fallback, source: "ai" };
   try {
     const { data } = await generateJson(aiOffersSchema, {
-      system: systemPrompt(pitch.difficulty),
+      system: systemPrompt(pitch.difficulty, pitch.customPanels),
       prompt: offersPrompt(pitch, sharks, turns),
       temperature: 0.8,
       maxTokens: 900,
@@ -176,7 +176,7 @@ export async function runNegotiate({ pitch, offer, counter, counters }: z.output
   if (counters >= MAX_COUNTERS) return { data: scripted, source: "fallback" };
   try {
     const { data } = await generateJson(aiNegotiateSchema, {
-      system: systemPrompt(pitch.difficulty),
+      system: systemPrompt(pitch.difficulty, pitch.customPanels),
       prompt: negotiatePrompt(pitch, offer, terms, counters),
       temperature: 0.7,
       maxTokens: 800,
@@ -198,7 +198,7 @@ export async function runNegotiate({ pitch, offer, counter, counters }: z.output
 export async function runDebrief({ pitch, sharks, turns, deal }: z.output<typeof debriefRequestSchema>): Result<Debrief> {
   try {
     const { data } = await generateJson(debriefSchema, {
-      system: systemPrompt(pitch.difficulty),
+      system: systemPrompt(pitch.difficulty, pitch.customPanels),
       prompt: debriefPrompt(pitch, sharks, turns, deal),
       temperature: 0.4,
       maxTokens: 3000,

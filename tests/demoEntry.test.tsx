@@ -2,11 +2,13 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DemoEntry } from "@/components/DemoEntry";
-import { DemoReplay } from "@/components/DemoReplay";
 
-vi.mock("next/dynamic", () => ({
-  default: () => DemoReplay,
-}));
+vi.mock("next/dynamic", async () => {
+  const { DemoReplay } = await import("@/components/DemoReplay");
+  return {
+    default: () => DemoReplay,
+  };
+});
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({ matches: true, media: query, addEventListener() {}, removeEventListener() {} }));

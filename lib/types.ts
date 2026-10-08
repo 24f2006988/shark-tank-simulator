@@ -5,11 +5,14 @@ import type {
   offerSchema,
   pitchSchema,
   reactionSchema,
+  sharkCustomizationSchema,
   sharkStateSchema,
   termsSchema,
   turnSchema,
 } from "./schemas";
 import type { DIFFICULTIES, DIMENSIONS, SHARK_IDS } from "./schemas";
+
+export type SharkCustomization = z.output<typeof sharkCustomizationSchema>;
 
 export type SharkId = (typeof SHARK_IDS)[number];
 export type Dimension = (typeof DIMENSIONS)[number];
