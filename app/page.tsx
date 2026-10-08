@@ -1,3 +1,4 @@
+import { DemoEntry } from "@/components/DemoEntry";
 import { PanelList } from "@/components/PanelList";
 import { PitchForm } from "@/components/PitchForm";
 import { Shell } from "@/components/Shell";
@@ -35,6 +36,8 @@ export default function Home() {
           ))}
         </ol>
       </section>
+
+      <DemoEntry />
 
       <section aria-labelledby="panel-h">
         <h2 id="panel-h" className="font-display text-2xl font-semibold">
