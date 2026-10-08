@@ -95,17 +95,16 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - Deployed URL (Cloud Run, asia-south1, GCP project project-49ab7bea-3f18-4f37-868): https://shark-tank-simulator-888217860739.asia-south1.run.app
 - GitHub repo: https://github.com/24f2006988/shark-tank-simulator (submit as https://github.com/24f2006988/shark-tank-simulator.git)
 
-### Current state (11:10, 8 Oct): infrastructure done, NO app features yet
-- **Live site is only a placeholder** (`app/page.tsx`: title, tagline, 4 shark names, "The tank opens soon"). No pitch form, no questioning, no Gemini calls, no debrief. 0 of 5 required features work.
-- Done: Next.js scaffold, `output: "standalone"` + `Dockerfile` + `.dockerignore`, deploy pipeline verified (HTTP 200 on the live URL), `GEMINI_API_KEY` set as a Cloud Run env var, docs/rules/checklist, repo-size pre-commit hook, gcloud installed and logged in.
-- Not started: everything in `PLAN.md` section 7 (`lib/`, API routes, `/tank`, `/debrief`, components), tests (no Vitest yet), accessibility, README "Google services used" section, LinkedIn post.
+### Current state (11:55, 8 Oct): ALL 5 REQUIRED FEATURES LIVE (revision 00004)
+- **Live:** pitch form with samples and difficulty → `/tank` with 4 sharks, interest meters, multi-turn Gemini questions, follow-ups on vague answers, walkouts → offers + counter/accept → debrief (scorecard, toughest moment, improved pitch). A headless-Chrome e2e run on the live URL passed end to end with no console errors (script in the backend agent's scratchpad; ask it to rerun).
+- **Backend (done):** `lib/` + 4 API routes, Gemini `gemini-3.5-flash` → `gemini-3.5-flash-lite` → scripted fallback, about 3-4 s per turn, key in **Secret Manager** (`gemini-api-key`), security headers, rate limit, 71 Vitest tests, CI workflow, README with feature map and Google services.
+- **Frontend:** first version committed (3570c2b) at the user's request; the frontend agent is still polishing (`SharkFace.tsx`, OfferCard, SharkCard, Tank, globals.css uncommitted).
+- **Known issues:** the "OUT" stamp overlaps shark names on the cards (frontend); the panel was too harsh even on a strong pitch (backend is tuning: non-asker reactions capped, the model may keep a follow-up).
 
-### Next steps (follow `PLAN.md` timeline; behind schedule by ~15 min)
-1. `lib/types.ts` (agree on shapes first), `lib/sharks.ts`, `lib/gemini.ts` (timeout, retry, schema validation), `lib/prompts.ts`, `lib/fallback.ts`, `lib/validate.ts`.
-2. `POST /api/turn` (evaluate answer + next question, one Gemini call) + Vitest tests for `lib/` and input validation.
-3. Landing pitch form + `/tank` page (panel, interest meters, chat, answer box). **Redeploy.**
-4. `/api/debrief` + `/debrief` page (scorecard, improved pitch, copy). **Redeploy. All required features live by ~15:00.**
-5. Extras (walkouts, offers/negotiation, voice), then a11y pass, README, LinkedIn post, checklist, submit 17:45-18:00.
+### Next steps
+1. Frontend agent: finish polish, then push and log it → backend agent redeploys and reruns the e2e.
+2. Backend: tune scoring harshness; component a11y tests; Lighthouse a11y check on live.
+3. Then: incognito manual demo (strong, vague, nonsense input, phone width), `SUBMISSION CHECKLIST.txt`, LinkedIn post (draft in PLAN.md section 18), submit 17:30-17:50.
 
 ### Deploy how-to (for any AI)
 - gcloud is NOT on this session's PATH: use `"$env:LOCALAPPDATA\gcloud-cli\google-cloud-sdk\bin\gcloud.cmd"` (PowerShell). Account xalphanoscruiser@gmail.com, project `project-49ab7bea-3f18-4f37-868` (only project with billing), region `asia-south1` (both set as gcloud defaults).
@@ -131,6 +130,7 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08 11:40, Claude Code (Agent A, backend): built `lib/` (schemas, types, sharks, game, prompts, gemini, fallback, handlers, http, rateLimit, log), the 4 API routes, 71 Vitest tests (`npm test`), CI workflow, security headers, README. Moved GEMINI_API_KEY to Secret Manager (`gemini-api-key`) and deploying with GEMINI_MODEL=gemini-3.5-flash. Contract notes: `SharkState` has no `asked` field (computed from turns); `/api/turn` returns updated `sharks`. Frontend files (components/, app/page.tsx, app/tank, lib/session.ts, samples, api-client) belong to Agent B; I don't edit them.
 - 2026-10-08, Claude Code (frontend, Agent B): built the UI: `app/layout.tsx`, `app/globals.css`, `app/page.tsx`, `app/tank/*`, `components/*`, `lib/session.ts`, `lib/samples.ts`, `lib/api-client.ts`. Wired to the real `/api/*` routes. Typecheck and lint clean; not committed yet.
 - 2026-10-08 11:45, Claude Code (backend): LIVE revision 00002 serves all 4 APIs with Gemini (about 3.5 s per turn), key from Secret Manager, security headers on. Note: commit d9b3d24 (my `git add -A`, before the protocol existed) also committed the frontend agent's early `lib/api-client.ts`, `lib/samples.ts`, `lib/session.ts`; contents unchanged, just committed. Frontend agent: tell me in this log when the UI is pushed, and I'll run lint/test/build and redeploy. Metrics: Security, Testing, Google Services, Efficiency up.
+- 2026-10-08, Claude Code (frontend): added animated SVG shark faces (`components/SharkFace.tsx`): expression follows interest, blink, talking mouth, nod or shake after each answer, respects reduced motion. No image files or dependencies.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
