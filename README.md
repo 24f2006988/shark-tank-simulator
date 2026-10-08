@@ -15,12 +15,16 @@ Built for PromptWars (8-hour Build With AI hackathon, Pondicherry University), p
 ## How it solves the problem statement
 | Requirement | Where it lives | What you see |
 |---|---|---|
-| The user pitches an idea | `app/page.tsx`, `components/PitchForm.tsx`, `lib/schemas.ts` (`pitchSchema`) | Idea, one-liner, ask (Rs lakh for %), pitch text, difficulty, sample pitches, voice input |
-| An AI investor **panel** | `lib/sharks.ts`, `components/SharkPanel.tsx` | Four investors, each with a distinct lens, personality and live interest meter |
-| The panel questions the founder, multi-turn | `app/api/turn/route.ts` → `lib/handlers.ts` (`runTurn`), `app/tank/page.tsx` | One question at a time, the founder answers, the next shark reacts and asks |
+| The user pitches an idea | `app/page.tsx`, `components/PitchForm.tsx`, `components/MicButton.tsx`, `lib/schemas.ts` (`pitchSchema`) | Idea, one-liner, ask (Rs lakh for %), pitch text, difficulty, sample pitches, voice dictation |
+| An AI investor **panel** | `lib/sharks.ts`, `components/Stage.tsx`, `components/SharkFace.tsx`, `components/PanelList.tsx`, `components/SharkCard.tsx`, `components/InterestMeter.tsx` | Four illustrated investors on a stage, each with a distinct lens, personality and live interest meter (also in the sidebar) |
+| The panel questions the founder, multi-turn | `app/api/turn/route.ts` → `lib/handlers.ts` (`runTurn`), `app/tank/page.tsx`, `components/Tank.tsx`, `components/AnswerBox.tsx`, `components/ChatLog.tsx` | Each shark speaks one line at a time, the founder answers, the next shark reacts and asks; the full transcript is one click away |
 | **Hard** questions that dig into weak answers | `lib/prompts.ts` (`HARD_QUESTION_RULES`, scoring rubric), `lib/game.ts` (`pickNextAsker`, `followUpCandidate`) | Questions quote your own claims, demand numbers and names; a vague answer gets a **Follow-up** from the same shark and drops interest |
 | The founder walks away with a **better pitch** | `app/api/debrief/route.ts` → `runDebrief`, `components/Debrief.tsx` | Scorecard per dimension, strengths and weaknesses, your toughest moment answered better, what each shark needed, a rewritten 60-second pitch (Copy / Pitch again), 3 fixes |
-| Extras | `lib/game.ts`, `app/api/offers`, `app/api/negotiate` | Walkouts ("I'm out"), offers with implied valuation, counter-offers, Friendly / Realistic / Ruthless modes |
+| Walkouts, offers and negotiation | `lib/game.ts`, `app/api/offers`, `app/api/negotiate`, `components/OfferCard.tsx`, `components/QuestionsDone.tsx` | Sharks walk out ("I'm out") with a reason; the rest make offers with implied valuation; counter, accept or walk; Friendly / Realistic / Ruthless modes |
+| Stage presence | `components/greeting.ts`, `components/useScript.ts`, `components/mumble.ts` | The panel greets you by idea and ask; lines type out with per-shark "mumble" sound blips (toggle in the header) |
+| Light and dark themes | `components/ThemeToggle.tsx`, `components/Shell.tsx`, `app/globals.css` | Theme toggle in the header, app shell with breadcrumbs and panel sidebar |
+| Demo replay (no network) | `components/DemoReplay.tsx`, `lib/demoScript.ts` | Two recorded real sessions (a strong and a weak pitch) that play back with zero API calls |
+| Guided walkthroughs | [`DEMO.md`](DEMO.md) | Tested scripts for a pitch that gets a deal and one that gets torn apart |
 
 ### "Make it yours": our answers
 - **Who sits on the panel?** Four investors who together cover a real investment memo:
@@ -52,7 +56,7 @@ flowchart LR
 ## Google services used
 | Service | How we use it | Where |
 |---|---|---|
-| **Gemini on Vertex AI** (`@google/genai`; `gemini-3.8-flash` → `gemini-3.5-flash` → `gemini-3.5-flash-lite`) | Questions, answer scoring, shark reactions, offers, negotiation and the debrief, all via **structured JSON output** (`responseJsonSchema` generated from our Zod schemas). In production Cloud Run calls Vertex AI with its own service account (IAM role `aiplatform.user`), so no API key is needed | `lib/gemini.ts`, `lib/prompts.ts`, `lib/handlers.ts` |
+| **Gemini on Vertex AI** (`@google/genai`; `gemini-3.5-flash-lite` → `gemini-3.5-flash`) | Questions, answer scoring, shark reactions, offers, negotiation and the debrief, all via **structured JSON output** (`responseJsonSchema` generated from our Zod schemas). In production Cloud Run calls Vertex AI with its own service account (IAM role `aiplatform.user`), so no API key is needed | `lib/gemini.ts`, `lib/prompts.ts`, `lib/handlers.ts` |
 | **Google Cloud Run** | Hosts the app (asia-south1) as a non-root container; scales to zero | `Dockerfile`, live URL above |
 | **Cloud Build + Artifact Registry** | Build the container from source on every deploy | `gcloud run deploy --source .` |
 | **Secret Manager** | Stores the optional `GEMINI_API_KEY` (Gemini Developer API mode), mounted into Cloud Run at runtime; the key never touches the repo, image or browser | Deploy command below |
@@ -63,7 +67,7 @@ flowchart LR
 ## Quality
 ### Testing
 ```bash
-npm test               # Vitest: game rules, validation, prompts, fallbacks, Gemini client, every API route
+npm test               # Vitest: game rules, validation, prompts, fallbacks, Gemini client, every API route, key UI components
 npm run test:coverage  # coverage report
 ```
 - **Gemini is mocked in the unit and route tests.** They cover:
@@ -73,7 +77,7 @@ npm run test:coverage  # coverage report
 - GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck and tests on every push.
 
 ### Security
-- The Gemini key lives in Secret Manager and is only read server-side (`server-only` guard).
+- **No API key in production:** Cloud Run calls Vertex AI with its own service account (least-privilege `roles/aiplatform.user`). The optional Developer API key lives in Secret Manager, and Gemini code is server-only (`server-only` guard).
 - Every request body is validated with Zod: types, ranges, length caps, a 32 KB body limit. Gemini replies are validated against the same schemas, then clamped in code before use.
 - **Prompt-injection defence:**
   - Founder text is wrapped in data tags.
@@ -85,12 +89,12 @@ npm run test:coverage  # coverage report
 - **Accepted trade-off:** the session lives in the browser, so a user could edit their own scores. That only affects their own game; nothing is stored or shared server-side.
 
 ### Reliability and efficiency
-- **Fallback chain:** a list of Gemini models tried in order within an 18 s budget. A model that returns 429 or 503 is skipped while it cools down. After that come deterministic scripted questions, scoring, offers and debrief (`lib/fallback.ts`). A session never dead-ends, and the API never returns a 5xx for an AI failure.
-- **Fast turns:** each turn is one call with a low thinking level, a 12 s timeout and only the last 10 exchanges in the prompt (about 3 s per turn).
+- **Fallback chain:** Gemini models are tried in order (13 s per attempt, 26 s in total; the debrief gets 14 s per attempt and 35 s in total). A model that returns 429 or 503 is skipped briefly (20 s on Vertex AI). After that come deterministic scripted questions, scoring, offers and debrief (`lib/fallback.ts`). A session never dead-ends, and the API never returns a 5xx for an AI failure. Measured live: about 3 s per turn, about 4 s per debrief.
+- **Fast turns:** each turn is one call with a low thinking level and only the last 10 exchanges in the prompt.
 - **Lean dependencies:** Next.js, React, `@google/genai`, Zod. No UI kit, chart library or database.
 
 ### Accessibility
-Semantic landmarks and headings, labelled form fields with linked error messages, `role="meter"` interest meters with text values, an `aria-live` chat log, full keyboard flow with visible focus, WCAG AA contrast, and support for `prefers-reduced-motion`. Voice input is a progressive enhancement.
+Semantic landmarks and headings, labelled form fields with linked error messages, `role="meter"` interest meters with text values, shark lines announced through `aria-live` regions (the typewriter text itself is hidden from screen readers), a `role="log"` transcript, full keyboard flow with visible focus, WCAG AA contrast in both themes, and support for `prefers-reduced-motion`. Voice dictation and sounds are progressive enhancements. Lighthouse accessibility score: 100.
 
 ## Run locally
 ```bash
@@ -100,18 +104,26 @@ npm run dev                  # http://localhost:3000
 npm test
 ```
 
-## Deploy (Google Cloud Run)
+## Deploy (Google Cloud Run + Vertex AI)
+Production calls Gemini through **Vertex AI** with the Cloud Run service account, so no API key is needed:
 ```bash
-gcloud secrets create gemini-api-key --data-file=key.txt
-gcloud run deploy shark-tank-simulator --source . --region asia-south1 \
-  --update-secrets GEMINI_API_KEY=gemini-api-key:latest \
-  --update-env-vars GEMINI_MODEL=gemini-3.5-flash,GEMINI_FALLBACK_MODEL=gemini-3.5-flash-lite
+gcloud services enable run.googleapis.com aiplatform.googleapis.com
+gcloud projects add-iam-policy-binding PROJECT_ID   --member serviceAccount:PROJECT_NUMBER-compute@developer.gserviceaccount.com --role roles/aiplatform.user
+gcloud run deploy shark-tank-simulator --source . --region asia-south1 --env-vars-file env.yaml
 ```
+`env.yaml` (no secrets):
+```yaml
+GEMINI_USE_VERTEX: "true"
+GOOGLE_CLOUD_PROJECT: "PROJECT_ID"
+GOOGLE_CLOUD_LOCATION: "global"
+GEMINI_MODELS: "gemini-3.5-flash-lite,gemini-3.5-flash"
+```
+To use the Gemini Developer API instead, store the key in Secret Manager (`gcloud secrets create gemini-api-key --data-file=key.txt`), drop `GEMINI_USE_VERTEX`, and add `--update-secrets GEMINI_API_KEY=gemini-api-key:latest`.
 
 ## Project layout
 ```
 app/            pages (/, /tank) and API routes (/api/turn, /api/offers, /api/negotiate, /api/debrief)
-components/     UI: pitch form, shark panel, interest meters, chat, offers, debrief
+components/     UI: app shell, pitch form, stage and shark faces, interest meters, transcript, offers, debrief, demo replay
 lib/            schemas, game rules, sharks, prompts, Gemini client, fallbacks, rate limit, logging
 tests/          Vitest unit and route tests
 ```

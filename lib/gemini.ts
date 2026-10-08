@@ -7,7 +7,8 @@ import { log } from "./log";
  * Tried in order. Free-tier quotas are per model per day (gemini-3.5-flash allows only 20 requests),
  * so spreading calls across several fast models keeps the panel answering under load.
  */
-export const DEFAULT_MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-3.5-flash"];
+// Measured on Vertex AI: flash-lite answers a turn in about 3 s; gemini-3.1-flash-lite returned 429 on every call, so it is left out.
+export const DEFAULT_MODELS = ["gemini-3.5-flash-lite", "gemini-3.5-flash"];
 export const ATTEMPT_TIMEOUT_MS = 13_000;
 /** Total time a request may spend across all models before the caller uses its scripted fallback (the client waits 45 s). */
 export const BUDGET_MS = 26_000;
