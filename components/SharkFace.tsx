@@ -43,122 +43,174 @@ interface Look {
   hairLight: string;
   iris: string;
   irisGlow: string;
+  lip: string;
+  /** Head outline: each shark has their own jaw so the panel reads at a glance, none of them pointed. */
+  face: string;
+  earX: number;
+  eyeScale: number;
+  browWidth: number;
   delay: string;
 }
 
 const LOOKS: Record<SharkId, Look> = {
-  vikram: { irisGlow: "#8a5a35", skin: "#d39a6c", skinShade: "#b27650", hair: "#3f3f46", hairLight: "#a1a1aa", iris: "#3b2416", delay: "0s" },
-  meera: { irisGlow: "#8a4f2a", skin: "#e0a77c", skinShade: "#c2855c", hair: "#1c1412", hairLight: "#4a302a", iris: "#2a160c", delay: "1.7s" },
-  arjun: { irisGlow: "#7a4a2a", skin: "#c08a5f", skinShade: "#9c6a45", hair: "#151313", hairLight: "#3a3330", iris: "#24150d", delay: "3.1s" },
-  zara: { irisGlow: "#9a5a86", skin: "#ebbb94", skinShade: "#cf9670", hair: "#3a2233", hairLight: "#8b6aa8", iris: "#3a2030", delay: "4.4s" },
+  vikram: {
+    skin: "#d39a6c", skinShade: "#b27650", hair: "#3f3f46", hairLight: "#b4b4bc", iris: "#3b2416", irisGlow: "#8a5a35", lip: "#8a3b32",
+    face: "M23 45 C23 15 77 15 77 45 C78 66 68 82 50 82 C32 82 22 66 23 45Z", earX: 22.5, eyeScale: 0.92, browWidth: 3.2, delay: "0s",
+  },
+  meera: {
+    skin: "#e0a77c", skinShade: "#c2855c", hair: "#1c1412", hairLight: "#5a3a30", iris: "#2a160c", irisGlow: "#8a4f2a", lip: "#a8403c",
+    face: "M25 46 C25 14 75 14 75 46 C75 68 64 82 50 82 C36 82 25 68 25 46Z", earX: 24, eyeScale: 1.1, browWidth: 2.2, delay: "1.7s",
+  },
+  arjun: {
+    skin: "#c08a5f", skinShade: "#9c6a45", hair: "#151313", hairLight: "#4a423d", iris: "#24150d", irisGlow: "#7a4a2a", lip: "#7a3a30",
+    face: "M27 45 C27 14 73 14 73 45 C73 66 63 85 50 85 C37 85 27 66 27 45Z", earX: 26, eyeScale: 0.96, browWidth: 2.6, delay: "3.1s",
+  },
+  zara: {
+    skin: "#ebbb94", skinShade: "#cf9670", hair: "#3a2233", hairLight: "#a47ccf", iris: "#3a2030", irisGlow: "#9a5a86", lip: "#b0306a",
+    face: "M26 46 C26 14 74 14 74 46 C74 67 63 83 50 84 C37 83 26 67 26 46Z", earX: 25, eyeScale: 1.06, browWidth: 2, delay: "4.4s",
+  },
 };
 
 const OUTLINE = "#4a3326";
+const GOLD = "#f5c451";
 
 /** Hair behind the head (drawn first). */
 function HairBack({ id, fill }: { id: SharkId; fill: string }) {
-  if (id === "meera")
-    return (
-      <g fill={fill}>
-        <circle cx="50" cy="11" r="9.5" />
-        <path d="M19 52 Q16 14 50 12 Q84 14 81 52 L76 52 Q76 22 50 20 Q24 22 24 52Z" />
-      </g>
-    );
-  if (id === "zara") return <path d="M17 84 Q10 52 20 30 Q32 9 54 12 Q82 15 83 44 Q88 66 82 86 L72 86 Q79 62 75 46 L25 46 Q21 64 28 86Z" fill={fill} />;
-  return null;
+  switch (id) {
+    case "meera": // a big bun with a gold hairpin
+      return (
+        <g>
+          <circle cx="50" cy="9" r="12" fill={fill} />
+          <path d="M19 54 Q16 14 50 12 Q84 14 81 54 L76 54 Q76 22 50 20 Q24 22 24 54Z" fill={fill} />
+          <path d="M34 6 L66 13" stroke={GOLD} strokeWidth="1.6" strokeLinecap="round" />
+          <circle cx="67" cy="13.4" r="2" fill={GOLD} />
+        </g>
+      );
+    case "zara": // long, wavy, down to the shoulders
+      return (
+        <path
+          d="M17 88 Q9 54 20 30 Q32 9 54 12 Q82 15 83 44 Q89 66 83 88 Q78 80 74 86 L72 62 L28 62 L26 86 Q22 80 17 88Z"
+          fill={fill}
+        />
+      );
+    case "arjun": // cowlick at the crown
+      return <path d="M42 20 Q46 -2 60 4 Q54 9 57 20Z" fill={fill} />;
+    default:
+      return null;
+  }
 }
 
 /** Fringe and hairline (drawn over the forehead). */
 function HairFront({ id, fill, light }: { id: SharkId; fill: string; light: string }) {
   switch (id) {
-    case "vikram": // neat side parting, grey at the temples
+    case "vikram": // receding, swept back, grey at the temples
       return (
         <g>
-          <path d="M24 46 Q21 17 46 13 Q71 11 77 34 Q78 41 76 46 Q72 29 59 25 Q45 23 35 30 Q28 36 24 46Z" fill={fill} stroke={OUTLINE} strokeWidth="0.8" />
-          <path d="M24 46 Q23 36 28 31 L29.5 47Z M76 46 Q77 36 72 31 L70.5 47Z" fill={light} />
-          <path d="M40 18 Q54 14 66 20" fill="none" stroke={light} strokeWidth="1.2" opacity="0.6" />
+          <path d="M23 44 Q20 15 46 12 Q73 10 77 32 Q78 40 77 44 Q73 27 60 22 Q46 19 35 27 Q27 33 23 44Z" fill={fill} stroke={OUTLINE} strokeWidth="0.7" />
+          <path d="M23 44 Q22 34 28 29 L30 45Z M77 44 Q78 34 72 29 L70 45Z" fill={light} />
+          <path d="M38 16 Q54 11 68 18" fill="none" stroke={light} strokeWidth="1.2" opacity="0.7" />
         </g>
       );
     case "meera": // centre parting framing the face
       return (
         <g>
-          <path d="M24 49 Q23 18 50 17 Q77 18 76 49 Q72 29 52 24 L50 21.5 L48 24 Q28 29 24 49Z" fill={fill} stroke={OUTLINE} strokeWidth="0.8" />
+          <path d="M24 50 Q23 18 50 17 Q77 18 76 50 Q72 29 52 24 L50 21.5 L48 24 Q28 29 24 50Z" fill={fill} stroke={OUTLINE} strokeWidth="0.7" />
           <path d="M30 26 Q38 20 46 21" fill="none" stroke={light} strokeWidth="1.2" />
-          <path className="hair-sway" d="M25 47 Q21 60 26 71" fill="none" stroke={fill} strokeWidth="2.6" strokeLinecap="round" />
+          <path className="hair-sway" d="M25 48 Q21 62 26 74" fill="none" stroke={fill} strokeWidth="2.8" strokeLinecap="round" />
         </g>
       );
-    case "arjun": // messy, slept-at-the-desk hair
+    case "arjun": // tall, messy, slept-at-the-desk hair
       return (
         <g>
           <path
             className="hair-sway"
-            d="M23 45 Q19 22 33 15 Q40 9 50 12 Q60 8 68 14 Q81 21 77 45 Q74 34 68 30 L66 37 L62 28 L56 34 L52 26 L46 33 L42 27 L36 35 L33 29 Q27 35 23 45Z"
+            d="M26 46 Q17 20 32 12 Q36 0 45 5 Q51 -4 59 5 Q69 1 72 12 Q85 20 74 46 Q72 33 67 29 L65 36 L62 27 L56 34 L52 25 L46 33 L42 26 L36 34 L33 28 Q28 34 26 46Z"
             fill={fill}
             stroke={OUTLINE}
-            strokeWidth="0.8"
+            strokeWidth="0.7"
           />
-          <path d="M38 17 Q46 13 54 15" fill="none" stroke={light} strokeWidth="1.2" />
+          <path d="M37 15 Q46 9 56 13" fill="none" stroke={light} strokeWidth="1.2" />
         </g>
       );
-    case "zara": // swept wavy fringe with a violet sheen
+    case "zara": // swept wavy fringe with a violet streak
       return (
         <g>
-          <path className="hair-sway" d="M24 47 Q21 17 52 14 Q77 15 78 41 Q66 24 48 28 Q34 32 24 47Z" fill={fill} stroke={OUTLINE} strokeWidth="0.8" />
-          <path d="M34 22 Q48 15 64 20" fill="none" stroke={light} strokeWidth="1.6" strokeLinecap="round" />
+          <path className="hair-sway" d="M25 47 Q21 16 52 14 Q78 15 79 42 Q66 24 48 28 Q34 32 25 47Z" fill={fill} stroke={OUTLINE} strokeWidth="0.7" />
+          <path d="M33 22 Q48 14 65 20" fill="none" stroke={light} strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M58 21 Q66 24 70 36" fill="none" stroke={light} strokeWidth="3" strokeLinecap="round" opacity="0.85" />
         </g>
       );
   }
 }
 
-/** Clothes in the shark's accent colour. */
+/** Clothes and neckwear: each silhouette differs (broad blazer, dupatta, hoodie and headphones, lapels). */
 function Outfit({ id }: { id: SharkId }) {
   switch (id) {
     case "vikram":
       return (
         <g>
-          <path d="M12 100 Q14 86 36 83 L64 83 Q86 86 88 100Z" fill="#1e2a44" />
-          <path d="M42 83 L50 97 L58 83Z" fill="#f1f5f9" />
-          <path d="M48.5 85 L51.5 85 L53 97 L50 100 L47 97Z" fill="#fbbf24" />
+          <path d="M5 100 Q7 83 34 81 L66 81 Q93 83 95 100Z" fill="#1e2a44" />
+          <path d="M41 81 L50 97 L59 81Z" fill="#f1f5f9" />
+          <path d="M48.5 85 L51.5 85 L53 97 L50 100 L47 97Z" fill={GOLD} />
+          <path d="M34 81 L43 99 M66 81 L57 99" stroke="#131c30" strokeWidth="1.6" fill="none" />
+          <path d="M70 90 L78 89 L78 94 L70 94Z" fill="#e11d48" />
         </g>
       );
     case "meera":
       return (
         <g>
           <path d="M12 100 Q14 86 36 83 L64 83 Q86 86 88 100Z" fill="#fb7185" />
-          <path d="M40 83 Q50 92 60 83" fill="none" stroke="#fde68a" strokeWidth="1.6" />
+          <path d="M40 83 Q50 93 60 83" fill="none" stroke="#fde68a" strokeWidth="1.6" />
+          <path d="M14 90 Q40 94 62 100 L86 100 L84 94 Q50 88 14 84Z" fill="#0f766e" />
+          <path d="M14 90 Q40 94 62 100" fill="none" stroke={GOLD} strokeWidth="1.4" />
         </g>
       );
     case "arjun":
       return (
         <g>
-          <path d="M10 100 Q12 84 34 81 L66 81 Q88 84 90 100Z" fill="#0e7490" />
-          <path d="M36 81 Q50 90 64 81" fill="none" stroke="#155e75" strokeWidth="3" />
-          <path d="M45 87 L44 97 M55 87 L56 97" stroke="#a5f3fc" strokeWidth="1.2" strokeLinecap="round" />
+          <path d="M8 100 Q10 83 33 81 L67 81 Q90 83 92 100Z" fill="#0e7490" />
+          <path d="M30 81 Q50 97 70 81 Q64 73 50 75 Q36 73 30 81Z" fill="#0b5367" />
+          <path d="M45 88 L44 98 M55 88 L56 98" stroke="#a5f3fc" strokeWidth="1.2" strokeLinecap="round" />
+          <path d="M31 83 Q50 99 69 83" fill="none" stroke="#111827" strokeWidth="3" strokeLinecap="round" />
+          <ellipse cx="30" cy="87" rx="4.6" ry="6.4" fill="#111827" />
+          <ellipse cx="70" cy="87" rx="4.6" ry="6.4" fill="#111827" />
+          <ellipse cx="30" cy="87" rx="2.2" ry="3.4" fill="#22d3ee" />
+          <ellipse cx="70" cy="87" rx="2.2" ry="3.4" fill="#22d3ee" />
         </g>
       );
     case "zara":
       return (
         <g>
-          <path d="M12 100 Q14 86 36 83 L64 83 Q86 86 88 100Z" fill="#7c3aed" />
-          <path d="M38 83 L50 94 L62 83" fill="none" stroke="#ddd6fe" strokeWidth="1.4" />
+          <path d="M12 100 Q14 86 36 83 L64 83 Q86 86 88 100Z" fill="#6d28d9" />
+          <path d="M38 83 L50 96 L62 83Z" fill="#f5f3ff" />
+          <path d="M36 83 L47 100 M64 83 L53 100" stroke="#a78bfa" strokeWidth="1.6" fill="none" />
+          <circle cx="68" cy="92" r="2.2" fill={GOLD} />
         </g>
       );
   }
 }
 
-/** Details drawn on top of the face: glasses, moustache, bindi, stubble, earrings. */
-function Extras({ id, hair, light }: { id: SharkId; hair: string; light: string }) {
-  const gold = "#f5c451";
+/** Details drawn on top of the face: glasses and beard, bindi and earrings, stubble, lipstick sheen. */
+function Extras({ id, look, clip }: { id: SharkId; look: Look; clip: string }) {
+  const earR = 100 - look.earX;
   const star = (cx: number) => `M${cx} 59 l1.3 2.7 3 .4 -2.2 2.1 .5 3 -2.6-1.4 -2.6 1.4 .5-3 -2.2-2.1 3-.4Z`;
+  const clipUrl = `url(#${clip})`;
   switch (id) {
     case "vikram":
       return (
         <g>
-          <path d="M41.5 62.5 Q46 59.5 50 61.5 Q54 59.5 58.5 62.5 Q54 64 50 63 Q46 64 41.5 62.5Z" fill={light} />
-          <g fill="none" stroke="#27272a" strokeWidth="1.3">
-            <circle cx="39" cy="50" r="7.2" />
-            <circle cx="61" cy="50" r="7.2" />
-            <path d="M46.2 49.5 Q50 47.5 53.8 49.5 M31.8 49 L25 47 M68.2 49 L75 47" />
+          <path
+            d="M15 58 H85 V95 H15Z M35 62 Q50 57 65 62 Q69 75 50 78 Q31 75 35 62Z"
+            fillRule="evenodd"
+            fill={look.hairLight}
+            opacity="0.9"
+            clipPath={clipUrl}
+          />
+          <path d="M40.5 62.5 Q46 59.5 50 61.5 Q54 59.5 59.5 62.5 Q54 64.4 50 63.2 Q46 64.4 40.5 62.5Z" fill={look.hairLight} />
+          <g fill="none" stroke="#27272a" strokeWidth="1.4">
+            <circle cx="39" cy="50" r="7.6" />
+            <circle cx="61" cy="50" r="7.6" />
+            <path d="M46.6 49.5 Q50 47.5 53.4 49.5 M31.4 49 L23 47 M68.6 49 L77 47" />
           </g>
           <path d="M34 46 L37 44" stroke="white" strokeWidth="1" opacity="0.5" />
         </g>
@@ -166,18 +218,37 @@ function Extras({ id, hair, light }: { id: SharkId; hair: string; light: string 
     case "meera":
       return (
         <g>
-          <circle cx="50" cy="38" r="1.6" fill="#dc2626" />
-          <circle cx="24" cy="61" r="2.2" fill={gold} />
-          <circle cx="76" cy="61" r="2.2" fill={gold} />
+          <circle cx="50" cy="38" r="1.7" fill="#dc2626" />
+          {[look.earX, earR].map((x) => (
+            <g key={x}>
+              <circle cx={x} cy="58.5" r="1.6" fill={GOLD} />
+              <path d={`M${x - 2.4} 60 Q${x} 68 ${x + 2.4} 60Z`} fill={GOLD} />
+              <circle cx={x} cy="66.2" r="0.9" fill="#fff7d6" />
+            </g>
+          ))}
         </g>
       );
     case "arjun":
-      return <path d="M31 64 Q50 87 69 64 Q67 76 50 81 Q33 76 31 64Z" fill={hair} opacity="0.13" />;
+      return (
+        <g>
+          <path
+            d="M15 60 Q50 70 85 60 V95 H15Z M37 63 Q50 60 63 63 Q67 75 50 77 Q33 75 37 63Z"
+            fillRule="evenodd"
+            fill={look.hair}
+            opacity="0.24"
+            clipPath={clipUrl}
+          />
+          <circle cx={look.earX} cy="58" r="1.4" fill="#d4d4d8" />
+        </g>
+      );
     case "zara":
       return (
-        <g fill={gold}>
-          <path d={star(23)} />
-          <path d={star(77)} />
+        <g>
+          <g fill={GOLD}>
+            <path d={star(look.earX - 1)} />
+            <path d={star(earR + 1)} />
+          </g>
+          <path d="M45 67 Q50 69.4 55 67" fill="none" stroke="#ffd1e6" strokeWidth="0.7" opacity="0.7" strokeLinecap="round" />
         </g>
       );
   }
@@ -219,10 +290,11 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
 
   const live = animated && mood !== "out";
   const hair = `hair-${uid}`;
+  const clip = `clip-${uid}`;
   const sparkle = mood === "hooked";
   // Large glossy irises under a heavy upper lash with a small outer flick: the film look, not the emoji look.
   const eye = (cx: number, side: -1 | 1): ReactNode => (
-    <g>
+    <g transform={`translate(${cx} 50) scale(${look.eyeScale}) translate(${-cx} -50)`}>
       <ellipse cx={cx} cy="50" rx="5.3" ry="4.7" fill="#fffaf2" stroke={OUTLINE} strokeWidth="0.4" />
       <g className={live ? "face-glance" : undefined} style={live ? { animationDelay: look.delay } : undefined}>
         <ellipse cx={cx} cy="50.4" rx="3.7" ry="4.4" fill={look.iris} />
@@ -240,6 +312,9 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
     <div ref={ref} aria-hidden="true" className="inline-block shrink-0" style={typeof size === "number" ? { width: size, height: size } : { width: size, aspectRatio: "1" }}>
       <svg viewBox="0 0 100 100" width="100%" height="100%" className="face overflow-visible">
         <defs>
+          <clipPath id={clip}>
+            <path d={look.face} />
+          </clipPath>
           <linearGradient id={hair} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={look.hairLight} stopOpacity="0.9" />
             <stop offset="35%" stopColor={look.hair} />
@@ -252,10 +327,10 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
 
           <g className="face-tilt" style={{ transform: e.tilt }}>
             <HairBack id={shark.id} fill={`url(#${hair})`} />
-            <ellipse cx="24" cy="53" rx="3.6" ry="6" fill={look.skinShade} />
-            <ellipse cx="76" cy="53" rx="3.6" ry="6" fill={look.skinShade} />
-            <path d="M25 46 Q25 16 50 16 Q75 16 75 46 Q74 67 50 83 Q26 67 25 46Z" fill={look.skin} stroke={OUTLINE} strokeWidth="0.7" />
-            <path d="M63 21 Q75 29 75 46 Q74 67 50 83 Q66 66 67 46 Q67 31 63 21Z" fill={look.skinShade} opacity="0.3" />
+            <ellipse cx={look.earX} cy="53" rx="3.6" ry="6" fill={look.skinShade} />
+            <ellipse cx={100 - look.earX} cy="53" rx="3.6" ry="6" fill={look.skinShade} />
+            <path d={look.face} fill={look.skin} stroke={OUTLINE} strokeWidth="0.7" />
+            <ellipse cx="80" cy="52" rx="15" ry="42" fill={look.skinShade} opacity="0.3" clipPath={`url(#${clip})`} />
 
             <g className="face-part" style={{ opacity: e.blush }}>
               <ellipse cx="32.5" cy="61" rx="5.5" ry="3" fill="#f08a8a" opacity="0.55" />
@@ -269,7 +344,7 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
               </g>
             </g>
 
-            <g stroke={look.hair} strokeWidth="2.2" strokeLinecap="round">
+            <g stroke={look.hair} strokeWidth={look.browWidth} strokeLinecap="round">
               <path d="M33 41.5 Q38.5 39.5 44 41" fill="none" className="face-part" style={{ transform: e.brows[0] }} />
               <path d="M56 41 Q61.5 39.5 67 41.5" fill="none" className="face-part" style={{ transform: e.brows[1] }} />
             </g>
@@ -282,10 +357,10 @@ export function SharkFace({ shark, mood = "neutral", size = 64, talking = false,
                 <ellipse cx="50" cy="68.6" rx="2.2" ry="1" fill="#e07a7a" />
               </g>
             ) : (
-              <path d={e.mouth} className="face-part" style={{ d: `path("${e.mouth}")` }} fill="none" stroke="#8a3b32" strokeWidth="1.3" strokeLinecap="round" />
+              <path d={e.mouth} className="face-part" style={{ d: `path("${e.mouth}")` }} fill="none" stroke={look.lip} strokeWidth="1.4" strokeLinecap="round" />
             )}
 
-            <Extras id={shark.id} hair={look.hair} light={look.hairLight} />
+            <Extras id={shark.id} look={look} clip={clip} />
             <HairFront id={shark.id} fill={`url(#${hair})`} light={look.hairLight} />
           </g>
         </g>
