@@ -7,6 +7,7 @@ import {
   answeredCount,
   applyReactions,
   applyWalkouts,
+  capBystanders,
   eligibleForOffer,
   fallbackNegotiate,
   followUpCandidate,
@@ -78,10 +79,13 @@ export async function runTurn({ pitch, sharks, turns }: z.output<typeof turnRequ
   }
 
   // One reaction per shark still in; each delta is reported as the change actually applied.
-  const proposed = activeSharks(sharks).map((id) => {
-    const r = raw.reactions.find((x) => x.sharkId === id);
-    return { sharkId: id, delta: r?.delta ?? 0, line: tidy(r?.line ?? "") };
-  });
+  const proposed = capBystanders(
+    activeSharks(sharks).map((id) => {
+      const r = raw.reactions.find((x) => x.sharkId === id);
+      return { sharkId: id, delta: r?.delta ?? 0, line: tidy(r?.line ?? "") };
+    }),
+    last.sharkId,
+  );
   const applied = applyReactions(sharks, proposed, pitch.difficulty);
   const reactions = proposed.map((r) => ({ ...r, delta: applied[r.sharkId].interest - sharks[r.sharkId].interest }));
   const reasons = Object.fromEntries(reactions.map((r) => [r.sharkId, r.line]));
@@ -96,18 +100,18 @@ export async function runTurn({ pitch, sharks, turns }: z.output<typeof turnRequ
   const over = isQuestioningOver(after, turns, pitch.difficulty);
   let next: Question | null = null;
   if (!over) {
-    // Any shark still in may ask, but the shark who just asked may only continue as a permitted follow-up.
+    // Any shark still in may ask; the shark who just asked may press on only within the follow-up streak cap.
     const usable =
       aiNext &&
       aiNext.question.trim() &&
       after[aiNext.sharkId].status === "in" &&
-      (aiNext.sharkId !== last.sharkId || (raw.vague && followUp === last.sharkId) || activeSharks(after).length === 1);
+      (aiNext.sharkId !== last.sharkId || followUp === last.sharkId || activeSharks(after).length === 1);
     if (aiNext && usable) {
       next = {
         sharkId: aiNext.sharkId,
         question: tidy(aiNext.question, LIMITS.question.max),
         probing: aiNext.probing,
-        isFollowUp: raw.vague && aiNext.sharkId === last.sharkId,
+        isFollowUp: aiNext.sharkId === last.sharkId,
       };
     } else {
       const pick = pickNextAsker(after, turns, raw.vague);

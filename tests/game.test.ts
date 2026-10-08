@@ -4,6 +4,7 @@ import {
   activeSharks,
   applyReactions,
   applyWalkouts,
+  capBystanders,
   clampDelta,
   createSharks,
   eligibleForOffer,
@@ -49,6 +50,17 @@ describe("applyReactions", () => {
     const next = applyReactions(sharks, [{ sharkId: "arjun", delta: 20, line: "" }], "realistic");
     expect(next.arjun.interest).toBe(50);
     expect(sharks.arjun.interest).toBe(50);
+  });
+});
+
+describe("capBystanders", () => {
+  it("limits only the reactions of sharks who did not ask", () => {
+    const capped = capBystanders([
+      { sharkId: "vikram", delta: -20, line: "" },
+      { sharkId: "meera", delta: -20, line: "" },
+      { sharkId: "zara", delta: 15, line: "" },
+    ], "vikram");
+    expect(capped.map((r) => r.delta)).toEqual([-20, -6, 6]);
   });
 });
 

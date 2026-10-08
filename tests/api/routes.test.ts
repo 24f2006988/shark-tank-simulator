@@ -71,7 +71,20 @@ describe("POST /api/turn", () => {
     expect(body.data.next).toMatchObject({ sharkId: "vikram", isFollowUp: true });
   });
 
-  it("replaces a question from a shark the model was not allowed to pick", async () => {
+  it("caps reactions from sharks who did not ask", async () => {
+    generateJson.mockResolvedValue({
+      data: {
+        evaluation: { quality: 1, vague: true, reactions: [{ sharkId: "vikram", delta: -20, line: "" }, { sharkId: "zara", delta: -20, line: "" }] },
+        next: { sharkId: "meera", question: "Who pays?", probing: "customer" },
+      },
+      model: "m",
+    });
+    const body = await (await post(turnRoute.POST, { ...session, turns: [makeTurn("vikram", "dunno")] })).json();
+    expect(body.data.sharks.vikram.interest).toBe(30);
+    expect(body.data.sharks.zara.interest).toBe(44);
+  });
+
+  it("replaces a question from a shark past the follow-up streak cap", async () => {
     generateJson.mockResolvedValue({
       data: {
         evaluation: { quality: 4, vague: false, reactions: [] },
@@ -79,7 +92,8 @@ describe("POST /api/turn", () => {
       },
       model: "m",
     });
-    const body = await (await post(turnRoute.POST, { ...session, turns: [makeTurn("vikram", "Rs 400 CAC")] })).json();
+    const turns = [makeTurn("vikram", "a"), makeTurn("vikram", "b"), makeTurn("vikram", "Rs 400 CAC")];
+    const body = await (await post(turnRoute.POST, { ...session, turns })).json();
     expect(body.data.next.sharkId).not.toBe("vikram");
     expect(body.data.next.isFollowUp).toBe(false);
   });

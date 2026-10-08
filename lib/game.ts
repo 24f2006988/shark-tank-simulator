@@ -25,6 +25,8 @@ export const WALKOUT_GRACE_ANSWERS = 2;
 export const MAX_SAME_SHARK_STREAK = 3;
 export const MIN_ANSWERS_BEFORE_OFFERS = 4;
 export const MAX_COUNTERS = 2;
+/** Sharks who did not ask the question react, but only mildly, so one answer cannot sink the whole panel. */
+export const BYSTANDER_MAX_DELTA = 6;
 
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 const roundHalf = (n: number) => Math.round(n * 2) / 2;
@@ -56,6 +58,12 @@ export function streak(turns: Turn[], id: SharkId): number {
 export function clampDelta(delta: number, difficulty: Difficulty): number {
   const d = clamp(Math.round(delta), -20, 20);
   return d < 0 ? Math.round(d * DIFFICULTY[difficulty].negativeMultiplier) : d;
+}
+
+export function capBystanders(reactions: Reaction[], askerId: SharkId): Reaction[] {
+  return reactions.map((r) =>
+    r.sharkId === askerId ? r : { ...r, delta: clamp(r.delta, -BYSTANDER_MAX_DELTA, BYSTANDER_MAX_DELTA) },
+  );
 }
 
 /** Applies interest changes to sharks still in; unknown or departed sharks are ignored. */
