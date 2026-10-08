@@ -8,10 +8,17 @@ import { log } from "./log";
  * so spreading calls across several fast models keeps the panel answering under load.
  */
 export const DEFAULT_MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-3.5-flash"];
-export const ATTEMPT_TIMEOUT_MS = 9_000;
-/** Total time a request may spend across all models before the caller uses its scripted fallback. */
-export const BUDGET_MS = 18_000;
-const COOLDOWN_MS = { quota: 10 * 60_000, overloaded: 60_000 };
+export const ATTEMPT_TIMEOUT_MS = 13_000;
+/** Total time a request may spend across all models before the caller uses its scripted fallback (the client waits 45 s). */
+export const BUDGET_MS = 26_000;
+/**
+ * How long a model is skipped after a 429 or 503. Free-tier 429s mean the daily quota is gone; on Vertex AI
+ * they are short per-minute throttling, so a long cooldown would only push traffic onto slower models.
+ */
+export function cooldownMs(status: 429 | 503): number {
+  if (status === 503) return 30_000;
+  return process.env.GEMINI_USE_VERTEX === "true" ? 20_000 : 10 * 60_000;
+}
 
 export class GeminiError extends Error {}
 
@@ -82,8 +89,10 @@ function toJsonSchema(schema: z.ZodType): unknown {
 export async function generateJson<T>(schema: z.ZodType<T>, opts: GenerateOptions, now: () => number = Date.now): Promise<{ data: T; model: string }> {
   const ai = getClient();
   const deadline = now() + (opts.budgetMs ?? BUDGET_MS);
-  const available = models().filter((m) => (coolingUntil.get(m) ?? 0) <= now());
-  let lastError: unknown = new GeminiError("Every model is cooling down");
+  const ready = models().filter((m) => (coolingUntil.get(m) ?? 0) <= now());
+  // If every model is cooling down, try them anyway: a likely-throttled model beats a scripted reply.
+  const available = ready.length ? ready : models();
+  let lastError: unknown = new GeminiError("No Gemini model answered in time");
   for (const model of available) {
     const remaining = deadline - now();
     if (remaining < 2_000) break;
@@ -109,8 +118,7 @@ export async function generateJson<T>(schema: z.ZodType<T>, opts: GenerateOption
     } catch (err) {
       lastError = err;
       const status = statusOf(err);
-      if (status === 429) coolingUntil.set(model, now() + COOLDOWN_MS.quota);
-      if (status === 503) coolingUntil.set(model, now() + COOLDOWN_MS.overloaded);
+      if (status === 429 || status === 503) coolingUntil.set(model, now() + cooldownMs(status));
       log("WARNING", "gemini_attempt_failed", {
         model,
         ms: now() - started,

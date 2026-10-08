@@ -13,7 +13,7 @@ vi.mock("@google/genai", () => ({
   ThinkingLevel: { LOW: "LOW" },
 }));
 
-const { generateJson, GeminiError, models, resetCooldowns, DEFAULT_MODELS } = await import("@/lib/gemini");
+const { generateJson, GeminiError, models, resetCooldowns, cooldownMs, DEFAULT_MODELS } = await import("@/lib/gemini");
 
 const schema = z.object({ question: z.string() });
 const opts = { system: "s", prompt: "p", temperature: 0.5, maxTokens: 100 };
@@ -60,6 +60,24 @@ describe("generateJson", () => {
     expect(generateContent).toHaveBeenCalledTimes(1);
 
     t += 11 * 60_000;
+    await expect(generateJson(schema, opts, clock)).resolves.toMatchObject({ model: "primary" });
+  });
+
+  it("uses a short cooldown on Vertex AI, where 429s are per-minute throttling", async () => {
+    vi.stubEnv("GEMINI_USE_VERTEX", "true");
+    vi.stubEnv("GOOGLE_CLOUD_PROJECT", "p");
+    expect(cooldownMs(429)).toBe(20_000);
+    vi.stubEnv("GEMINI_USE_VERTEX", "");
+    expect(cooldownMs(429)).toBe(10 * 60_000);
+    expect(cooldownMs(503)).toBe(30_000);
+  });
+
+  it("still tries the models when every one is cooling down", async () => {
+    const clock = () => 0;
+    generateContent.mockRejectedValueOnce(apiError(429));
+    generateContent.mockRejectedValueOnce(apiError(429));
+    await expect(generateJson(schema, opts, clock)).rejects.toBeInstanceOf(GeminiError);
+    generateContent.mockResolvedValue({ text: '{"question":"back"}' });
     await expect(generateJson(schema, opts, clock)).resolves.toMatchObject({ model: "primary" });
   });
 
