@@ -365,7 +365,7 @@ function TankGame({ initial }: { initial: GameSession }) {
           </div>
         ) : null}
 
-        {s.stage === "debrief" && s.debrief ? <Debrief debrief={s.debrief} pitch={s.pitch} deal={s.deal} onPitchAgain={pitchAgain} /> : null}
+        {s.stage === "debrief" && s.debrief ? <Debrief debrief={s.debrief} pitch={s.pitch} deal={s.deal} offerCount={s.offers.length} onPitchAgain={pitchAgain} /> : null}
 
         {source === "fallback" ? (
           <p className="text-xs text-slate-400">The AI panel is busy, so the last reply came from scripted backup sharks.</p>

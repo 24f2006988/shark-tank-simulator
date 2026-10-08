@@ -4,6 +4,7 @@ import { formatInr } from "@/lib/game";
 import { SHARKS } from "@/lib/sharks";
 import type { Deal, Debrief as DebriefData, Pitch } from "@/lib/types";
 import { CopyButton } from "./CopyButton";
+import { ResultCard } from "./ResultCard";
 import { Scorecard } from "./Scorecard";
 import { SharkAvatar } from "./SharkCard";
 import { btn, card } from "./ui";
@@ -12,6 +13,8 @@ interface Props {
   debrief: DebriefData;
   pitch: Pitch;
   deal: Deal | null;
+  /** How many sharks made an offer, for the result card. */
+  offerCount?: number;
   onPitchAgain: () => void;
 }
 
@@ -38,7 +41,7 @@ function download(text: string, name: string) {
   URL.revokeObjectURL(url);
 }
 
-export function Debrief({ debrief: d, pitch, deal, onPitchAgain }: Props) {
+export function Debrief({ debrief: d, pitch, deal, offerCount = 0, onPitchAgain }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <section aria-labelledby="verdict-h" className={`${card} flex flex-col gap-4 p-6 sm:flex-row sm:items-center`}>
@@ -57,6 +60,8 @@ export function Debrief({ debrief: d, pitch, deal, onPitchAgain }: Props) {
           </p>
         </div>
       </section>
+
+      <ResultCard debrief={d} pitch={pitch} deal={deal} offerCount={offerCount} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section aria-labelledby="scores-h" className={`${card} p-6`}>

@@ -41,7 +41,7 @@ export function Shell({ crumbs, sidebar, status, actions, toolbar, wide = false,
         </Link>
         <div className="flex-1 overflow-y-auto px-2 pb-4">{sidebar}</div>
         <p className="border-t border-slate-800 px-4 py-3 text-xs leading-relaxed text-slate-400">
-          Built with the Gemini API on Google Cloud Run. The sharks are AI characters; their offers are practice, not investment advice.
+          Built with Gemini on Vertex AI · hosted on Google Cloud Run. The sharks are AI characters; their offers are practice, not investment advice.
         </p>
       </aside>
 
@@ -87,7 +87,7 @@ export function Shell({ crumbs, sidebar, status, actions, toolbar, wide = false,
         </main>
 
         <footer className="border-t border-slate-800 px-4 py-4 text-center text-xs text-slate-400 md:hidden">
-          Built with the Gemini API on Google Cloud Run. The sharks are AI characters; their offers are practice, not investment advice.
+          Built with Gemini on Vertex AI · hosted on Google Cloud Run. The sharks are AI characters; their offers are practice, not investment advice.
         </footer>
       </div>
     </div>
