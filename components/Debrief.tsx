@@ -8,6 +8,7 @@ import { ResultCard } from "./ResultCard";
 import { Scorecard } from "./Scorecard";
 import { SharkAvatar } from "./SharkCard";
 import { btn, card } from "./ui";
+import { TONE_CLASS, scoreBand } from "./verdict";
 
 interface Props {
   debrief: DebriefData;
@@ -41,19 +42,46 @@ function download(text: string, name: string) {
   URL.revokeObjectURL(url);
 }
 
+/** The overall score as a ring that fills to the score, coloured by its band. */
+function ScoreRing({ overall }: { overall: number }) {
+  const r = 42;
+  const length = 2 * Math.PI * r;
+  const tone = TONE_CLASS[scoreBand(overall).tone];
+  return (
+    <div className="relative grid size-32 shrink-0 place-items-center">
+      <svg aria-hidden="true" viewBox="0 0 100 100" className="absolute inset-0 -rotate-90">
+        <circle cx="50" cy="50" r={r} fill="none" strokeWidth="8" className="stroke-slate-800" />
+        <circle
+          cx="50"
+          cy="50"
+          r={r}
+          fill="none"
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeDasharray={length}
+          strokeDashoffset={length * (1 - Math.min(100, Math.max(0, overall)) / 100)}
+          className={`${tone.stroke} transition-[stroke-dashoffset] duration-700`}
+        />
+      </svg>
+      <p className={`font-display text-4xl font-extrabold ${tone.text}`}>
+        <span className="sr-only">Overall score: </span>
+        {overall}
+        <span className="text-base text-slate-400">/100</span>
+      </p>
+    </div>
+  );
+}
+
 export function Debrief({ debrief: d, pitch, deal, offerCount = 0, onPitchAgain }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <section aria-labelledby="verdict-h" className={`${card} flex flex-col gap-4 p-6 sm:flex-row sm:items-center`}>
-        <p className="font-display text-6xl font-extrabold text-accent">
-          <span className="sr-only">Overall score: </span>
-          {d.overall}
-          <span className="text-2xl text-slate-400">/100</span>
-        </p>
+        <ScoreRing overall={d.overall} />
         <div>
           <h2 id="verdict-h" className="font-display text-2xl font-semibold">
             The verdict
           </h2>
+          <p className={`mt-1 text-sm font-semibold tracking-wide uppercase ${TONE_CLASS[scoreBand(d.overall).tone].text}`}>{scoreBand(d.overall).label}</p>
           <p className="mt-1 text-lg text-slate-100">{d.verdict}</p>
           <p className="mt-2 text-slate-300">
             {deal ? `You closed with ${SHARKS[deal.sharkId].name}: ${formatInr(deal.amountLakh)} for ${deal.equityPct}%${deal.condition ? ` (${deal.condition})` : ""}.` : "You left the tank without a deal."}

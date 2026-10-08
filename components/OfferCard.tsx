@@ -8,6 +8,7 @@ import { SHARKS } from "@/lib/sharks";
 import type { Offer, Pitch, Terms } from "@/lib/types";
 import { SharkAvatar } from "./SharkCard";
 import { btn, card, field } from "./ui";
+import { TONE_CLASS, valuationGap } from "./verdict";
 
 interface Props {
   offer: Offer;
@@ -35,6 +36,7 @@ export function OfferCard({ offer, pitch, talk, busy, onAccept, onDecline, onCou
 
   const offerVal = impliedValuationLakh(offer.amountLakh, offer.equityPct);
   const askVal = impliedValuationLakh(pitch.askLakh, pitch.equityPct);
+  const gap = valuationGap(offerVal, askVal);
   const open = talk.status === "open";
   const canCounter = open && talk.counters < MAX_COUNTERS;
 
@@ -50,7 +52,8 @@ export function OfferCard({ offer, pitch, talk, busy, onAccept, onDecline, onCou
   };
 
   return (
-    <article aria-labelledby={`${id}-h`} className={`${card} flex flex-col gap-3 p-5 ${open ? "" : "opacity-75"}`}>
+    <article aria-labelledby={`${id}-h`} className={`${card} relative flex flex-col gap-3 overflow-hidden p-5 ${open ? "" : "opacity-75"}`}>
+      <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1 ${shark.color.bar}`} />
       <header className="flex items-center gap-3">
         <SharkAvatar shark={shark} mood={talk.status === "withdrawn" ? "cold" : talk.status === "declined" ? "doubtful" : "hooked"} />
         <div>
@@ -61,9 +64,12 @@ export function OfferCard({ offer, pitch, talk, busy, onAccept, onDecline, onCou
         </div>
       </header>
 
-      <p className="font-display text-2xl font-extrabold text-slate-50">
-        {formatInr(offer.amountLakh)} <span className="text-slate-300">for</span> {offer.equityPct}%
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-display text-2xl font-extrabold text-slate-50">
+          {formatInr(offer.amountLakh)} <span className="text-slate-300">for</span> {offer.equityPct}%
+        </p>
+        <p className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold ${TONE_CLASS[gap.tone].chip}`}>{gap.label}</p>
+      </div>
       <dl className="grid grid-cols-2 gap-2 text-sm">
         <div>
           <dt className="text-slate-400">Valuation implied</dt>

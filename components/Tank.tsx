@@ -243,6 +243,11 @@ function TankGame({ initial }: { initial: GameSession }) {
                 className={`rounded-md px-2.5 py-1 ${i === stepIndex ? "bg-accent/15 font-semibold text-accent-hover" : i < stepIndex ? "text-slate-200" : "text-slate-400"}`}
               >
                 <span className="sr-only">{i < stepIndex ? "Done: " : ""}</span>
+                {i < stepIndex ? (
+                  <span aria-hidden="true" className="mr-1 text-emerald-300">
+                    ✓
+                  </span>
+                ) : null}
                 {step.label}
               </li>
             ))}
@@ -266,8 +271,14 @@ function TankGame({ initial }: { initial: GameSession }) {
               {busy}
             </span>
           ) : s.stage === "questioning" ? (
-            <span className="text-slate-300">
+            <span className="flex items-center gap-3 text-slate-300">
               {s.over ? "Questions done" : `Question ${Math.min(answered.length + 1, rules.maxAnswers)} of ${rules.maxAnswers}`}
+              <span aria-hidden="true" className="h-1.5 w-32 overflow-hidden rounded-full bg-slate-800 sm:w-48">
+                <span
+                  className="block h-full rounded-full bg-accent transition-[width] duration-500"
+                  style={{ width: `${(s.over ? 1 : answered.length / rules.maxAnswers) * 100}%` }}
+                />
+              </span>
             </span>
           ) : null}
         </div>

@@ -122,6 +122,11 @@
   --spot: rgb(126 162 255 / 0.3);
 }
 
+html {
+  /* Anchor jumps land below the sticky top bar. */
+  scroll-padding-top: 4.5rem;
+}
+
 html,
 body {
   background-color: var(--color-slate-950);
@@ -186,6 +191,21 @@ body {
 /* The exclamation icon pops in over a shark's head. */
 .emote-pop {
   animation: emote-pop 0.35s steps(5, end) both;
+}
+
+/* Landing hero: a lit stage behind the headline. */
+.hero {
+  background:
+    radial-gradient(ellipse 60% 90% at 100% 0%, var(--spot), transparent 70%),
+    radial-gradient(ellipse 40% 60% at 0% 100%, var(--spot), transparent 70%),
+    var(--color-slate-900);
+}
+
+/* The tank set: a soft spotlight wash above the desk the panel sits behind. */
+.tank-set {
+  background:
+    radial-gradient(ellipse 70% 80% at 50% 0%, var(--spot), transparent 75%),
+    var(--color-slate-900);
 }
 
 /* Spotlight under the shark who is speaking. */

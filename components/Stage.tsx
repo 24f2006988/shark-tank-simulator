@@ -25,6 +25,11 @@ interface Props {
   customPanels?: Partial<Record<SharkId, SharkCustomization>>;
 }
 
+/** Horizontal centre of a shark's seat, as a percentage of the row, so the bubble's tail can point at them. */
+export function seatCentre(id: SharkId): number {
+  return ((SHARK_IDS.indexOf(id) + 0.5) / SHARK_IDS.length) * 100;
+}
+
 /** The panel seated in a row like the show, with a speech bubble pointing at whoever is talking. */
 export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSkip, customPanels }: Props) {
   const speaker = line?.sharkId ?? (thinking ? null : idle?.sharkId) ?? null;
@@ -37,7 +42,8 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
       <h2 id="stage-h" className="sr-only">
         The panel
       </h2>
-      <ul className="grid grid-cols-4 gap-1 sm:gap-4">
+      <div className="tank-set relative overflow-hidden rounded-2xl border border-slate-800 px-2 pt-4 pb-3 sm:px-5 sm:pt-6">
+      <ul className="relative grid grid-cols-4 gap-1 sm:gap-4">
         {SHARK_IDS.map((id) => {
           const shark = resolveShark(id, customPanels?.[id]);
           const state = sharks[id];
@@ -80,10 +86,21 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
           );
         })}
       </ul>
+        {/* The desk the panel sits behind. */}
+        <div aria-hidden="true" className="relative mt-3 h-2 rounded-full bg-slate-700" />
+      </div>
 
       <div className="relative">
+        {/* A tail on the bubble points up at the shark who is talking. */}
+        {barShark ? (
+          <span
+            aria-hidden="true"
+            className="absolute -top-1.5 z-10 size-3 -translate-x-1/2 rotate-45 border-t border-l border-slate-800 bg-[color-mix(in_oklab,var(--color-accent)_10%,var(--color-slate-950))] transition-[left] duration-500"
+            style={{ left: `${seatCentre(barShark)}%` }}
+          />
+        ) : null}
         {/* Hidden when nobody is speaking (e.g. on the offers stage once the announcements end). */}
-        <div className={`relative min-h-28 overflow-hidden rounded-md border border-slate-800 bg-accent/10 py-4 pr-5 pl-6 ${bubble || thinking ? "" : "hidden"}`}>
+        <div className={`relative min-h-28 overflow-hidden rounded-xl border border-slate-800 bg-accent/10 py-4 pr-5 pl-6 ${bubble || thinking ? "" : "hidden"}`}>
           {barShark ? <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1.5 ${SHARKS[barShark].color.bar}`} /> : null}
           {thinking && !line ? (
             <p className="flex items-center gap-3 text-slate-300">
