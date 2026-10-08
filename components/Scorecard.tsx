@@ -18,14 +18,14 @@ export function Scorecard({ scores }: { scores: Debrief["scores"] }) {
       {ROWS.map(({ key, label }) => {
         const v = Math.round(scores[key]);
         return (
-          <div key={key}>
-            <div className="flex justify-between text-sm">
-              <dt className="text-slate-200">{label}</dt>
-              <dd className="font-mono font-semibold">{v}/10</dd>
-            </div>
-            <div aria-hidden="true" className="mt-1 h-2 overflow-hidden rounded-full bg-slate-800">
-              <div className={`h-full rounded-full ${barColor(v)}`} style={{ width: `${v * 10}%` }} />
-            </div>
+          <div key={key} className="relative">
+            <dt className="text-sm text-slate-200">{label}</dt>
+            <dd>
+              <span className="absolute top-0 right-0 font-mono text-sm font-semibold">{v}/10</span>
+              <span aria-hidden="true" className="mt-1 block h-2 overflow-hidden rounded-full bg-slate-800">
+                <span className={`block h-full rounded-full ${barColor(v)}`} style={{ width: `${v * 10}%` }} />
+              </span>
+            </dd>
           </div>
         );
       })}

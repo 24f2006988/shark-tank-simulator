@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SHARK_IDS } from "@/lib/schemas";
+import { SHARK_IDS } from "@/lib/constants";
 import { DEMO_SCRIPTS, type DemoBeat, type DemoScript } from "@/lib/demoScript";
 import { SHARKS } from "@/lib/sharks";
 import { InterestMeter } from "./InterestMeter";

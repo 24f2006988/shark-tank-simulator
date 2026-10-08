@@ -3,8 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, useSyncExternalStore } from "react";
 import { DIFFICULTY, formatInr, impliedValuationLakh } from "@/lib/game";
-import { DIFFICULTIES, LIMITS, pitchSchema } from "@/lib/schemas";
-import { SHARK_IDS } from "@/lib/schemas";
+import { DIFFICULTIES, LIMITS, SHARK_IDS } from "@/lib/constants";
+import { pitchSchema } from "@/lib/schemas";
 import { SHARK_ARCHETYPES, resolveShark } from "@/lib/sharks";
 import { SAMPLE_PITCHES } from "@/lib/samples";
 import { clearPrefill, createSession, parsePrefill, readPrefillRaw, saveSession } from "@/lib/session";

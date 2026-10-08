@@ -1,6 +1,6 @@
 "use client";
 
-import { SHARK_IDS } from "@/lib/schemas";
+import { SHARK_IDS } from "@/lib/constants";
 import { DIMENSION_LABELS, SHARKS, resolveShark } from "@/lib/sharks";
 import type { SharkCustomization, SharkId, Sharks } from "@/lib/types";
 import { InterestMeter } from "./InterestMeter";

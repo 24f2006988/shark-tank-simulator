@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type KeyboardEvent, type RefObject } from "react";
-import { LIMITS } from "@/lib/schemas";
+import { LIMITS } from "@/lib/constants";
 import { MicButton } from "./MicButton";
 import { btn, field } from "./ui";
 

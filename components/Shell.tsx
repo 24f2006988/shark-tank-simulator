@@ -53,11 +53,11 @@ export function Shell({ crumbs, sidebar, status, actions, toolbar, wide = false,
               <span className="sr-only">Shark Tank Simulator home</span>
             </Link>
             <nav aria-label="Breadcrumb" className="min-w-0 flex-1">
-              <ol className="flex items-center gap-1.5 truncate text-sm text-slate-400">
+              <ol className="flex min-w-0 items-center gap-1.5 text-sm text-slate-400">
                 {crumbs.map((c, i) => {
                   const last = i === crumbs.length - 1;
                   return (
-                    <li key={c.label} className="flex min-w-0 items-center gap-1.5">
+                    <li key={c.label} className={`min-w-0 items-center gap-1.5 ${last ? "flex" : "hidden sm:flex"}`}>
                       {c.href && !last ? (
                         <Link href={c.href} className="hover:text-slate-100 hover:underline">
                           {c.label}
