@@ -296,13 +296,14 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
                       </span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-1.5 pt-1">
+                  <div role="group" aria-label={`${shark.name} personality`} className="grid grid-cols-3 gap-1.5 pt-1">
                     {archetypes.map((arch) => {
                       const active = selectedId === arch.id;
                       return (
                         <button
                           key={arch.id}
                           type="button"
+                          aria-pressed={active}
                           onClick={() => {
                             const next = { ...(values.customPanels ?? {}) };
                             next[id] = { archetypeId: arch.id };
