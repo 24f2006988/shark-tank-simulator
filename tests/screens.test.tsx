@@ -208,3 +208,13 @@ describe("Landing panel", () => {
     expect(card.textContent).toContain(SHARK_LIST[1].bio);
   });
 });
+
+describe("ChatLog structure", () => {
+  it("keeps the transcript a real list inside the live log region (WCAG 1.3.1)", () => {
+    render(<ChatLog turns={[makeTurn("vikram", "We make Rs 4 per cup.")]} walkouts={[]} />);
+    const log = screen.getByRole("log", { name: "Conversation with the panel" });
+    const list = within(log).getByRole("list");
+    expect(list.tagName).toBe("OL");
+    expect(within(list).getAllByRole("listitem").length).toBeGreaterThan(0);
+  });
+});
