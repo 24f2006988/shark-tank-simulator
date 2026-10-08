@@ -4,6 +4,18 @@
 > Read this first. Source of truth: `AGENTS.md`. `GEMINI.md` is a copy and `CLAUDE.md` imports it. Edit `AGENTS.md`, then re-copy to `GEMINI.md`.
 > Several AIs work in parallel here, so keep changes small, don't rewrite files you didn't create, and log what you did under "Progress log" below.
 
+## ⚠️ READ BEFORE EVERY CHANGE: build for the 7 scoring metrics
+An **AI evaluator** scores the repo + live app out of 100 on these 7 metrics. Every agent must maintain all of them on **every** change, not "later". Before you finish any task, check your change against this list:
+1. **Code Quality:** small typed modules with one job each, clear names, ESLint clean (`npm run lint`), no dead code, no `any`.
+2. **Security:** secrets only in server env vars (never in repo, image or client); validate and length-limit every request body; validate Gemini JSON before use; rate limit; no `dangerouslySetInnerHTML`.
+3. **Efficiency:** one Gemini call per turn; no new dependency without a clear need; no redundant fetches or re-renders.
+4. **Testing:** add or update **Vitest** tests in the same change as the code (`npm test` must pass).
+5. **Accessibility:** semantic HTML, labels/ARIA (`role="meter"`, `aria-live` for shark messages), full keyboard use, visible focus, WCAG AA contrast, `prefers-reduced-motion`.
+6. **Google Services:** prefer Google tech when there is a choice (Gemini API, Cloud Run, Secret Manager, Cloud Logging, Google Fonts, Cloud TTS) and list each in the README's "Google services used" section.
+7. **Problem Statement Alignment:** every required feature in `chosen problem statement.txt` works on the live app; keep the README's feature-to-code map up to date.
+
+If a change would hurt a metric, say so in your Progress log line. When handing work to another agent, **pass this list on**.
+
 Organized by the Dept. of Computer Science, Pondicherry University. Part of the hack2skill/Google PromptWars program.
 Event page: https://hack2skill.com/event/promptwars-x-the-prompt-arena-pu/?sectionid=6aa90a039d38ac1eb4ddb596
 
@@ -97,3 +109,14 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08, Claude Code: installed gcloud (%LOCALAPPDATA%\gcloud-cli), deployed hello-world to Cloud Run: https://shark-tank-simulator-888217860739.asia-south1.run.app. Redeploy: `gcloud run deploy shark-tank-simulator --source . --region asia-south1` (env vars persist).
 - 2026-10-08 11:10, Claude Code: added "Current state", "Next steps" and "Deploy how-to" to Project status (live site is a placeholder; no features yet).
 - 2026-10-08 11:35, Claude Code: rewrote `PLAN.md` as a detailed v2 spec (types and API contracts, game rules, prompts, a11y, security, tests, Google services, timeline from 11:30, work split). Model tests: use `gemini-3.5-flash` + fallback `gemini-3.5-flash-lite` (3.8-flash returned 503, 2.5-flash returns 404 for new users).
+- 2026-10-08, Claude Code: added "READ BEFORE EVERY CHANGE: build for the 7 scoring metrics" rule at the top of AGENTS.md (all agents must maintain it).
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
