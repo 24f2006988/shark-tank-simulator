@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from "react";
 import { ApiError, api } from "@/lib/api-client";
 import { DIFFICULTY, MIN_ANSWERS_BEFORE_OFFERS, activeSharks, formatInr } from "@/lib/game";
-import { answeredTurns, loadSession, saveSession, savePrefill, sessionReducer, type GameSession } from "@/lib/session";
+import { answeredTurns, loadSession, readSessionId, saveSession, savePrefill, sessionReducer, type GameSession } from "@/lib/session";
 import { SHARKS } from "@/lib/sharks";
 import type { SharkId, Source, Stage, Terms } from "@/lib/types";
 import { AnswerBox } from "./AnswerBox";
@@ -33,7 +33,15 @@ const NO_DELTAS: Partial<Record<SharkId, number>> = {};
 
 const errorText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Please try again.");
 
+const noop = () => () => {};
+
+/** The router keeps this page alive between visits, so a new pitch (new session id) remounts the game. */
 export default function Tank() {
+  const id = useSyncExternalStore(noop, readSessionId, () => null);
+  return <TankSession key={id ?? "none"} />;
+}
+
+function TankSession() {
   const [stored] = useState(loadSession);
   if (!stored) return <NoSession />;
   return <TankGame initial={stored} />;
@@ -71,7 +79,12 @@ function TankGame({ initial }: { initial: GameSession }) {
   const current = s.turns.at(-1);
   const awaitingAnswer = s.stage === "questioning" && !!current && !current.answer;
 
-  useEffect(() => saveSession(s), [s]);
+  // A newer pitch has replaced this game in storage (this page was hidden, not unmounted): stay quiet until remounted.
+  const replaced = () => readSessionId() !== s.id;
+
+  useEffect(() => {
+    if (readSessionId() === s.id) saveSession(s);
+  }, [s]);
 
   /** Runs one API call with a busy message and an error banner whose retry repeats the same task. */
   async function run(message: string, task: () => Promise<void>): Promise<boolean> {
@@ -97,7 +110,7 @@ function TankGame({ initial }: { initial: GameSession }) {
   const kicked = useRef<string | null>(null);
   useEffect(() => {
     const need = s.stage === "questioning" && s.turns.length === 0 ? "opening" : s.stage === "debrief" && !s.debrief ? "debrief" : null;
-    if (!need || kicked.current === need) return;
+    if (!need || kicked.current === need || replaced()) return;
     kicked.current = need;
     if (need === "opening") {
       // The panel greets while the first question is being written.

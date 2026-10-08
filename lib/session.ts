@@ -23,6 +23,8 @@ export interface Talk {
 }
 
 export interface GameSession {
+  /** New for every pitch, so a tank page kept alive by the router knows a different game has started. */
+  id: string;
   pitch: Pitch;
   sharks: Sharks;
   turns: Turn[];
@@ -52,6 +54,7 @@ const PREFILL_KEY = "shark-tank:prefill";
 
 export function createSession(pitch: Pitch): GameSession {
   return {
+    id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
     pitch,
     sharks: createSharks(pitch.difficulty),
     turns: [],
@@ -164,9 +167,11 @@ function write(key: string, value: unknown) {
 
 export const loadSession = () => {
   const s = read<GameSession>(STORAGE_KEY);
-  return s && s.pitch && s.sharks && Array.isArray(s.turns) ? s : null;
+  return s && typeof s.id === "string" && s.pitch && s.sharks && Array.isArray(s.turns) ? s : null;
 };
 export const saveSession = (session: GameSession) => write(STORAGE_KEY, session);
+/** Id of the stored game (a string, so it can be a useSyncExternalStore snapshot). */
+export const readSessionId = () => loadSession()?.id ?? null;
 
 /** "Pitch again" hands the improved pitch back to the landing form; it stays until the next pitch starts. */
 export const savePrefill = (pitch: Pitch) => write(PREFILL_KEY, pitch);

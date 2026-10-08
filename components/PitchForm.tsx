@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DIFFICULTY, formatInr, impliedValuationLakh } from "@/lib/game";
 import { DIFFICULTIES, LIMITS, SHARK_IDS } from "@/lib/constants";
 import { pitchSchema } from "@/lib/schemas";
@@ -60,6 +60,9 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState(prefill ? "Your improved pitch is loaded. Review it and step back into the tank." : "");
   const summaryRef = useRef<HTMLDivElement>(null);
+
+  // The router keeps this page alive (hidden) while the tank runs; re-enable the button for the next pitch.
+  useLayoutEffect(() => () => setSubmitting(false), []);
 
   const set = <K extends keyof Values>(key: K, value: Values[K]) => {
     setValues((v) => ({ ...v, [key]: value }));

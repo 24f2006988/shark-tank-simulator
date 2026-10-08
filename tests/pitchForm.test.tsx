@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { Activity } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PitchForm } from "@/components/PitchForm";
 import { loadSession } from "@/lib/session";
@@ -55,6 +56,22 @@ describe("PitchForm validation and submit", () => {
     expect(push).toHaveBeenCalledWith("/tank");
     expect(loadSession()?.pitch).toMatchObject({ ideaName: "ChaiCart", askLakh: 50, equityPct: 10, difficulty: "ruthless" });
     expect(screen.getByRole("button", { name: "Opening the tank…" }).hasAttribute("disabled")).toBe(true);
+  });
+
+  it("is ready for a new pitch when the router shows the kept-alive page again", async () => {
+    const page = (mode: "visible" | "hidden") => (
+      <Activity mode={mode}>
+        <PitchForm />
+      </Activity>
+    );
+    const { rerender } = render(page("visible"));
+    fireEvent.click(within(screen.getByRole("group", { name: "Try a sample pitch" })).getByRole("button", { name: "Strong pitch" }));
+    fireEvent.click(screen.getByRole("button", { name: "Pitch to the sharks" }));
+    expect(screen.getByRole("button", { name: "Opening the tank…" })).toBeTruthy();
+
+    rerender(page("hidden"));
+    rerender(page("visible"));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Pitch to the sharks" }).hasAttribute("disabled")).toBe(false));
   });
 
   it("loads a sample pitch and announces it", () => {
