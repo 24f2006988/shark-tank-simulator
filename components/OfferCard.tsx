@@ -52,7 +52,7 @@ export function OfferCard({ offer, pitch, talk, busy, onAccept, onDecline, onCou
   return (
     <article aria-labelledby={`${id}-h`} className={`${card} flex flex-col gap-3 p-5 ${open ? "" : "opacity-75"}`}>
       <header className="flex items-center gap-3">
-        <SharkAvatar shark={shark} />
+        <SharkAvatar shark={shark} mood={talk.status === "withdrawn" ? "cold" : talk.status === "declined" ? "doubtful" : "hooked"} />
         <div>
           <h3 id={`${id}-h`} className="font-display text-lg font-semibold">
             {shark.name}

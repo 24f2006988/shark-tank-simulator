@@ -7,12 +7,13 @@ import { ApiError, api } from "@/lib/api-client";
 import { DIFFICULTY, MIN_ANSWERS_BEFORE_OFFERS, formatInr } from "@/lib/game";
 import { answeredTurns, loadSession, saveSession, savePrefill, sessionReducer, type GameSession } from "@/lib/session";
 import { SHARKS } from "@/lib/sharks";
-import type { SharkId, Source, Stage, Terms } from "@/lib/types";
+import type { OffersResult, Question, SharkId, Source, Stage, Terms, TurnResult } from "@/lib/types";
 import { AnswerBox } from "./AnswerBox";
 import { ChatLog } from "./ChatLog";
 import { Debrief } from "./Debrief";
 import { OfferCard } from "./OfferCard";
-import { SharkPanel } from "./SharkPanel";
+import { Stage as PanelStage } from "./Stage";
+import { canSpeak, useScript, type LineInput } from "./useScript";
 import { btn, card } from "./ui";
 
 const STEPS: { stage: Stage | "pitch"; label: string }[] = [
@@ -23,6 +24,46 @@ const STEPS: { stage: Stage | "pitch"; label: string }[] = [
 ];
 
 const errorText = (e: unknown) => (e instanceof ApiError ? e.message : "Something went wrong. Please try again.");
+
+const questionLine = (q: Question): LineInput => ({
+  sharkId: q.sharkId,
+  text: q.question,
+  kind: "question",
+  followUp: q.isFollowUp,
+  probing: q.probing,
+});
+
+/**
+ * After an answer the panel performs in order: the asker reacts, the most moved other shark chips in,
+ * anyone leaving says why, then the next question. Short and sequential, so nothing floods the screen.
+ */
+export function reactionScript(result: TurnResult, askerId: SharkId): LineInput[] {
+  const reactions = result.evaluation?.reactions ?? [];
+  const walkouts = result.evaluation?.walkouts ?? [];
+  const leaving = new Set(walkouts.map((w) => w.sharkId));
+  const lines: LineInput[] = [];
+  const asker = reactions.find((r) => r.sharkId === askerId);
+  if (asker?.line && !leaving.has(askerId)) lines.push({ sharkId: askerId, text: asker.line, kind: "reaction" });
+  const loudest = reactions
+    .filter((r) => r.sharkId !== askerId && r.line && !leaving.has(r.sharkId) && Math.abs(r.delta) >= 8)
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))[0];
+  if (loudest) lines.push({ sharkId: loudest.sharkId, text: loudest.line, kind: "reaction" });
+  for (const w of walkouts) lines.push({ sharkId: w.sharkId, text: w.reason, kind: "out" });
+  if (result.next) lines.push(questionLine(result.next));
+  return lines;
+}
+
+/** Each offer is announced by its shark; sharks who were still in but pass say why. */
+export function offerScript(result: OffersResult, sharks: GameSession["sharks"]): LineInput[] {
+  return [
+    ...result.offers.map(
+      (o): LineInput => ({ sharkId: o.sharkId, text: `${o.line} ${formatInr(o.amountLakh)} for ${o.equityPct} percent.`.trim(), kind: "offer" }),
+    ),
+    ...result.outs
+      .filter((o) => sharks[o.sharkId].status === "in")
+      .map((o): LineInput => ({ sharkId: o.sharkId, text: o.reason, kind: "out" })),
+  ];
+}
 
 export default function Tank() {
   const [stored] = useState(loadSession);
@@ -46,10 +87,11 @@ function TankGame({ initial }: { initial: GameSession }) {
   const router = useRouter();
   const [s, dispatch] = useReducer(sessionReducer, initial);
   const [busy, setBusy] = useState<string | null>(null);
+  const [thinking, setThinking] = useState<SharkId | null>(null);
   const [error, setError] = useState<{ message: string; retry: () => void } | null>(null);
-  const [pending, setPending] = useState<string | null>(null);
   const [source, setSource] = useState<Source | null>(null);
-  const [speak, setSpeak] = useState(false);
+  const [voiceOn, setVoiceOn] = useState(true);
+  const script = useScript(voiceOn);
   const answerRef = useRef<HTMLTextAreaElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const inFlight = useRef(false);
@@ -58,7 +100,6 @@ function TankGame({ initial }: { initial: GameSession }) {
   const answered = answeredTurns(s.turns);
   const current = s.turns.at(-1);
   const awaitingAnswer = s.stage === "questioning" && !!current && !current.answer;
-  const asking = awaitingAnswer ? current.sharkId : null;
 
   useEffect(() => saveSession(s), [s]);
 
@@ -77,6 +118,7 @@ function TankGame({ initial }: { initial: GameSession }) {
     } finally {
       inFlight.current = false;
       setBusy(null);
+      setThinking(null);
     }
   }
 
@@ -91,7 +133,9 @@ function TankGame({ initial }: { initial: GameSession }) {
       void run("The panel is reading your pitch…", async () => {
         const res = await api.turn({ pitch: s.pitch, sharks: s.sharks, turns: [] });
         setSource(res.source);
-        if (res.data.next) dispatch({ type: "question", next: res.data.next });
+        if (!res.data.next) return;
+        dispatch({ type: "question", next: res.data.next });
+        script.play([questionLine(res.data.next)]);
       });
     } else {
       void run("Writing your feedback and a stronger pitch…", async () => {
@@ -102,18 +146,10 @@ function TankGame({ initial }: { initial: GameSession }) {
     }
   });
 
-  // New question: move focus to the answer box and optionally read it aloud.
-  const questionCount = s.turns.length;
+  // Once the panel has finished speaking, hand the floor to the founder.
   useEffect(() => {
-    if (!awaitingAnswer || !current) return;
-    answerRef.current?.focus();
-    if (speak && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(new SpeechSynthesisUtterance(`${SHARKS[current.sharkId].name} asks: ${current.question}`));
-    }
-    // Only react to a new question arriving.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionCount, awaitingAnswer]);
+    if (awaitingAnswer && !script.playing) answerRef.current?.focus();
+  }, [awaitingAnswer, script.playing]);
 
   // Stage change: focus the stage heading so screen readers announce where we are.
   useEffect(() => {
@@ -121,43 +157,41 @@ function TankGame({ initial }: { initial: GameSession }) {
   }, [s.stage]);
 
   const submitAnswer = async (answer: string) => {
-    setPending(answer);
+    if (!current) return false;
+    script.skip();
+    setThinking(current.sharkId);
     const turns = s.turns.map((t, i) => (i === s.turns.length - 1 ? { ...t, answer } : t));
-    const ok = await run(
-      `${SHARKS[current!.sharkId].name.split(" ")[0]} is weighing your answer…`,
-      async () => {
-        const res = await api.turn({ pitch: s.pitch, sharks: s.sharks, turns });
-        setSource(res.source);
-        dispatch({ type: "answered", answer, result: res.data });
-      },
-    );
-    setPending(null);
-    return ok;
+    return run(`${SHARKS[current.sharkId].name.split(" ")[0]} is weighing your answer…`, async () => {
+      const res = await api.turn({ pitch: s.pitch, sharks: s.sharks, turns });
+      setSource(res.source);
+      dispatch({ type: "answered", answer, result: res.data });
+      script.play(reactionScript(res.data, current.sharkId));
+    });
   };
 
   const goToOffers = () => {
-    void run(
-      "The sharks are deciding whether to make offers…",
-      async () => {
-        const res = await api.offers({ pitch: s.pitch, sharks: s.sharks, turns: answeredTurns(s.turns) });
-        setSource(res.source);
-        dispatch({ type: "offers", result: res.data });
-      },
-    );
+    script.skip();
+    void run("The sharks are deciding whether to make offers…", async () => {
+      const res = await api.offers({ pitch: s.pitch, sharks: s.sharks, turns: answeredTurns(s.turns) });
+      setSource(res.source);
+      dispatch({ type: "offers", result: res.data });
+      script.play(offerScript(res.data, s.sharks));
+    });
   };
 
   const counter = async (sharkId: SharkId, terms: Terms) => {
     const offer = s.offers.find((o) => o.sharkId === sharkId);
     const talk = s.talks[sharkId];
     if (!offer || !talk) return;
-    await run(
-      `${SHARKS[sharkId].name.split(" ")[0]} is considering your counter…`,
-      async () => {
-        const res = await api.negotiate({ pitch: s.pitch, offer, counter: terms, counters: talk.counters });
-        setSource(res.source);
-        dispatch({ type: "countered", sharkId, counter: terms, result: res.data });
-      },
-    );
+    script.skip();
+    setThinking(sharkId);
+    await run(`${SHARKS[sharkId].name.split(" ")[0]} is considering your counter…`, async () => {
+      const res = await api.negotiate({ pitch: s.pitch, offer, counter: terms, counters: talk.counters });
+      setSource(res.source);
+      dispatch({ type: "countered", sharkId, counter: terms, result: res.data });
+      const proposal = res.data.response === "counter" ? ` ${formatInr(res.data.amountLakh)} for ${res.data.equityPct} percent.` : "";
+      script.play([{ sharkId, text: `${res.data.line}${proposal}`, kind: res.data.response === "walk" ? "out" : "offer" }]);
+    });
   };
 
   const pitchAgain = () => {
@@ -167,8 +201,21 @@ function TankGame({ initial }: { initial: GameSession }) {
   };
 
   const lastReactions = answered.at(-1)?.reactions ?? [];
+  const deltas = Object.fromEntries(lastReactions.map((r) => [r.sharkId, r.delta]));
   const openOffers = s.offers.filter((o) => s.talks[o.sharkId]?.status === "open");
   const stepIndex = STEPS.findIndex((x) => x.stage === s.stage);
+  const stage = (
+    <PanelStage
+      sharks={s.sharks}
+      line={script.current}
+      shown={script.shown}
+      idle={awaitingAnswer ? questionLine(current) : null}
+      thinking={thinking}
+      deltas={s.stage === "questioning" ? deltas : {}}
+      round={answered.length}
+      onSkip={script.skip}
+    />
+  );
 
   return (
     <>
@@ -194,7 +241,7 @@ function TankGame({ initial }: { initial: GameSession }) {
         </div>
       </header>
 
-      <main id="main" className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-6 px-4 py-6">
+      <main id="main" className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-5 px-4 py-6">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 ref={headingRef} tabIndex={-1} className="font-display text-2xl font-extrabold sm:text-3xl">
             {s.stage === "questioning" ? `Pitching ${s.pitch.ideaName}` : s.stage === "deal" ? "The offers" : "Your debrief"}
@@ -204,13 +251,20 @@ function TankGame({ initial }: { initial: GameSession }) {
           </p>
         </div>
 
-        <div role="status" aria-live="polite" className="min-h-6 text-amber-200">
-          {busy ? (
-            <span className="inline-flex items-center gap-2">
-              <span aria-hidden="true" className="size-2 animate-pulse rounded-full bg-amber-300" />
-              {busy}
-            </span>
-          ) : null}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div role="status" aria-live="polite" className="min-h-6 text-amber-200">
+            {busy ? (
+              <span className="inline-flex items-center gap-2">
+                <span aria-hidden="true" className="size-2 animate-pulse rounded-full bg-amber-300" />
+                {busy}
+              </span>
+            ) : s.stage === "questioning" ? (
+              <span className="text-slate-300">
+                {s.over ? "Questions done" : `Question ${Math.min(answered.length + 1, rules.maxAnswers)} of ${rules.maxAnswers}`}
+              </span>
+            ) : null}
+          </div>
+          {s.stage !== "debrief" ? <VoiceToggle on={voiceOn} onChange={setVoiceOn} /> : null}
         </div>
 
         {error ? (
@@ -223,61 +277,59 @@ function TankGame({ initial }: { initial: GameSession }) {
         ) : null}
 
         {s.stage === "questioning" ? (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-            <div className="lg:sticky lg:top-4 lg:self-start">
-              <SharkPanel sharks={s.sharks} asking={asking} lastReactions={lastReactions} />
-            </div>
+          <div className="flex flex-col gap-5">
+            {stage}
 
-            <section aria-labelledby="qa-h" className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 id="qa-h" className="font-display text-xl font-semibold">
-                  {s.over ? "Questions done" : `Question ${Math.min(answered.length + 1, rules.maxAnswers)} of ${rules.maxAnswers}`}
-                </h2>
-                <SpeakToggle on={speak} onChange={setSpeak} />
+            {s.over && !script.playing ? (
+              <div className={`${card} flex flex-col gap-3 p-5`}>
+                <p className="font-semibold">The panel has heard enough. Time to see who wants in.</p>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={goToOffers} disabled={!!busy} className={btn.primary}>
+                    Hear the offers
+                  </button>
+                </div>
               </div>
+            ) : awaitingAnswer ? (
+              <AnswerBox sharkName={SHARKS[current.sharkId].name} busy={!!busy} onSubmit={submitAnswer} inputRef={answerRef} />
+            ) : null}
 
-              <ChatLog turns={s.turns} walkouts={s.walkouts} pendingAnswer={pending} />
+            {!s.over ? (
+              <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-4">
+                <button
+                  type="button"
+                  onClick={goToOffers}
+                  disabled={!!busy || answered.length < MIN_ANSWERS_BEFORE_OFFERS}
+                  aria-describedby="offers-hint"
+                  className={btn.secondary}
+                >
+                  Go to offers
+                </button>
+                <button type="button" onClick={() => dispatch({ type: "toDebrief" })} disabled={!!busy || answered.length < 1} className={btn.ghost}>
+                  End and get feedback
+                </button>
+                <p id="offers-hint" className="w-full text-sm text-slate-400">
+                  {answered.length < MIN_ANSWERS_BEFORE_OFFERS
+                    ? `Offers open after ${MIN_ANSWERS_BEFORE_OFFERS} answers (${answered.length} so far).`
+                    : "You can ask for offers now, or keep answering to win more sharks over."}
+                </p>
+              </div>
+            ) : null}
 
-              {s.over ? (
-                <div className={`${card} flex flex-col gap-3 p-5`}>
-                  <p className="font-semibold">The panel has heard enough. Time to see who wants in.</p>
-                  <div className="flex flex-wrap gap-2">
-                    <button type="button" onClick={goToOffers} disabled={!!busy} className={btn.primary}>
-                      Hear the offers
-                    </button>
-                  </div>
+            {answered.length > 0 ? (
+              <details className={`${card} p-4`}>
+                <summary className="min-h-6 cursor-pointer font-semibold text-slate-200">Transcript ({answered.length} answered)</summary>
+                <div className="mt-4">
+                  <ChatLog turns={s.turns} walkouts={s.walkouts} />
                 </div>
-              ) : awaitingAnswer ? (
-                <AnswerBox sharkName={SHARKS[current.sharkId].name} busy={!!busy} onSubmit={submitAnswer} inputRef={answerRef} />
-              ) : null}
-
-              {!s.over ? (
-                <div className="flex flex-wrap gap-2 border-t border-slate-800 pt-4">
-                  <button
-                    type="button"
-                    onClick={goToOffers}
-                    disabled={!!busy || answered.length < MIN_ANSWERS_BEFORE_OFFERS}
-                    aria-describedby="offers-hint"
-                    className={btn.secondary}
-                  >
-                    Go to offers
-                  </button>
-                  <button type="button" onClick={() => dispatch({ type: "toDebrief" })} disabled={!!busy || answered.length < 1} className={btn.ghost}>
-                    End and get feedback
-                  </button>
-                  <p id="offers-hint" className="w-full text-sm text-slate-400">
-                    {answered.length < MIN_ANSWERS_BEFORE_OFFERS
-                      ? `Offers open after ${MIN_ANSWERS_BEFORE_OFFERS} answers (${answered.length} so far).`
-                      : "You can ask for offers now, or keep answering to win more sharks over."}
-                  </p>
-                </div>
-              ) : null}
-            </section>
+              </details>
+            ) : null}
           </div>
         ) : null}
 
         {s.stage === "deal" ? (
           <div className="flex flex-col gap-6">
+            {stage}
+
             {s.offers.length > 0 ? (
               <section aria-labelledby="offers-h">
                 <h2 id="offers-h" className="sr-only">
@@ -303,21 +355,6 @@ function TankGame({ initial }: { initial: GameSession }) {
               <p className={`${card} p-5 text-lg`}>No shark made an offer this time. The feedback will show you exactly why.</p>
             )}
 
-            {s.outs.length > 0 ? (
-              <section aria-labelledby="outs-h" className={`${card} p-5`}>
-                <h2 id="outs-h" className="font-display text-lg font-semibold">
-                  Out of the deal
-                </h2>
-                <ul className="mt-2 flex flex-col gap-2">
-                  {s.outs.map((o) => (
-                    <li key={o.sharkId}>
-                      <span className={`font-semibold ${SHARKS[o.sharkId].color.text}`}>{SHARKS[o.sharkId].name}:</span> “{o.reason}”
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-
             <div>
               <button type="button" onClick={() => dispatch({ type: "toDebrief" })} disabled={!!busy} className={openOffers.length ? btn.secondary : btn.primary}>
                 {openOffers.length ? "Walk away with no deal" : "Get my feedback"}
@@ -336,20 +373,15 @@ function TankGame({ initial }: { initial: GameSession }) {
   );
 }
 
-function SpeakToggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
-  const supported = typeof window !== "undefined" && "speechSynthesis" in window;
-  if (!supported) return null;
+function VoiceToggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+  if (!canSpeak()) return null;
   return (
-    <button
-      type="button"
-      aria-pressed={on}
-      onClick={() => {
-        if (on) window.speechSynthesis.cancel();
-        onChange(!on);
-      }}
-      className={btn.ghost}
-    >
-      {on ? "Read questions aloud: on" : "Read questions aloud: off"}
+    <button type="button" aria-pressed={on} onClick={() => onChange(!on)} className={btn.ghost}>
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M11 5 6 9H3v6h3l5 4V5Z" />
+        {on ? <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /> : <path d="m16 9 6 6M22 9l-6 6" />}
+      </svg>
+      {on ? "Voices on" : "Voices off"}
     </button>
   );
 }
