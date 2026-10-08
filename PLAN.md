@@ -13,9 +13,10 @@ Pitch your idea to a panel of 4 AI sharks. They grill you round by round, their 
 | AI | **Gemini API** via `@google/genai` (installed), model from env `GEMINI_MODEL` (default: a current Flash model) | Free tier, fast, JSON-schema output |
 | Voice (extra) | Browser `SpeechRecognition` + `speechSynthesis` | Free, no extra API |
 | State | Client-side (React state + `localStorage` for the session) | No database needed; the server is stateless |
-| Hosting | **Vercel** (Hobby, free) | User has an account; `vercel` CLI installed |
+| Hosting | **Google Cloud Run ONLY** (organizers' rule; Vercel not accepted). Next.js `output: "standalone"` + Dockerfile, `gcloud run deploy --source .` | Required |
+| Tests | **Vitest** for `lib/` (prompts, scoring, validation, fallback) and API input validation | Testing is a scored parameter |
 
-Secret: `GEMINI_API_KEY` only, in Vercel env vars and the git-ignored `.env.local`. `.env.example` lists the names.
+Secret: `GEMINI_API_KEY` only, in Cloud Run env vars (`--set-env-vars` or Secret Manager) and the git-ignored `.env.local`. Never baked into the Docker image. `.env.example` lists the names.
 
 ## 3. The panel (personas)
 | Shark | Cares about | Typical hard question |
@@ -86,7 +87,7 @@ components/  SharkPanel, InterestMeter, ChatLog, AnswerBox, MicButton, OfferCard
 ## 8. Timeline
 | Time | Milestone | Done when |
 |---|---|---|
-| 10:30-11:00 | Clean scaffold, `.env.example`, git init, push to GitHub, **deploy hello-world to Vercel** | Live URL opens |
+| 10:30-11:00 | Clean scaffold, `.env.example`, git init, push to GitHub, **deploy hello-world to Cloud Run** (install gcloud, GCP project with billing/free trial) | Live URL opens |
 | 11:00-12:15 | `lib/sharks.ts`, `lib/gemini.ts`, `lib/prompts.ts`, `/api/turn` | Curl a pitch + answer, get a good question and deltas |
 | 12:15-13:30 | Landing + Tank page (panel, meters, chat, answer box). **Redeploy** | A full questioning session works live: **all REQUIRED except debrief** |
 | 13:30-14:00 | Lunch / buffer | |
@@ -95,7 +96,7 @@ components/  SharkPanel, InterestMeter, ChatLog, AnswerBox, MicButton, OfferCard
 | 16:15-16:45 | Voice in/out, difficulty | |
 | 16:45-17:15 | Polish, mobile, fallback paths, rate limit, error states | |
 | 17:15-17:45 | README with live link, repo size check, incognito full demo, `SUBMISSION CHECKLIST.txt` | All boxes ticked |
-| 17:45 | Submit (only 2 attempts in total) | |
+| 17:45-18:00 | Submit (only 2 attempts in total; window 18:00-18:30, hard deadline 18:30) | |
 
 If behind at 15:00: drop voice first, then negotiation (keep plain offers), then walkouts.
 
@@ -110,3 +111,13 @@ Agree on `lib/types.ts` first, then each works in its own files.
 2. Sharks ask; the judge answers one vaguely and watches the interest meter drop and a follow-up land.
 3. Offers come in; counter one live.
 4. Debrief shows the rewritten pitch: "this is what you should have said."
+
+## 11. Scoring rubric (from the briefing deck) and how we hit it
+| Parameter | What we do |
+|---|---|
+| Code Quality | Small typed modules in `lib/`, one job each, ESLint clean, no dead code |
+| Security | Key server-side only (Cloud Run env); validate and length-limit every request body; validate Gemini JSON before use; per-IP rate limit; no `dangerouslySetInnerHTML` |
+| Efficiency | One Gemini call per turn; no heavy UI/chart libraries (CSS bars); minimal deps |
+| Testing | Vitest unit tests for sharks, prompts, validation, scoring, fallback; route tests with mocked Gemini; `npm test` in README |
+| Accessibility | Semantic landmarks and labels, ARIA live region for shark messages, labelled meters (`role="meter"`, `aria-valuenow`), full keyboard flow, visible focus, WCAG AA contrast, reduced-motion support |
+| Problem Alignment | Every required feature visible in the demo; README and LinkedIn post map features to the statement (panel, hard questions, better pitch) |

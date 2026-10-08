@@ -1,6 +1,6 @@
 SUBMISSION CHECKLIST (only 2 attempts total, submit ONCE, complete)
 ==================================================================
-Do NOT submit until every box is ticked. Attempt 2 is an emergency reserve only.
+Do NOT submit until every box is ticked. Only the LATEST score counts: use attempt 2 only to fix weak parameters named in attempt 1's feedback.
 
 A. REQUIRED FEATURES (test on the LIVE URL, in an incognito window)
 [ ] Founder can enter a pitch (idea, ask, description)
@@ -12,7 +12,8 @@ A. REQUIRED FEATURES (test on the LIVE URL, in an incognito window)
 [ ] Session still completes if Gemini errors or rate-limits (fallback path)
 [ ] Works on a phone-sized screen
 
-B. DEPLOYMENT
+B. DEPLOYMENT (Cloud Run ONLY)
+[ ] Live URL is a Google Cloud Run URL (*.run.app), not Vercel or any other host
 [ ] Live URL opens in a fresh incognito window, with no login needed
 [ ] No errors in the browser console during the full demo
 [ ] Gemini API key set as server environment variables, and the app works with them
@@ -21,14 +22,20 @@ B. DEPLOYMENT
 C. GITHUB REPO
 [ ] `sh scripts/check-repo-size.sh` passes (under 8 MB, hard cap 10 MB, history included)
 [ ] Repo is PUBLIC and opens in an incognito window
+[ ] Repo has EXACTLY ONE branch (`git ls-remote --heads origin` shows only main)
+[ ] Tests exist and pass (`npm test`); lint passes (`npm run lint`)
+[ ] Accessibility pass: keyboard-only full demo, labels/ARIA present, contrast OK (Lighthouse a11y)
 [ ] No secrets in the repo (search for "key", "token", ".env")
 [ ] README has: project name, one-line description, LIVE LINK, how to run, tech used
 [ ] Latest code is pushed (`git status` clean, `git log origin/main` matches local)
 
 D. SUBMISSION FORM
 [ ] Deployed URL copied exactly and opened once from the copied text
-[ ] GitHub URL copied exactly and opened once from the copied text
-[ ] Submitting 30+ minutes before the deadline
+[ ] GitHub URL ends in .git (https://github.com/24f2006988/shark-tank-simulator.git)
+[ ] LinkedIn post published: names "Shark Tank Simulator", explains how the app solves it, links app + repo; post URL copied
+[ ] All 3 fields filled (GitHub .git, Cloud Run URL, LinkedIn post); one missing/incorrect field invalidates the entry
+[ ] Logged in to the Innovator Dashboard with the registration email; Submissions tab shows ONGOING
+[ ] Submitting by 17:45-18:00 (hard deadline 18:30, no extension); all 3 links submitted
 [ ] Attempt logged in AGENTS.md Progress log (time, URLs, commit hash)
 
 E. AFTER SUBMITTING

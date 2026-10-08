@@ -47,3 +47,7 @@ coverage/
 # Next.js / TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Event docs (keep out of the repo)
+*.pptx
+~$*

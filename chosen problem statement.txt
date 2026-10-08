@@ -39,5 +39,5 @@ PLANNED EXTRAS (for jury impact, only after the required features work)
 Demo plan: a judge pitches their own idea live and faces the panel.
 
 Notes:
-- Only the Gemini API is needed (free tier from aistudio.google.com/apikey); key in Vercel env vars.
-- Hosting: Vercel (user has an account).
+- Only the Gemini API is needed (free tier from aistudio.google.com/apikey); key in Cloud Run env vars.
+- Hosting: Google Cloud Run ONLY (organizers' rule; Vercel not accepted).

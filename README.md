@@ -12,6 +12,6 @@ npm run dev
 ```
 
 ## Stack
-Next.js 16, TypeScript, Tailwind CSS, Gemini API, Vercel.
+Next.js 16, TypeScript, Tailwind CSS, Gemini API, Google Cloud Run.
 
 Built at PromptWars (8-Hour Build With AI Hackathon, Pondicherry University).

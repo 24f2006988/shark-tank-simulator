@@ -7,34 +7,45 @@
 Organized by the Dept. of Computer Science, Pondicherry University. Part of the hack2skill/Google PromptWars program.
 Event page: https://hack2skill.com/event/promptwars-x-the-prompt-arena-pu/?sectionid=6aa90a039d38ac1eb4ddb596
 
-## Schedule
-- **Date:** 8 October 2026. Reporting at 9:00 AM sharp. Venue: Ground Floor Lab, Dept. of Computer Science.
-- 09:00-09:30: reporting and check-in.
-- 09:30-10:00: briefing, submission-website walkthrough and problem-statement reveal (Room 104, New Building).
-- From about 10:00: build time (8 hours in total). The organizers' announcement was cut off after this point, so the exact submission deadline and finale time are unknown.
-- Organizers emailed a detailed walkthrough covering the schedule, submission timings, guidelines, certificate eligibility and the finale / Top 10 selection.
+## Schedule (source: organizers' email "Final Info: Build With AI Hackathon", 7 Oct 2026)
+- **8 Oct 2026 (build day).** Reporting 9:00 AM sharp, Ground Floor Lab, Dept. of Computer Science.
+- 09:00-09:15: reporting and check-in. 09:15-10:00: briefing, submission-website walkthrough, problem-statement reveal (Room 104, New Building).
+- **10:00-18:00: 8-hour build sprint** (Ground and Second Floor labs).
+- **18:00-18:30: FINAL SUBMISSION window. Hard deadline 18:30, no extension.** Our target: submit by 17:45-18:00.
+- **8 Oct by midnight:** Top 10 finalists announced by email and on the submission portal.
+- **9 Oct (finale day), Top 10 only:** PPT presentation + final evaluation + winner announcement. Venue/time sent to finalists on the night of 8 Oct. Prize pool Rs 15,000.
 
 ## Rules and deliverables
-- Any AI agent may be used.
-- The solution must **implement every feature asked in the problem statement**.
-- Submit a **working cloud (deployed) link** and a **GitHub link** through the organizers' submission website. **Only 2 submission attempts in total** (see HARD LIMITS rule 4).
-- The Top 10 go to a finale (pitch).
+Sources: organizers' email (7 Oct) and the official deck `Prompt_Arena_Participant_Briefing.pdf` (repo root, git-ignored). The deck wins where they differ.
+- Any AI agent may be used. Log in to the hack2skill **Innovator Dashboard** with the registration email (hrisitroy4@gmail.com); submit in its **Submissions** tab when it shows ONGOING ("Submission Attempts: 0/2").
+- **Submission = 3 links, all required. One missing or incorrect field invalidates the entry:**
+  1. **GitHub repo**: public, link must END IN `.git` (`https://github.com/24f2006988/shark-tank-simulator.git`).
+  2. **Cloud Run URL**: the deployed app, **hosted on Google Cloud Run ONLY. No other host (Vercel, Netlify, Firebase Hosting...) is accepted.**
+  3. **LinkedIn post**: short, clear post about what was built; must NAME the problem statement (Shark Tank Simulator) and show how the app addresses it. Vague posts hurt the alignment score.
+- **Scoring (automated, score shown instantly after submitting):** Code Quality (clean, readable, structured) | Security (no leaked keys, validate inputs and external data) | Efficiency (no redundant work, no bloated deps) | **Testing (unit/integration tests showing coverage)** | **Accessibility (semantic HTML, ARIA labels, keyboard use, contrast)** | Problem Alignment (solves the stated challenge, not just impressive tech).
+- **Only the LATEST score counts**, not the best (90 then 60 = 60 on the leaderboard). The leaderboard updates live.
+- Only 2 submission attempts in total, no appeals (see HARD LIMITS rule 4).
+- The solution must **implement every feature asked in the problem statement**. Certificate needs at least **80% of problem-statement features**; aim for 100%.
+- **Participation certificate only if all three:** checked in before 09:30 AM on 8 Oct; BOTH links submitted before 18:30; at least 80% of features covered. No certificate for late or incomplete submissions.
+- The Top 10 go to a finale on 9 Oct with a **PPT presentation**: keep a short deck outline in mind (problem, demo, panel design, tech, what's next).
+- Queries: organizers' WhatsApp community (link in the email).
 
 ## HARD LIMITS (enforced, never cross; breaking one can disqualify the submission)
+0. **Repo: public, EXACTLY ONE branch (`main`), under 10 MB. Break any one and the repo is rejected.** Never create or push other branches (no feature branches, no `gh-pages`); all AIs commit straight to `main`. Delete any extra remote branch before submitting.
 1. **GitHub repo must stay under 10 MB, including git history.** Working ceiling is **8 MB** to keep a safety margin.
    - Never commit `node_modules/`, build output (`.next/`, `dist/`, `build/`), `.env` files, logs, videos, large images, datasets, zips or model files. `.gitignore` covers these; don't weaken it.
    - Images: compressed (WebP/SVG), each under 200 KB. Prefer CSS/SVG/icons over image files. No fonts committed; load them from Google Fonts.
    - A big file committed and then deleted still counts (it stays in history). If one slips in, stop and fix history before pushing.
    - Run `sh scripts/check-repo-size.sh` before every push. It is installed as a git pre-commit hook and blocks the commit if the limit is broken.
-2. **The app must be deployed and the cloud link must work at submission time.**
+2. **The app must be deployed ON GOOGLE CLOUD RUN and the Cloud Run URL (`*.run.app`) must work at submission time.** Vercel is not accepted.
    - Deploy within the first 1-2 hours, then redeploy after every working feature. Never leave the live link broken.
    - Open the live URL in a fresh incognito window before submitting and run the full demo (pitch, get questioned by the panel, answer, offers, debrief with improved pitch).
-   - All secrets (Gemini API key) go in the host's environment variables, never in the repo or client-side code.
+   - All secrets (Gemini API key) go in Cloud Run environment variables (or Secret Manager), never in the repo, the Docker image or client-side code.
 3. **Every required feature in `chosen problem statement.txt` must work on the deployed app**, not only locally.
 4. **Only 2 submission attempts in total. Submit only a COMPLETE, final app.**
    - No AI agent ever submits or tells the user to submit without first passing the pre-submission checklist in `SUBMISSION CHECKLIST.txt`, with every box ticked.
-   - Attempt 1 is the real, final submission. Attempt 2 is an emergency reserve only (e.g. the link breaks or a wrong URL was pasted). Never plan to "submit early and fix later".
-   - Submit well before the deadline (target 30+ minutes early), never in the last minutes.
+   - Attempt 1 is the real, final submission. Attempt 2 only to fix the specific weak parameters named in attempt 1's feedback, or a wrong link. Only the LATEST score counts, so a rushed or unchanged attempt 2 can LOWER the score. Never resubmit without changes; never plan to "submit early and fix later".
+   - Submit well before the 18:30 hard deadline (target 17:45-18:00), never in the last minutes.
    - After submitting, freeze the deployed app: no risky redeploys or pushes that could break the live link or push the repo over 10 MB while judging is in progress.
    - Log each attempt in the Progress log (time, URL, repo link, commit hash).
 
@@ -44,10 +55,11 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 ## Working guidance
 - Favor a small, fully working, deployed app over a large unfinished one. Check every feature in the problem statement off against the build.
 - Deploy early, push to GitHub often, and keep the README short with the live link.
+- Build for the scoring rubric from the start: tests alongside code (Vitest for `lib/` and API validation), semantic HTML + ARIA + keyboard + contrast, validate every input server-side, minimal dependencies.
 
 ## Project status (update as decisions are made)
 - Chosen problem: **Shark Tank Simulator** (switched from GitHub Roast and Rescue for more interaction). Full statement, required-feature checklist and planned extras in `chosen problem statement.txt` (read it before building).
-- Tech stack: **Next.js 16 + TypeScript + Tailwind 4, Gemini API (`@google/genai`, free tier key), hosted on Vercel**. Full build plan: `PLAN.md`.
+- Tech stack: **Next.js 16 + TypeScript + Tailwind 4, Gemini API (`@google/genai`, free tier key), hosted on Google Cloud Run** (Docker image from Next.js `output: "standalone"`; Vercel is NOT allowed). Full build plan: `PLAN.md`.
 - Deployed URL: _TBD_
 - GitHub repo: https://github.com/24f2006988/shark-tank-simulator
 
@@ -58,3 +70,5 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08, Claude Code: added HARD LIMIT 4 (only 2 submission attempts, submit complete app only) and `SUBMISSION CHECKLIST.txt`.
 - 2026-10-08, Claude Code: switched to Shark Tank Simulator; rewrote `chosen problem statement.txt`, `PLAN.md`, checklist section A; scaffolded Next.js 16 app (deps installed, not yet committed).
 - 2026-10-08, Claude Code: first commit pushed to https://github.com/24f2006988/shark-tank-simulator (hello-world page, README, .env.example, pre-commit size hook installed).
+- 2026-10-08, Claude Code: added official timeline (submit 18:00-18:30, no extension), certificate rules (80% features, public GitHub, check-in by 09:30) and 9 Oct PPT finale from the organizers' email.
+- 2026-10-08, Claude Code: added rules from the official briefing deck: Cloud Run ONLY (replaces Vercel), 3 required links (.git GitHub URL, Cloud Run URL, LinkedIn post), exactly one branch, scoring rubric (incl. testing + accessibility), latest score counts.
