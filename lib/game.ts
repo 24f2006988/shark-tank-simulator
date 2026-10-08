@@ -14,6 +14,7 @@ export interface DifficultyRules {
 }
 
 export const DIFFICULTY: Record<Difficulty, DifficultyRules> = {
+  explore: { label: "Explore with Sharks", startInterest: 70, negativeMultiplier: 0.2, walkoutBelow: 5, offerMin: 35, maxAnswers: 6, acceptGap: 0.3 },
   friendly: { label: "Friendly", startInterest: 60, negativeMultiplier: 0.6, walkoutBelow: 10, offerMin: 45, maxAnswers: 6, acceptGap: 0.2 },
   realistic: { label: "Realistic", startInterest: 50, negativeMultiplier: 1, walkoutBelow: 20, offerMin: 55, maxAnswers: 7, acceptGap: 0.1 },
   ruthless: { label: "Ruthless", startInterest: 40, negativeMultiplier: 1.4, walkoutBelow: 30, offerMin: 65, maxAnswers: 8, acceptGap: 0.05 },

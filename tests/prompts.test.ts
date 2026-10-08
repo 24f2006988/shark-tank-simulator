@@ -23,6 +23,12 @@ describe("prompts", () => {
     expect(sys).toContain("Ruthless");
   });
 
+  it("system prompt in explore mode sets exploratory tone", () => {
+    const sys = systemPrompt("explore");
+    expect(sys).toContain("Explore with Sharks");
+    expect(sys).toMatch(/Exploratory/);
+  });
+
   it("pitch block shows the ask with implied valuation inside tags", () => {
     const block = pitchBlock(pitch);
     expect(block.startsWith("<pitch>")).toBe(true);
@@ -41,6 +47,13 @@ describe("prompts", () => {
     const prompt = openingPrompt(pitch, "meera");
     expect(prompt).toContain('sharkId "meera"');
     for (const rule of HARD_QUESTION_RULES) expect(prompt).toContain(rule);
+  });
+
+  it("opening prompt uses explore question rules in explore mode", () => {
+    const explorePitch = { ...pitch, difficulty: "explore" as const };
+    const prompt = openingPrompt(explorePitch, "meera");
+    expect(prompt).toContain('sharkId "meera"');
+    expect(prompt).toContain("explore the vision, upside potential");
   });
 
   it("turn prompt offers a follow-up shark and the next shark", () => {

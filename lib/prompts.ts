@@ -7,6 +7,7 @@ import type { Deal, Difficulty, Offer, Pitch, SharkCustomization, SharkId, Shark
 export const TRANSCRIPT_WINDOW = 10;
 
 const TONE: Record<Difficulty, string> = {
+  explore: "Exploratory and mentor-like: engage in an open, curious conversation about the vision, market possibilities, and potential financial returns. Treat this as an encouraging brainstorming session with minimal rigidity; guide and help the pitcher rather than grilling them.",
   friendly: "Encouraging but honest: point out gaps kindly and reward partial answers.",
   realistic: "Like a real seed-stage partner meeting: fair, sharp and unimpressed by buzzwords.",
   ruthless: "Sceptical with little patience: punish vagueness hard and demand evidence for every claim.",
@@ -66,6 +67,15 @@ export const HARD_QUESTION_RULES = [
   "Never repeat a question already asked in the transcript.",
 ];
 
+export const EXPLORE_QUESTION_RULES = [
+  "Engage conversationally: explore the vision, upside potential, and possible business models.",
+  "Ask open, thought-provoking questions about unit economics, returns, customer discovery, or growth paths without demanding rigid proof.",
+  "Build upon the founder's thoughts constructively rather than grilling or cornering them.",
+  "If an answer is early-stage or incomplete, help them explore how returns or customer traction could work.",
+  "One question only, at most 40 words, friendly and curious, no preamble.",
+  "Never repeat a question already asked in the transcript.",
+];
+
 const RUBRIC = [
   "+10 to +20: specific, evidenced, numbers that add up.",
   "+1 to +9: decent but partial.",
@@ -74,15 +84,24 @@ const RUBRIC = [
   "-11 to -20: dodged the question, contradicted an earlier answer, or numbers that do not add up.",
 ];
 
+const EXPLORE_RUBRIC = [
+  "+10 to +20: exciting insight, creative perspective, or thoughtful discussion of potential returns.",
+  "+2 to +9: genuine effort to explore the idea, open to feedback.",
+  "0 to +1: neutral or brief thought.",
+  "-1 to -4: very disengaged or dismissive (keep drops minimal).",
+];
+
 function rules(list: string[]): string {
   return list.map((r, i) => `${i + 1}. ${r}`).join("\n");
 }
 
 export function openingPrompt(pitch: Pitch, asker: SharkId): string {
+  const isExplore = pitch.difficulty === "explore";
+  const questionRules = isExplore ? EXPLORE_QUESTION_RULES : HARD_QUESTION_RULES;
   return [
     pitchBlock(pitch),
     `The founder has just finished pitching. ${SHARKS[asker].name} (sharkId "${asker}") asks the first question.`,
-    `Rules for a hard investor question:\n${rules(HARD_QUESTION_RULES)}`,
+    `Rules for an investor question:\n${rules(questionRules)}`,
     `Return next: { sharkId: "${asker}", question, probing } where probing is the dimension the question tests.`,
   ].join("\n\n");
 }
@@ -98,20 +117,23 @@ export interface TurnPromptInput {
 /** Evaluates the latest answer and, when `next` is set, writes the next question in the same call. */
 export function turnPrompt({ pitch, sharks, turns, followUp, next }: TurnPromptInput): string {
   const last = turns[turns.length - 1];
+  const isExplore = pitch.difficulty === "explore";
+  const activeRubric = isExplore ? EXPLORE_RUBRIC : RUBRIC;
+  const questionRules = isExplore ? EXPLORE_QUESTION_RULES : HARD_QUESTION_RULES;
   const parts = [
     pitchBlock(pitch),
     transcriptBlock(turns.slice(0, -1)),
     `Latest question from ${SHARKS[last.sharkId].name} (${last.sharkId}): ${last.question}`,
     `<answer>\n${last.answer ?? ""}\n</answer>`,
     `Current interest: ${interestLine(sharks)}.`,
-    `Step 1, evaluation. Judge the answer to the latest question. quality is 1 (dodged) to 5 (excellent). vague is true if the answer avoids the specific thing asked. Give one reaction per shark still in, with delta from this rubric:\n${rules(RUBRIC)}\nEach line is that shark's in-character reaction, at most 20 words, specific to what the founder said. A shark whose interest is collapsing should sound like they are close to leaving.`,
+    `Step 1, evaluation. Judge the answer to the latest question. quality is 1 (dodged) to 5 (excellent). vague is true if the answer avoids the specific thing asked. Give one reaction per shark still in, with delta from this rubric:\n${rules(activeRubric)}\nEach line is that shark's in-character reaction, at most 20 words, specific to what the founder said. A shark whose interest is collapsing should sound like they are close to leaving.`,
   ];
   if (next) {
     const allowed = followUp && followUp !== next
       ? `If vague is true, ${SHARKS[followUp].name} ("${followUp}") presses with a follow-up. Otherwise ${SHARKS[next].name} ("${next}") asks.`
       : `${SHARKS[next].name} ("${next}") asks.`;
     parts.push(
-      `Step 2, next question. ${allowed} Use only that sharkId.\nRules for a hard investor question:\n${rules(HARD_QUESTION_RULES)}`,
+      `Step 2, next question. ${allowed} Use only that sharkId.\nRules for an investor question:\n${rules(questionRules)}`,
     );
   }
   return parts.join("\n\n");

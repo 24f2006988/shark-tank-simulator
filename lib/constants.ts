@@ -4,7 +4,7 @@
  */
 export const SHARK_IDS = ["vikram", "meera", "arjun", "zara"] as const;
 export const DIMENSIONS = ["economics", "customer", "defensibility", "founder", "market"] as const;
-export const DIFFICULTIES = ["friendly", "realistic", "ruthless"] as const;
+export const DIFFICULTIES = ["explore", "friendly", "realistic", "ruthless"] as const;
 
 export const LIMITS = {
   ideaName: { min: 3, max: 80 },

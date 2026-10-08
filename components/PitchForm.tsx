@@ -28,6 +28,7 @@ type FieldName = Exclude<keyof Values, "difficulty" | "customPanels">;
 const EMPTY: Values = { ideaName: "", oneLiner: "", askLakh: "", equityPct: "", description: "", difficulty: "realistic", customPanels: undefined };
 
 const DIFFICULTY_HINTS: Record<Difficulty, string> = {
+  explore: "Curious mentors: explore the idea, returns, and vision together with minimal rigidity.",
   friendly: "Patient sharks, gentler drops in interest.",
   realistic: "Like the show: fair, but they push.",
   ruthless: "Low patience, quick walkouts, tough offers.",
@@ -343,7 +344,7 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
 
       <fieldset>
         <legend className="font-medium">How tough should the panel be?</legend>
-        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+        <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {DIFFICULTIES.map((d) => (
             <label
               key={d}

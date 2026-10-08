@@ -9,6 +9,19 @@ export interface SamplePitch {
 /** One well-prepared pitch and one deliberately vague one, so judges can see the panel push back. */
 export const SAMPLE_PITCHES: SamplePitch[] = [
   {
+    label: "Explore idea",
+    hint: "Early stage, open discussion",
+    pitch: {
+      ideaName: "SolarDost",
+      oneLiner: "Community solar micro-grids for rural artisanal workshops.",
+      askLakh: 25,
+      equityPct: 15,
+      difficulty: "explore",
+      description:
+        "SolarDost provides shared solar rooftops and battery backup to cluster workshops of weavers and potters in tier-3 towns. We have a working pilot powering 12 looms in Varanasi. We want to explore the right pricing model—pay-per-use vs monthly subscription—and brainstorm how to expand to 50 clusters with investor guidance.",
+    },
+  },
+  {
     label: "Strong pitch",
     hint: "Real numbers and traction",
     pitch: {

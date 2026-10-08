@@ -20,7 +20,7 @@ Built for PromptWars (8-hour Build With AI hackathon, Pondicherry University), p
 | The panel questions the founder, multi-turn | `app/api/turn/route.ts` → `lib/handlers.ts` (`runTurn`), `app/tank/page.tsx`, `components/Tank.tsx`, `components/AnswerBox.tsx`, `components/ChatLog.tsx` | Each shark speaks one line at a time, the founder answers, the next shark reacts and asks; the full transcript is one click away |
 | **Hard** questions that dig into weak answers | `lib/prompts.ts` (`HARD_QUESTION_RULES`, scoring rubric), `lib/game.ts` (`pickNextAsker`, `followUpCandidate`) | Questions quote your own claims, demand numbers and names; a vague answer gets a **Follow-up** from the same shark and drops interest |
 | The founder walks away with a **better pitch** | `app/api/debrief/route.ts` → `runDebrief`, `components/Debrief.tsx` | Scorecard per dimension, strengths and weaknesses, your toughest moment answered better, what each shark needed, a rewritten 60-second pitch (Copy / Pitch again), 3 fixes |
-| Walkouts, offers and negotiation | `lib/game.ts`, `app/api/offers`, `app/api/negotiate`, `components/OfferCard.tsx`, `components/QuestionsDone.tsx` | Sharks walk out ("I'm out") with a reason; the rest make offers with implied valuation; counter, accept or walk; Friendly / Realistic / Ruthless modes |
+| Walkouts, offers and negotiation | `lib/game.ts`, `app/api/offers`, `app/api/negotiate`, `components/OfferCard.tsx`, `components/QuestionsDone.tsx` | Sharks walk out ("I'm out") with a reason; the rest make offers with implied valuation; counter, accept or walk; Explore with Sharks / Friendly / Realistic / Ruthless modes |
 | Shark archetypes | `lib/sharks.ts` (`SHARK_ARCHETYPES`), `lib/schemas.ts`, `components/PitchForm.tsx`, `components/Stage.tsx` | 3 distinct archetypes per shark (Growth Hacker, Value Investor, Systems Architect, etc.) with safe server-side enum resolution |
 | Illustrated, reactive sharks | `components/SharkFace.tsx`, `components/FaceEmote.tsx`, `components/emotes.ts` | Vector portraits with moods that follow interest; an emote pops up as each shark reacts to your answer |
 | Stage and verdict visuals | `components/Stage.tsx`, `components/Debrief.tsx`, `components/OfferCard.tsx`, `components/verdict.ts` | Lit tank set with a speech bubble pointing at the speaker, question progress bar, each offer compared with your valuation ("20% below your valuation"), a score ring with a verdict band |
@@ -78,7 +78,7 @@ npm run test:coverage  # coverage report
   - a 503/429 falling back to scripted content;
   - rate limiting, oversized bodies and invalid input.
 - **UI tests** (jsdom + Testing Library): the offer card (counter form validation, keyboard-reachable actions, disabled while waiting), debrief regions, the stage's screen-reader line, the transcript log, the typewriter script hook, the API client's error handling and the panel's reaction order.
-- **Coverage** (Vitest v8, 170 tests): **`lib/` 96% of lines, API routes 100%, UI components 66%, 79% overall**. CI fails if `lib/` drops below 90%, the API routes below 95% or UI components below 60%.
+- **Coverage** (Vitest v8): **`lib/` 96% of lines, API routes 100%, UI components 66%, 79% overall**. CI fails if `lib/` drops below 90%, the API routes below 95% or UI components below 60%.
 - GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck and tests with coverage on every push.
 
 ### Security

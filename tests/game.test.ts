@@ -20,7 +20,7 @@ import {
 import { makePitch, makeSharks, makeTurn } from "./helpers";
 
 describe("createSharks", () => {
-  it.each(["friendly", "realistic", "ruthless"] as const)("starts every shark in with the %s interest", (d) => {
+  it.each(["explore", "friendly", "realistic", "ruthless"] as const)("starts every shark in with the %s interest", (d) => {
     const sharks = createSharks(d);
     expect(activeSharks(sharks)).toHaveLength(4);
     expect(Object.values(sharks).every((s) => s.interest === DIFFICULTY[d].startInterest)).toBe(true);
@@ -39,6 +39,7 @@ describe("applyReactions", () => {
   });
 
   it("scales negative deltas by difficulty", () => {
+    expect(clampDelta(-10, "explore")).toBe(-2);
     expect(clampDelta(-10, "friendly")).toBe(-6);
     expect(clampDelta(-10, "ruthless")).toBe(-14);
     expect(clampDelta(10, "ruthless")).toBe(10);

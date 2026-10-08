@@ -43,6 +43,11 @@ describe("pitchSchema", () => {
     expect(pitch.oneLiner).toBe("");
   });
 
+  it("accepts explore difficulty", () => {
+    const pitch = pitchSchema.parse({ ...valid, difficulty: "explore" });
+    expect(pitch.difficulty).toBe("explore");
+  });
+
   it.each([
     ["ideaName", "ab", /at least 3/],
     ["ideaName", "x".repeat(81), /at most 80/],
