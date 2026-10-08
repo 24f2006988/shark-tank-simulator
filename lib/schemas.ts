@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+// Zod 4 probes for eval support with `new Function("")`, which our CSP (no unsafe-eval) reports as a violation.
+z.config({ jitless: true });
+
 export const SHARK_IDS = ["vikram", "meera", "arjun", "zara"] as const;
 export const DIMENSIONS = ["economics", "customer", "defensibility", "founder", "market"] as const;
 export const DIFFICULTIES = ["friendly", "realistic", "ruthless"] as const;

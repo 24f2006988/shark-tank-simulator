@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { cleanText, pitchSchema, turnRequestSchema } from "@/lib/schemas";
 import { makePitch, makeSharks, makeTurn } from "./helpers";
 
@@ -8,6 +9,12 @@ const valid = {
   equityPct: 10,
   description: "We run e-bike chai carts around tech parks in Bengaluru for offices.",
 };
+
+describe("zod config", () => {
+  it("runs without eval so the CSP (no unsafe-eval) is never violated", () => {
+    expect(z.config().jitless).toBe(true);
+  });
+});
 
 describe("cleanText", () => {
   it("strips control characters and collapses whitespace", () => {
