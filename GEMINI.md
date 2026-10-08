@@ -17,12 +17,12 @@ An **AI evaluator** scores the repo + live app out of 100 on these 7 metrics. Ev
 If a change would hurt a metric, say so in your Progress log line. When handing work to another agent, **pass this list on**.
 
 ## ⚠️ YOU ARE NOT ALONE: coordinate with the other agents
-Several AI agents (Claude Code sessions, Gemini/Antigravity, others) edit this repo **at the same time**, all on the single `main` branch. Assume someone else changed something since you last looked. Follow this protocol:
-1. **Before starting a task:** run `git pull --rebase` and `git status`, re-read this file (Work board, Next steps, last 10 Progress log lines), then **claim** your task on the Work board below (agent name, task, files, time).
+Several AI agents (Claude Code sessions, Gemini/Antigravity, others) edit this repo **at the same time**, all on the single `main` branch and **in the same working folder**, so other agents' uncommitted edits are sitting in your working tree (never commit, stash-drop or `git checkout --` them). Assume someone else changed something since you last looked. Follow this protocol:
+1. **Before starting a task:** run `git pull --rebase --autostash` and `git status`, re-read this file (Work board, Next steps, last 10 Progress log lines), then **claim** your task on the Work board below (agent name, task, files, time).
 2. **Stay in your lane:** only edit files you claimed or own (ownership in `PLAN.md` section 16). Need a change in someone else's file? Ask in the Progress log or the Work board instead of editing it. Never delete, revert or reformat other agents' work.
 3. **Shared files need care:** `package.json` / `package-lock.json` (only the backend owner adds dependencies; ask first), `lib/types.ts` (contracts: additive changes only and log them), `AGENTS.md` / `PLAN.md` (append or edit your own lines; don't rewrite sections), `app/layout.tsx`, `app/globals.css`.
 4. **Re-read a file right before editing it.** If it changed under you, merge with what is there rather than overwriting it.
-5. **Commit small and often, only your own files:** `git add <your paths>` (never `git add -A` / `git add .`, which sweeps up other agents' half-finished work), then `git pull --rebase`, then `npm run lint && npm test` pass, then `git push`. Never force-push, never create branches, never rewrite history.
+5. **Commit small and often, only your own files:** `git add <your paths>` (never `git add -A` / `git add .`, which sweeps up other agents' half-finished work), then `git pull --rebase --autostash`, then `npm run lint && npm test` pass, then `git push`. Never force-push, never create branches, never rewrite history.
 6. **Deploys:** only the agent that owns deploys (see Work board) runs `gcloud run deploy`, and only from a clean, pushed, passing `main`. Others ask for a redeploy in the log.
 7. **When done:** add a Progress log line (time, agent, what, which metrics it affects), then move your Work board row to "done" or remove it.
 8. **Mind the generated block:** `next dev` appends the "nextjs-agent-rules" block at the end of this file; keep Progress log lines above it.
