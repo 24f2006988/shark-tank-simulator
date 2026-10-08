@@ -79,7 +79,7 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
             style={{ left: `calc(${(SHARK_IDS.indexOf(pointer) + 0.5) * 25}% - 8px)` }}
           />
         ) : null}
-        <div className="min-h-28 rounded-2xl border border-slate-600 bg-slate-900 px-5 py-4">
+        <div className="min-h-28 rounded-lg border border-slate-600 bg-slate-900 px-5 py-4">
           {thinking && !line ? (
             <p className="flex items-center gap-3 text-slate-300">
               <span className={`font-semibold ${SHARKS[thinking].color.text}`}>{SHARKS[thinking].name}</span>

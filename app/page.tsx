@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <>
       <header className="mx-auto w-full max-w-[1100px] px-4 pt-12 pb-6 text-center sm:pt-16">
-        <p className="text-sm font-semibold tracking-[0.2em] text-amber-300 uppercase">Practice before the real room</p>
+        <p className="text-sm font-semibold tracking-[0.2em] text-accent uppercase">Practice before the real room</p>
         <h1 className="mt-3 font-display text-4xl font-extrabold tracking-tight text-balance sm:text-6xl">Shark Tank Simulator</h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-pretty text-slate-300">
           Pitch your startup to four AI investors. They ask hard, specific questions, walk out when you lose them, and send you
@@ -30,7 +30,7 @@ export default function Home() {
             {STEPS.map((s, i) => (
               <li key={s.title} className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
                 <p className="font-display text-lg font-semibold">
-                  <span className="mr-2 text-amber-300">{i + 1}.</span>
+                  <span className="mr-2 text-accent">{i + 1}.</span>
                   {s.title}
                 </p>
                 <p className="mt-1 text-sm text-slate-300">{s.text}</p>

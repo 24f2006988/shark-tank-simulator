@@ -82,7 +82,7 @@ export function OfferCard({ offer, pitch, talk, busy, onAccept, onDecline, onCou
 
       <ol aria-label={`Negotiation with ${shark.name}`} className="flex flex-col gap-2 text-sm">
         {talk.log.map((entry, i) => (
-          <li key={i} className={entry.from === "founder" ? "text-right text-amber-100" : "text-slate-200"}>
+          <li key={i} className={entry.from === "founder" ? "text-right text-accent-hover" : "text-slate-200"}>
             <span className="font-semibold">{entry.from === "founder" ? "You" : SHARKS[entry.from].name.split(" ")[0]}:</span>{" "}
             {entry.line ? `“${entry.line}” ` : ""}
             <span className="text-slate-400">

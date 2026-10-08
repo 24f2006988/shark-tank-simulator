@@ -10,7 +10,7 @@ const ROWS: { key: keyof Debrief["scores"]; label: string }[] = [
   { key: "answers", label: "Handling questions" },
 ];
 
-const barColor = (v: number) => (v >= 7 ? "bg-emerald-300" : v >= 4 ? "bg-amber-300" : "bg-rose-300");
+const barColor = (v: number) => (v >= 7 ? "bg-emerald-300" : v >= 4 ? "bg-accent" : "bg-rose-300");
 
 export function Scorecard({ scores }: { scores: Debrief["scores"] }) {
   return (

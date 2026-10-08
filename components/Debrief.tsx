@@ -42,7 +42,7 @@ export function Debrief({ debrief: d, pitch, deal, onPitchAgain }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <section aria-labelledby="verdict-h" className={`${card} flex flex-col gap-4 p-6 sm:flex-row sm:items-center`}>
-        <p className="font-display text-6xl font-extrabold text-amber-300">
+        <p className="font-display text-6xl font-extrabold text-accent">
           <span className="sr-only">Overall score: </span>
           {d.overall}
           <span className="text-2xl text-slate-400">/100</span>
@@ -121,8 +121,8 @@ export function Debrief({ debrief: d, pitch, deal, onPitchAgain }: Props) {
         </section>
       ) : null}
 
-      <section aria-labelledby="pitch-h" className="rounded-2xl border border-amber-300/60 bg-amber-300/5 p-6">
-        <h2 id="pitch-h" className="font-display text-xl font-semibold text-amber-200">
+      <section aria-labelledby="pitch-h" className="rounded-lg border border-accent/60 bg-accent/5 p-6">
+        <h2 id="pitch-h" className="font-display text-xl font-semibold text-accent-hover">
           Your improved 60-second pitch
         </h2>
         <p className="mt-3 text-lg leading-relaxed whitespace-pre-wrap">{d.improvedPitch}</p>

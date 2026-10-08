@@ -222,7 +222,7 @@ function TankGame({ initial }: { initial: GameSession }) {
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
         <div className="mx-auto flex w-full max-w-[1100px] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <Link href="/" className="font-display text-lg font-extrabold">
-            Shark Tank <span className="text-amber-300">Simulator</span>
+            Shark Tank <span className="text-accent">Simulator</span>
           </Link>
           <nav aria-label="Progress">
             <ol className="flex gap-1 text-sm sm:gap-3">
@@ -230,7 +230,7 @@ function TankGame({ initial }: { initial: GameSession }) {
                 <li
                   key={step.stage}
                   aria-current={i === stepIndex ? "step" : undefined}
-                  className={`rounded-full px-2 py-1 ${i === stepIndex ? "bg-amber-300 font-semibold text-slate-950" : i < stepIndex ? "text-slate-200" : "text-slate-400"}`}
+                  className={`rounded-full px-2 py-1 ${i === stepIndex ? "bg-accent font-semibold text-slate-950" : i < stepIndex ? "text-slate-200" : "text-slate-400"}`}
                 >
                   <span className="sr-only">{i < stepIndex ? "Done: " : ""}</span>
                   {step.label}
@@ -252,10 +252,10 @@ function TankGame({ initial }: { initial: GameSession }) {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div role="status" aria-live="polite" className="min-h-6 text-amber-200">
+          <div role="status" aria-live="polite" className="min-h-6 text-accent-hover">
             {busy ? (
               <span className="inline-flex items-center gap-2">
-                <span aria-hidden="true" className="size-2 animate-pulse rounded-full bg-amber-300" />
+                <span aria-hidden="true" className="size-2 animate-pulse rounded-full bg-accent" />
                 {busy}
               </span>
             ) : s.stage === "questioning" ? (

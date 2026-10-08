@@ -27,7 +27,7 @@ export function ChatLog({ turns, walkouts, pendingAnswer }: Props) {
           <li key={i} className="flex flex-col gap-3">
             <div className="animate-rise flex gap-3">
               <SharkAvatar shark={shark} size="sm" />
-              <div className={`max-w-[85%] rounded-2xl rounded-tl-sm border bg-slate-900 px-4 py-3 ${shark.color.border}`}>
+              <div className={`max-w-[85%] rounded-lg rounded-tl-sm border bg-slate-900 px-4 py-3 ${shark.color.border}`}>
                 <p className="flex flex-wrap items-center gap-2 text-sm">
                   <span className={`font-semibold ${shark.color.text}`}>{shark.name}</span>
                   {turn.isFollowUp ? (
@@ -43,7 +43,7 @@ export function ChatLog({ turns, walkouts, pendingAnswer }: Props) {
 
             {answer ? (
               <div className="animate-rise flex flex-col items-end gap-1">
-                <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-amber-300/15 px-4 py-3 text-slate-100">
+                <div className="max-w-[85%] rounded-lg rounded-tr-sm bg-accent/15 px-4 py-3 text-slate-100">
                   <p className="sr-only">You:</p>
                   <p className="whitespace-pre-wrap">{answer}</p>
                 </div>

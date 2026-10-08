@@ -132,7 +132,7 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
         </div>
       </div>
 
-      <p role="status" className="text-sm text-amber-200 empty:hidden">
+      <p role="status" className="text-sm text-accent-hover empty:hidden">
         {notice}
       </p>
 
@@ -266,7 +266,7 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
           {DIFFICULTIES.map((d) => (
             <label
               key={d}
-              className="flex cursor-pointer gap-3 rounded-lg border border-slate-700 p-3 hover:border-slate-500 has-[:checked]:border-amber-300 has-[:checked]:bg-amber-300/10 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-amber-200"
+              className="flex cursor-pointer gap-3 rounded-lg border border-slate-700 p-3 hover:border-slate-500 has-[:checked]:border-accent has-[:checked]:bg-accent/10 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent-hover"
             >
               <input
                 type="radio"
@@ -274,7 +274,7 @@ function PitchFormInner({ prefill }: { prefill: Pitch | null }) {
                 value={d}
                 checked={values.difficulty === d}
                 onChange={() => set("difficulty", d)}
-                className="mt-1 accent-amber-300"
+                className="mt-1 accent-accent"
               />
               <span>
                 <span className="block font-semibold">{DIFFICULTY[d].label}</span>
