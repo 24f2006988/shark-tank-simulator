@@ -1,6 +1,7 @@
 import type { SharkId } from "@/lib/types";
 import type { Mood } from "./SharkFace";
-import type { EmoteKind } from "./pixel/sprites";
+
+export type EmoteKind = "exclaim" | "star" | "question" | "anger" | "dots";
 
 export interface Emote {
   kind: EmoteKind;
@@ -40,7 +41,7 @@ export interface Reaction {
   emote: Emote | null;
 }
 
-/** How a shark reacts on the face: an expression and a pixel exclamation that fit how the answer landed. */
+/** How a shark reacts on the face: an expression and an exclamation badge that fit how the answer landed. */
 export function reactionFor({ id, delta = 0, thinking, leaving, round }: Input): Reaction {
   const pick = (kind: EmoteKind, mood: Mood): Reaction => ({ mood, emote: { kind, word: emoteWord(kind, id, round) } });
   if (leaving) return pick("anger", "cold");
