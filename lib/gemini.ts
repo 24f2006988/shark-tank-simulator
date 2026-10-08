@@ -20,6 +20,9 @@ export interface GenerateOptions {
   prompt: string;
   temperature: number;
   maxTokens: number;
+  /** Per-attempt and total time limits; long replies such as the debrief need more than a turn. */
+  attemptMs?: number;
+  budgetMs?: number;
 }
 
 let client: { id: string; ai: GoogleGenAI } | null = null;
@@ -78,7 +81,7 @@ function toJsonSchema(schema: z.ZodType): unknown {
  */
 export async function generateJson<T>(schema: z.ZodType<T>, opts: GenerateOptions, now: () => number = Date.now): Promise<{ data: T; model: string }> {
   const ai = getClient();
-  const deadline = now() + BUDGET_MS;
+  const deadline = now() + (opts.budgetMs ?? BUDGET_MS);
   const available = models().filter((m) => (coolingUntil.get(m) ?? 0) <= now());
   let lastError: unknown = new GeminiError("Every model is cooling down");
   for (const model of available) {
@@ -97,7 +100,7 @@ export async function generateJson<T>(schema: z.ZodType<T>, opts: GenerateOption
           responseJsonSchema: toJsonSchema(schema),
           // Low thinking keeps a turn to a few seconds; the prompts carry the reasoning rules.
           thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-          abortSignal: AbortSignal.timeout(Math.min(ATTEMPT_TIMEOUT_MS, remaining)),
+          abortSignal: AbortSignal.timeout(Math.min(opts.attemptMs ?? ATTEMPT_TIMEOUT_MS, remaining)),
         },
       });
       const parsed = schema.safeParse(JSON.parse(res.text ?? ""));

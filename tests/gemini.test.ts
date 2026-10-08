@@ -63,6 +63,22 @@ describe("generateJson", () => {
     await expect(generateJson(schema, opts, clock)).resolves.toMatchObject({ model: "primary" });
   });
 
+  it("lets a long reply override the time budget so a slow first model still leaves room for the next", async () => {
+    let t = 0;
+    const clock = () => t;
+    const slowFailure = async () => {
+      t += 19_000;
+      throw apiError(500);
+    };
+    generateContent.mockImplementationOnce(slowFailure);
+    await expect(generateJson(schema, opts, clock)).rejects.toBeInstanceOf(GeminiError);
+
+    generateContent.mockReset();
+    generateContent.mockImplementationOnce(slowFailure);
+    generateContent.mockResolvedValueOnce({ text: '{"question":"ok"}' });
+    await expect(generateJson(schema, { ...opts, attemptMs: 20_000, budgetMs: 35_000 }, clock)).resolves.toMatchObject({ model: "backup" });
+  });
+
   it("throws GeminiError when every model fails or the reply is not JSON", async () => {
     generateContent.mockResolvedValue({ text: "not json" });
     await expect(generateJson(schema, opts)).rejects.toBeInstanceOf(GeminiError);

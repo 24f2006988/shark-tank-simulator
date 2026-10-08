@@ -40,6 +40,9 @@ import type { Debrief, Evaluation, NegotiateResult, OffersResult, Question, Shar
 
 type Result<T> = Promise<{ data: T; source: Source }>;
 
+export const DEBRIEF_ATTEMPT_MS = 20_000;
+export const DEBRIEF_BUDGET_MS = 35_000;
+
 const tidy = (s: string, max: number = LIMITS.line.max) => cleanText(s).slice(0, max);
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(n)));
 
@@ -196,6 +199,9 @@ export async function runDebrief({ pitch, sharks, turns, deal }: z.output<typeof
       prompt: debriefPrompt(pitch, sharks, turns, deal),
       temperature: 0.4,
       maxTokens: 3000,
+      // The longest reply in the game (scorecard plus a rewritten pitch); the client waits up to 45 s.
+      attemptMs: DEBRIEF_ATTEMPT_MS,
+      budgetMs: DEBRIEF_BUDGET_MS,
     });
     const three = (xs: string[]) => xs.slice(0, 3).map((x) => tidy(x, 400));
     const debrief: Debrief = {
