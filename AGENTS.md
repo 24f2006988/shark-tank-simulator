@@ -142,6 +142,7 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08 13:05, Claude Code (backend): debrief was timing out (9 s per attempt, both models AbortError) and showing the template; it now gets 20 s per attempt / 35 s total (`generateJson` takes optional `attemptMs`/`budgetMs`), commit 763eafc + test. DEPLOYED revision 00011 from a clean `git archive` of 763eafc (includes frontend 197c994); live e2e: all turns + debrief from AI, walked-out shark's question handed to a shark still in. Tests 88/88. Metrics: Alignment, Efficiency.
 
 <!-- BEGIN:nextjs-agent-rules -->
+- 2026-10-08 13:20, Claude Code: replaced the glitchy browser speechSynthesis voices with an Animal Crossing style "mumble" (`components/mumble.ts`: one Web Audio blip per typed letter, distinct pitch/timbre per shark, rising tone at the end of questions; no audio files or deps). `useScript.ts` simplified to a typewriter + blips; toggle now "Sound on/off"; off under reduced motion. Tests in `tests/mumble.test.ts` (92/92). Needs a redeploy. Metrics: Efficiency, Code Quality, Testing.
 
 ## This is NOT the Next.js you know
 

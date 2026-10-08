@@ -14,7 +14,8 @@ import { Debrief } from "./Debrief";
 import { greetingScript } from "./greeting";
 import { OfferCard } from "./OfferCard";
 import { Stage as PanelStage } from "./Stage";
-import { canSpeak, useScript, type LineInput } from "./useScript";
+import { canMumble } from "./mumble";
+import { useScript, type LineInput } from "./useScript";
 import { btn, card } from "./ui";
 
 const STEPS: { stage: Stage | "pitch"; label: string }[] = [
@@ -377,14 +378,14 @@ function TankGame({ initial }: { initial: GameSession }) {
 }
 
 function VoiceToggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
-  if (!canSpeak()) return null;
+  if (!canMumble()) return null;
   return (
     <button type="button" aria-pressed={on} onClick={() => onChange(!on)} className={btn.ghost}>
       <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M11 5 6 9H3v6h3l5 4V5Z" />
         {on ? <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /> : <path d="m16 9 6 6M22 9l-6 6" />}
       </svg>
-      {on ? "Voices on" : "Voices off"}
+      {on ? "Sound on" : "Sound off"}
     </button>
   );
 }
