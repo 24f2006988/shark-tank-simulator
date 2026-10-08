@@ -168,14 +168,28 @@ export const loadSession = () => {
 };
 export const saveSession = (session: GameSession) => write(STORAGE_KEY, session);
 
-/** "Pitch again" hands the improved pitch back to the landing form. */
+/** "Pitch again" hands the improved pitch back to the landing form; it stays until the next pitch starts. */
 export const savePrefill = (pitch: Pitch) => write(PREFILL_KEY, pitch);
-export function takePrefill(): Pitch | null {
-  const p = read<Pitch>(PREFILL_KEY);
+/** Raw JSON string (stable between calls, so it can be a useSyncExternalStore snapshot). */
+export function readPrefillRaw(): string | null {
+  try {
+    return sessionStorage.getItem(PREFILL_KEY);
+  } catch {
+    return null;
+  }
+}
+export function parsePrefill(raw: string | null): Pitch | null {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as Pitch;
+  } catch {
+    return null;
+  }
+}
+export function clearPrefill() {
   try {
     sessionStorage.removeItem(PREFILL_KEY);
   } catch {
     // ignore
   }
-  return p;
 }
