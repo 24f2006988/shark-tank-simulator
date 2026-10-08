@@ -355,14 +355,35 @@ vitest.config.ts
 4. Offers arrive with implied valuations; counter Meera, and she counters back.
 5. Debrief: "Here's your worst answer, rewritten, and the 60-second pitch you should have given." Click **Pitch again**.
 
-## 18. LinkedIn post (draft; fill the links at 17:15)
-> **Shark Tank Simulator: pitch to AI investors who won't go easy on you.** Built in 8 hours at #PromptWars (Build With AI, Pondicherry University).
-> The problem: everyone thinks their idea is brilliant and nobody tells them the truth. My app puts you in front of 4 AI sharks (numbers, customer, skeptic, visionary). They ask pitch-specific hard questions, dig into vague answers with follow-ups, walk out when you lose them, make offers you can negotiate, and finish with a scorecard and a rewritten, stronger pitch.
-> Built with Gemini API (structured output), Next.js, deployed on Google Cloud Run, key in Secret Manager. Tested with Vitest, built for keyboard and screen-reader users.
-> Try it: {Cloud Run URL} · Code: {GitHub URL} #BuildWithAI #GoogleCloud #Gemini #hack2skill
+## 18. LinkedIn post (final draft, matches live revision 00019; post at about 17:15, before submitting)
+> 🦈 **Shark Tank Simulator: pitch your idea to AI investors who won't go easy on you.**
+>
+> Built in 8 hours at #PromptWars, the Build With AI hackathon at the Dept. of Computer Science, Pondicherry University. My problem statement was **"Shark Tank Simulator: Pitch your idea to investors who will not go easy on you."**
+>
+> Everyone thinks their idea is brilliant, real investors are hard to reach, and friends are too polite. So I built an AI investor panel that tests your idea the way real investors do:
+> • **4 AI sharks** with their own focus: Vikram (the numbers), Meera (the customer), Arjun (the skeptic) and Zara (the visionary)
+> • Sharp questions written for **your** pitch, with **follow-ups** that quote your vague answers back at you
+> • Live interest meters, and sharks who **walk out** when you lose them
+> • **Offers you can counter** (₹ for % equity, with the implied valuation)
+> • A **debrief** with a scorecard, your weakest answer rewritten, and an improved 60-second pitch
+> • A light/dark notebook-style UI, with each shark speaking in its own "mumble" voice
+>
+> Under the hood: **Gemini on Vertex AI** with structured JSON output, Next.js on **Google Cloud Run**, Secret Manager, IAM and Cloud Logging. It has 100+ Vitest tests, a **Lighthouse accessibility score of 100**, input validation, rate limiting, and a scripted fallback so a pitch never dead-ends.
+>
+> 👉 Try it: https://shark-tank-simulator-888217860739.asia-south1.run.app
+> 💻 Code: https://github.com/24f2006988/shark-tank-simulator
+>
+> #BuildWithAI #PromptWars #GoogleCloud #Gemini #VertexAI #CloudRun #hack2skill #PondicherryUniversity
 
-## 19. Finale deck outline (9 Oct, if Top 10)
-1. Problem (the polite-friends problem) · 2. Live demo · 3. The panel and what makes a question hard · 4. Architecture (Gemini structured output, stateless Cloud Run, fallbacks) · 5. Quality: tests, a11y, security · 6. What's next: Gemini TTS voices, pitch-deck upload, progress tracking across attempts.
+Before posting, check that the live revision still matches each claim (features, test count, Lighthouse score). Tag the organizers if their handles are known.
+
+## 19. Finale deck outline (9 Oct, if Top 10): 6 slides
+1. **Problem.** "Shark Tank Simulator": everyone thinks their idea is brilliant, friends are too polite, and real investors are out of reach. Who it's for: student founders before a real pitch, incubation cells, B-plan contests.
+2. **Demo flow** (run it live, keep a screen recording as backup). Pitch (or a sample) → panel questions → a vague answer gets quoted back, a meter drops, a shark walks out → offers with implied valuation → counter, and the shark responds → debrief: scorecard, rewritten worst answer, improved 60-second pitch → "Pitch again".
+3. **Panel design: what makes a question hard.** 4 personas, each with one concern and its own voice (Numbers, Customer, Skeptic, Visionary). Questions must cite this pitch's own claims. Vague answers trigger follow-ups. Interest moves per answer, and a shark walks out below a threshold. Offers come from interest; difficulty (Friendly / Realistic / Ruthless) changes how strict the scoring and the deal terms are.
+4. **Tech and Google services.** Next.js 16 + TypeScript on **Cloud Run** (asia-south1). **Gemini on Vertex AI** with JSON-schema output generated from Zod schemas, a model chain (3.5-flash-lite → 3.5-flash) and then a scripted fallback. Also IAM (least-privilege service account), Secret Manager, Cloud Logging (structured logs, no pitch text) and Google Fonts. One AI call per turn; the server is stateless and the game state lives in the browser.
+5. **Quality: tests, accessibility, security.** 100+ Vitest tests (game rules, prompts, validation, fallback, API routes, components) plus CI. Lighthouse accessibility 100 on desktop and mobile, with screen-reader announcements, labelled meters, full keyboard use, AA contrast in both themes, and reduced motion. Security: no key in the client, validated inputs and AI output, rate limit, security headers.
+6. **What's next.** Pitch-deck upload (Gemini reads the slides), progress tracking across attempts, custom panels (e.g. "edtech investors"), real voice for sharks and voice answers, and an incubator mode for cohort practice.
 
 ## 20. Risks and mitigations
 | Risk | Mitigation |
