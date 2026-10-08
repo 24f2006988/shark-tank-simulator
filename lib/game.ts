@@ -1,4 +1,4 @@
-import { SHARK_IDS } from "./schemas";
+import { SHARK_IDS } from "./constants";
 import type { Difficulty, Offer, Pitch, Reaction, SharkId, Sharks, Terms, Turn } from "./types";
 
 export interface DifficultyRules {

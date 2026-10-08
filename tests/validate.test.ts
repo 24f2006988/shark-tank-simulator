@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { cleanText, pitchSchema, turnRequestSchema } from "@/lib/schemas";
+import * as constants from "@/lib/constants";
+import { LIMITS, SHARK_IDS, cleanText, pitchSchema, turnRequestSchema } from "@/lib/schemas";
 import { makePitch, makeSharks, makeTurn } from "./helpers";
 
 const valid = {
@@ -13,6 +14,13 @@ const valid = {
 describe("zod config", () => {
   it("runs without eval so the CSP (no unsafe-eval) is never violated", () => {
     expect(z.config().jitless).toBe(true);
+  });
+});
+
+describe("constants", () => {
+  it("are re-exported unchanged by the schemas module, so client code can import them without Zod", () => {
+    expect(SHARK_IDS).toBe(constants.SHARK_IDS);
+    expect(LIMITS).toBe(constants.LIMITS);
   });
 });
 

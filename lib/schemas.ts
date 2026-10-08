@@ -3,20 +3,10 @@ import { z } from "zod";
 // Zod 4 probes for eval support with `new Function("")`, which our CSP (no unsafe-eval) reports as a violation.
 z.config({ jitless: true });
 
-export const SHARK_IDS = ["vikram", "meera", "arjun", "zara"] as const;
-export const DIMENSIONS = ["economics", "customer", "defensibility", "founder", "market"] as const;
-export const DIFFICULTIES = ["friendly", "realistic", "ruthless"] as const;
+import { DIFFICULTIES, DIMENSIONS, LIMITS, SHARK_IDS } from "./constants";
 
-export const LIMITS = {
-  ideaName: { min: 3, max: 80 },
-  oneLiner: { max: 140 },
-  description: { min: 40, max: 2000 },
-  answer: { max: 1200 },
-  question: { max: 300 },
-  line: { max: 240 },
-  turns: 12,
-  bodyBytes: 32_000,
-} as const;
+// Re-exported so server code can keep importing them from here; client code should use ./constants.
+export { DIFFICULTIES, DIMENSIONS, LIMITS, SHARK_IDS };
 
 /** Strips control characters, collapses whitespace and neutralises angle brackets so user text cannot fake prompt tags. */
 export function cleanText(input: string): string {

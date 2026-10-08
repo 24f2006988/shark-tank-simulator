@@ -2,7 +2,7 @@ import "server-only";
 import type { z } from "zod";
 import { log } from "./log";
 import { clientIp, createRateLimiter } from "./rateLimit";
-import { LIMITS } from "./schemas";
+import { LIMITS } from "./constants";
 import type { Source } from "./types";
 
 const limiter = createRateLimiter(30, 30);
