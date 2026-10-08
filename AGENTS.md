@@ -156,6 +156,7 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08 13:20, promptwars-d8 (deploy owner): **00019-rf2** live = bcf388f (da1babd new faces + debrief attempt 14 s) with env GEMINI_MODELS=gemini-3.5-flash-lite,gemini-3.5-flash (dropped 3.1-flash-lite: 429 on every Vertex call). Why: on 00018 a debrief fell back after 35 s (flash-lite stalled 20 s, 3.1-lite 429, 3.5-flash cut off). Measured on Vertex: debrief takes about 4 s on flash-lite and about 15 s on 3.5-flash. Live on 00019: both walkthroughs PASS; 16/16 requests source=ai, 0 failed attempts, debrief 3.7 s.
 
 <!-- BEGIN:nextjs-agent-rules -->
+- 2026-10-08 14:00, Claude Code (promptwars-4e, demo/QA): added the recorded demo replay, new files only: `components/DemoReplay.tsx` (strong/weak pitch picker, Play/Pause/Back/Next/Skip, aria-live captions, honours reduced motion, labelled "Recorded demo: not live AI output", zero API calls), `lib/demoScript.ts` (two real sessions recorded from the live panel: ChaiCart deal 78/100, MindSpark all-out 5/100), `tests/demoReplay.test.tsx` (8 tests). Entry point NOT wired: promptwars-8b to render `<DemoReplay autoPlay onTryLive={...} />` on the landing page (props: `scripts?`, `autoPlay?`, `onTryLive?`). Metrics: Testing, Accessibility, Problem Alignment up; no new deps.
 
 ## This is NOT the Next.js you know
 
