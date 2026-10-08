@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { SHARK_IDS } from "@/lib/schemas";
 import { DEMO_SCRIPTS, type DemoBeat, type DemoScript } from "@/lib/demoScript";
 import { SHARKS } from "@/lib/sharks";
@@ -24,33 +24,16 @@ const KIND_LABEL: Record<DemoBeat["kind"], string> = {
   offer: "offers",
 };
 
-const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
-
-function subscribeReducedMotion(notify: () => void) {
-  const query = window.matchMedia(REDUCED_MOTION);
-  query.addEventListener("change", notify);
-  return () => query.removeEventListener("change", notify);
-}
-
 interface Props {
   scripts?: DemoScript[];
-  /** Start playing as soon as it opens (never when the visitor prefers reduced motion). */
-  autoPlay?: boolean;
   onTryLive?: () => void;
 }
 
 /** Plays back recorded sessions of the real panel. It makes no API calls and is labelled as a recording. */
-export function DemoReplay({ scripts = DEMO_SCRIPTS, autoPlay = false, onTryLive }: Props) {
+export function DemoReplay({ scripts = DEMO_SCRIPTS, onTryLive }: Props) {
   const [scriptId, setScriptId] = useState(scripts[0].id);
   const [index, setIndex] = useState(0);
-  /** null until the visitor presses a control, so auto-play can follow the motion preference. */
-  const [chosen, setChosen] = useState<boolean | null>(null);
-  const reducedMotion = useSyncExternalStore(
-    subscribeReducedMotion,
-    () => window.matchMedia(REDUCED_MOTION).matches,
-    () => true,
-  );
-  const playing = chosen ?? (autoPlay && !reducedMotion);
+  const [playing, setPlaying] = useState(false);
 
   const script = scripts.find((s) => s.id === scriptId) ?? scripts[0];
   const last = script.beats.length - 1;
@@ -67,19 +50,14 @@ export function DemoReplay({ scripts = DEMO_SCRIPTS, autoPlay = false, onTryLive
   const choose = (id: DemoScript["id"]) => {
     setScriptId(id);
     setIndex(0);
-    setChosen(true);
+    setPlaying(true);
   };
   const speaker = beat.sharkId ?? null;
   const speakerName = speaker ? SHARKS[speaker].name : "You (recorded founder)";
 
   return (
-    <section aria-labelledby="demo-h" className={`${card} flex flex-col gap-4 p-4 sm:p-6`}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="demo-h" className="font-display text-2xl font-semibold">
-          Watch a demo
-        </h2>
-        <p className="rounded-full border border-slate-600 px-3 py-1 text-sm text-slate-200">Recorded demo: not live AI output</p>
-      </div>
+    <section aria-label="Recorded demo" className={`${card} flex flex-col gap-4 p-4 sm:p-6`}>
+      <p className="self-start rounded-full border border-slate-600 px-3 py-1 text-sm text-slate-200">Recorded demo: not live AI output</p>
 
       <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Choose a recorded pitch">
         {scripts.map((s) => (
@@ -124,7 +102,8 @@ export function DemoReplay({ scripts = DEMO_SCRIPTS, autoPlay = false, onTryLive
           <span className="text-slate-300">{KIND_LABEL[beat.kind]}</span>
           {beat.followUp ? <span className="rounded-full bg-rose-300 px-2 py-0.5 text-xs font-bold text-slate-950">Follow-up</span> : null}
         </p>
-        <p aria-live="polite" className="mt-2 text-lg leading-relaxed text-slate-100 sm:text-xl">
+        {/* Silent while it auto-advances so screen readers are not flooded; the line is announced when paused or stepped. */}
+        <p aria-live={running ? "off" : "polite"} className="mt-2 text-lg leading-relaxed text-slate-100 sm:text-xl">
           {beat.text}
         </p>
       </div>
@@ -168,7 +147,7 @@ export function DemoReplay({ scripts = DEMO_SCRIPTS, autoPlay = false, onTryLive
           className={btn.primary}
           onClick={() => {
             if (finished) setIndex(0);
-            setChosen(finished ? true : !running);
+            setPlaying(finished ? true : !running);
           }}
         >
           {finished ? "Replay" : running ? "Pause" : "Play"}

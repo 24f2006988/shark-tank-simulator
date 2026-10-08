@@ -4,15 +4,13 @@ import type { Difficulty, SharkId } from "./types";
  * Two real sessions recorded from the live app (Gemini panel, 8 Oct 2026) and trimmed to the key lines.
  * The replay in components/DemoReplay.tsx plays them back with no API calls.
  */
-export type BeatKind = "question" | "answer" | "reaction" | "walkout" | "offer";
+type BeatKind = "question" | "answer" | "reaction" | "walkout" | "offer";
 
 export interface DemoBeat {
   kind: BeatKind;
   /** Speaker; absent for the founder's own lines. */
   sharkId?: SharkId;
   text: string;
-  /** Topic the question probes (questions only). */
-  probing?: string;
   followUp?: boolean;
   /** Interest change this line caused for its speaker. */
   delta?: number;
@@ -20,7 +18,7 @@ export interface DemoBeat {
   interests: Record<SharkId, number | null>;
 }
 
-export interface DemoSummary {
+interface DemoSummary {
   overall: number;
   verdict: string;
   strengths: string[];
@@ -34,7 +32,6 @@ export interface DemoScript {
   label: string;
   hint: string;
   pitch: { ideaName: string; oneLiner: string; askLakh: number; equityPct: number; difficulty: Difficulty };
-  start: Record<SharkId, number>;
   beats: DemoBeat[];
   summary: DemoSummary;
 }
@@ -51,18 +48,11 @@ export const DEMO_SCRIPTS: DemoScript[] = [
       "equityPct": 10,
       "difficulty": "realistic"
     },
-    "start": {
-      "vikram": 50,
-      "meera": 50,
-      "arjun": 50,
-      "zara": 50
-    },
     "beats": [
       {
         "kind": "question",
         "sharkId": "vikram",
         "text": "You claim 58% gross margin at Rs 15 a cup, but what is your fully loaded cost per cup including cart depreciation, wastage, and the staff salary?",
-        "probing": "economics",
         "interests": {
           "vikram": 50,
           "meera": 50,
@@ -108,7 +98,6 @@ export const DEMO_SCRIPTS: DemoScript[] = [
         "kind": "question",
         "sharkId": "meera",
         "text": "You claim 5 of your 6 parks renewed, but how do you actually acquire the cart space in a new tech park, and who specifically signs off on that?",
-        "probing": "customer",
         "interests": {
           "vikram": 65,
           "meera": 55,
@@ -154,7 +143,6 @@ export const DEMO_SCRIPTS: DemoScript[] = [
         "kind": "question",
         "sharkId": "arjun",
         "text": "You want to build an employer dashboard for Rs 50 lakh, but what stops a tech park vendor from building the exact same portal in a week?",
-        "probing": "defensibility",
         "interests": {
           "vikram": 65,
           "meera": 70,
@@ -200,7 +188,6 @@ export const DEMO_SCRIPTS: DemoScript[] = [
         "kind": "question",
         "sharkId": "zara",
         "text": "You claim you want to expand to Pune and Hyderabad with 40 new carts, but what is your exact plan to hire and train reliable cart leads in new cities without breaking quality?",
-        "probing": "founder",
         "interests": {
           "vikram": 70,
           "meera": 76,
@@ -246,7 +233,6 @@ export const DEMO_SCRIPTS: DemoScript[] = [
         "kind": "question",
         "sharkId": "arjun",
         "text": "You claim exclusive floor rights in tech parks, but what exact legal clause prevents a property manager from terminating your agreement after a twelve-week notice period?",
-        "probing": "defensibility",
         "interests": {
           "vikram": 72,
           "meera": 81,
@@ -292,7 +278,6 @@ export const DEMO_SCRIPTS: DemoScript[] = [
         "kind": "question",
         "sharkId": "arjun",
         "text": "If your floor-rights agreements can be terminated with notice and lack ironclad legal protection, what stops a well-funded competitor from undercutting you and paying landlords higher common area maintenance fees to evict you?",
-        "probing": "defensibility",
         "followUp": true,
         "interests": {
           "vikram": 75,
@@ -339,7 +324,6 @@ export const DEMO_SCRIPTS: DemoScript[] = [
         "kind": "question",
         "sharkId": "zara",
         "text": "You want Rs 50 lakh to expand to Pune and Hyderabad. Walk me through your exact marketing spend to acquire corporate clients in those new cities.",
-        "probing": "founder",
         "interests": {
           "vikram": 80,
           "meera": 90,
@@ -473,18 +457,11 @@ export const DEMO_SCRIPTS: DemoScript[] = [
       "equityPct": 2,
       "difficulty": "ruthless"
     },
-    "start": {
-      "vikram": 40,
-      "meera": 40,
-      "arjun": 40,
-      "zara": 40
-    },
     "beats": [
       {
         "kind": "question",
         "sharkId": "vikram",
         "text": "You want a Rs 250 crore valuation pre-launch with zero revenue. What is your exact cash burn rate per month, and how many months of runway do you have left?",
-        "probing": "economics",
         "interests": {
           "vikram": 40,
           "meera": 40,
@@ -530,7 +507,6 @@ export const DEMO_SCRIPTS: DemoScript[] = [
         "kind": "question",
         "sharkId": "vikram",
         "text": "You completely dodged my question. What is your exact monthly cash burn right now, down to the last rupee?",
-        "probing": "economics",
         "followUp": true,
         "interests": {
           "vikram": 12,
@@ -599,7 +575,6 @@ export const DEMO_SCRIPTS: DemoScript[] = [
         "kind": "question",
         "sharkId": "meera",
         "text": "You still have not answered. What is your exact monthly burn right now, or are you operating on zero capital?",
-        "probing": "economics",
         "interests": {
           "vikram": null,
           "meera": 24,
@@ -633,7 +608,6 @@ export const DEMO_SCRIPTS: DemoScript[] = [
         "kind": "question",
         "sharkId": "meera",
         "text": "You said you are pre-launch with no customers, so give me the exact name of one beta user who tested this today.",
-        "probing": "customer",
         "followUp": true,
         "interests": {
           "vikram": null,
