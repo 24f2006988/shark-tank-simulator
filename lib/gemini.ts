@@ -36,8 +36,9 @@ const jsonSchemaCache = new WeakMap<z.ZodType, unknown>();
 function toJsonSchema(schema: z.ZodType): unknown {
   let json = jsonSchemaCache.get(schema);
   if (!json) {
-    const { $schema: _ignored, ...rest } = z.toJSONSchema(schema, { io: "input" }) as Record<string, unknown>;
-    json = rest;
+    const full = z.toJSONSchema(schema, { io: "input" }) as Record<string, unknown>;
+    delete full.$schema; // Gemini rejects the meta-schema key
+    json = full;
     jsonSchemaCache.set(schema, json);
   }
   return json;
