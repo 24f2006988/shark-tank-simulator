@@ -40,6 +40,8 @@ import type { Debrief, Evaluation, NegotiateResult, OffersResult, Question, Shar
 
 type Result<T> = Promise<{ data: T; source: Source }>;
 
+// Output limits include the model's thinking tokens; below about 800, short replies came back as cut-off JSON.
+
 // 14 s per attempt: flash-lite normally answers in about 4 s, and a stalled attempt still leaves about 21 s for gemini-3.5-flash (about 15 s).
 export const DEBRIEF_ATTEMPT_MS = 14_000;
 export const DEBRIEF_BUDGET_MS = 35_000;
@@ -69,7 +71,7 @@ async function openingTurn({ pitch, sharks, turns }: TurnRequest): Result<TurnRe
       system: systemPrompt(pitch.difficulty),
       prompt: openingPrompt(pitch, sharkId),
       temperature: 0.8,
-      maxTokens: 400,
+      maxTokens: 800,
     });
     const next = { sharkId, question: tidy(data.next.question, LIMITS.question.max), probing: data.next.probing, isFollowUp: false };
     return { data: { evaluation: null, sharks, next, over: false }, source: "ai" };
@@ -177,7 +179,7 @@ export async function runNegotiate({ pitch, offer, counter, counters }: z.output
       system: systemPrompt(pitch.difficulty),
       prompt: negotiatePrompt(pitch, offer, terms, counters),
       temperature: 0.7,
-      maxTokens: 300,
+      maxTokens: 800,
     });
     const line = tidy(data.line);
     if (data.response === "accept") return { data: { response: "accept", ...terms, line }, source: "ai" };
