@@ -23,6 +23,9 @@ Sources: organizers' email (7 Oct) and the official deck `Prompt_Arena_Participa
   2. **Cloud Run URL**: the deployed app, **hosted on Google Cloud Run ONLY. No other host (Vercel, Netlify, Firebase Hosting...) is accepted.**
   3. **LinkedIn post**: short, clear post about what was built; must NAME the problem statement (Shark Tank Simulator) and show how the app addresses it. Vague posts hurt the alignment score.
 - **Scoring (automated, score shown instantly after submitting):** Code Quality (clean, readable, structured) | Security (no leaked keys, validate inputs and external data) | Efficiency (no redundant work, no bloated deps) | **Testing (unit/integration tests showing coverage)** | **Accessibility (semantic HTML, ARIA labels, keyboard use, contrast)** | Problem Alignment (solves the stated challenge, not just impressive tech).
+  - The scorer is an **AI evaluator** that reads the GitHub repo and the deployed app and gives a score out of 100 with **7 categories**: Code Quality, Security, Efficiency, Testing, Accessibility, **Google Services**, Problem Statement Alignment. (Briefing example of a weak entry: 25.56/100 with Code Quality 55, Security 70, Efficiency 20, Testing 13, Accessibility 15, **Google Services 0, Problem Statement Alignment 0**.)
+  - **Google Services** counts on its own: use and visibly document Google tech (Gemini API via `@google/genai`, Cloud Run, Secret Manager for the key, Cloud Logging, Google Fonts; optionally Cloud Text-to-Speech / Firebase). Name them in the README.
+  - **Problem Statement Alignment** is judged from what the evaluator can see: the README must map each required feature to where it is in the code and app.
 - **Only the LATEST score counts**, not the best (90 then 60 = 60 on the leaderboard). The leaderboard updates live.
 - Only 2 submission attempts in total, no appeals (see HARD LIMITS rule 4).
 - The solution must **implement every feature asked in the problem statement**. Certificate needs at least **80% of problem-statement features**; aim for 100%.
@@ -60,8 +63,8 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 ## Project status (update as decisions are made)
 - Chosen problem: **Shark Tank Simulator** (switched from GitHub Roast and Rescue for more interaction). Full statement, required-feature checklist and planned extras in `chosen problem statement.txt` (read it before building).
 - Tech stack: **Next.js 16 + TypeScript + Tailwind 4, Gemini API (`@google/genai`, free tier key), hosted on Google Cloud Run** (Docker image from Next.js `output: "standalone"`; Vercel is NOT allowed). Full build plan: `PLAN.md`.
-- Deployed URL: _TBD_
-- GitHub repo: https://github.com/24f2006988/shark-tank-simulator
+- Deployed URL (Cloud Run, asia-south1, GCP project project-49ab7bea-3f18-4f37-868): https://shark-tank-simulator-888217860739.asia-south1.run.app
+- GitHub repo: https://github.com/24f2006988/shark-tank-simulator (submit as https://github.com/24f2006988/shark-tank-simulator.git)
 
 ## Progress log (append one line per change: time, which AI, what)
 - 2026-10-08, Claude Code: chose GitHub Roast and Rescue; created `chosen problem statement.txt`; updated Project status.
@@ -72,3 +75,5 @@ The candidate problems are in `problem statements.txt`: Story Teacher, GitHub Ro
 - 2026-10-08, Claude Code: first commit pushed to https://github.com/24f2006988/shark-tank-simulator (hello-world page, README, .env.example, pre-commit size hook installed).
 - 2026-10-08, Claude Code: added official timeline (submit 18:00-18:30, no extension), certificate rules (80% features, public GitHub, check-in by 09:30) and 9 Oct PPT finale from the organizers' email.
 - 2026-10-08, Claude Code: added rules from the official briefing deck: Cloud Run ONLY (replaces Vercel), 3 required links (.git GitHub URL, Cloud Run URL, LinkedIn post), exactly one branch, scoring rubric (incl. testing + accessibility), latest score counts.
+- 2026-10-08, Claude Code: added AI-evaluator scoring details (7 categories incl. Google Services) from briefing screenshot to HARD rules context and PLAN.md rubric.
+- 2026-10-08, Claude Code: installed gcloud (%LOCALAPPDATA%\gcloud-cli), deployed hello-world to Cloud Run: https://shark-tank-simulator-888217860739.asia-south1.run.app. Redeploy: `gcloud run deploy shark-tank-simulator --source . --region asia-south1` (env vars persist).

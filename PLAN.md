@@ -113,6 +113,8 @@ Agree on `lib/types.ts` first, then each works in its own files.
 4. Debrief shows the rewritten pitch: "this is what you should have said."
 
 ## 11. Scoring rubric (from the briefing deck) and how we hit it
+Scored by an **AI evaluator** (repo + live app), out of 100, 7 categories. A weak example entry got 25.56 with Google Services 0 and Problem Alignment 0, so those two are cheap points we must not miss.
+
 | Parameter | What we do |
 |---|---|
 | Code Quality | Small typed modules in `lib/`, one job each, ESLint clean, no dead code |
@@ -121,3 +123,4 @@ Agree on `lib/types.ts` first, then each works in its own files.
 | Testing | Vitest unit tests for sharks, prompts, validation, scoring, fallback; route tests with mocked Gemini; `npm test` in README |
 | Accessibility | Semantic landmarks and labels, ARIA live region for shark messages, labelled meters (`role="meter"`, `aria-valuenow`), full keyboard flow, visible focus, WCAG AA contrast, reduced-motion support |
 | Problem Alignment | Every required feature visible in the demo; README and LinkedIn post map features to the statement (panel, hard questions, better pitch) |
+| **Google Services** (scored separately; 0 if absent) | Gemini API (`@google/genai`), hosted on Cloud Run, key in Secret Manager, structured logs to Cloud Logging, Google Fonts; extra if time: Cloud Text-to-Speech for shark voices. A "Google services used" section in the README listing each one and where it's used |

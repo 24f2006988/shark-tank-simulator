@@ -2,7 +2,7 @@
 
 Pitch your idea to a panel of AI investors who will not go easy on you. They question you round by round, react to every answer, make offers you can negotiate, and leave you with a sharper pitch.
 
-**Live:** _coming soon_
+**Live:** https://shark-tank-simulator-888217860739.asia-south1.run.app
 
 ## Run locally
 ```bash
