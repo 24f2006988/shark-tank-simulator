@@ -50,10 +50,11 @@ flowchart LR
 ## Google services used
 | Service | How we use it | Where |
 |---|---|---|
-| **Gemini API** (`@google/genai`; `gemini-3.5-flash`, fallback `gemini-3.5-flash-lite`) | Questions, answer scoring, shark reactions, offers, negotiation and the debrief, all via **structured JSON output** (`responseJsonSchema` generated from our Zod schemas) | `lib/gemini.ts`, `lib/prompts.ts`, `lib/handlers.ts` |
+| **Gemini on Vertex AI** (`@google/genai`; `gemini-3.8-flash` → `gemini-3.5-flash` → `gemini-3.5-flash-lite`) | Questions, answer scoring, shark reactions, offers, negotiation and the debrief, all via **structured JSON output** (`responseJsonSchema` generated from our Zod schemas). In production Cloud Run calls Vertex AI with its own service account (IAM role `aiplatform.user`), so no API key is needed | `lib/gemini.ts`, `lib/prompts.ts`, `lib/handlers.ts` |
 | **Google Cloud Run** | Hosts the app (asia-south1) as a non-root container; scales to zero | `Dockerfile`, live URL above |
 | **Cloud Build + Artifact Registry** | Build the container from source on every deploy | `gcloud run deploy --source .` |
-| **Secret Manager** | Stores `GEMINI_API_KEY`, mounted into Cloud Run at runtime; the key never touches the repo, image or browser | Deploy command below |
+| **Secret Manager** | Stores the optional `GEMINI_API_KEY` (Gemini Developer API mode), mounted into Cloud Run at runtime; the key never touches the repo, image or browser | Deploy command below |
+| **Cloud IAM** | Least-privilege service account for Vertex AI calls | `roles/aiplatform.user` on the Cloud Run service account |
 | **Cloud Logging** | Structured JSON request logs (route, latency, model, AI vs. fallback); pitch text is never logged | `lib/log.ts`, `lib/http.ts` |
 | **Google Fonts** | Typefaces via `next/font/google`, self-hosted at build time | `app/layout.tsx` |
 
@@ -82,7 +83,7 @@ npm run test:coverage  # coverage report
 - **Accepted trade-off:** the session lives in the browser, so a user could edit their own scores. That only affects their own game; nothing is stored or shared server-side.
 
 ### Reliability and efficiency
-- **Fallback chain:** primary model → lighter model → deterministic scripted questions, scoring, offers and debrief (`lib/fallback.ts`). A session never dead-ends, and the API never returns a 5xx for an AI failure.
+- **Fallback chain:** a list of Gemini models tried in order within an 18 s budget. A model that returns 429 or 503 is skipped while it cools down. After that come deterministic scripted questions, scoring, offers and debrief (`lib/fallback.ts`). A session never dead-ends, and the API never returns a 5xx for an AI failure.
 - **Fast turns:** each turn is one call with a low thinking level, a 12 s timeout and only the last 10 exchanges in the prompt (about 3 s per turn).
 - **Lean dependencies:** Next.js, React, `@google/genai`, Zod. No UI kit, chart library or database.
 
