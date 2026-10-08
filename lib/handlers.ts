@@ -40,7 +40,8 @@ import type { Debrief, Evaluation, NegotiateResult, OffersResult, Question, Shar
 
 type Result<T> = Promise<{ data: T; source: Source }>;
 
-export const DEBRIEF_ATTEMPT_MS = 20_000;
+// 14 s per attempt: flash-lite normally answers in about 4 s, and a stalled attempt still leaves about 21 s for gemini-3.5-flash (about 15 s).
+export const DEBRIEF_ATTEMPT_MS = 14_000;
 export const DEBRIEF_BUDGET_MS = 35_000;
 
 const tidy = (s: string, max: number = LIMITS.line.max) => cleanText(s).slice(0, max);
