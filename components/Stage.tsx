@@ -72,14 +72,15 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
       </ul>
 
       <div className="relative">
-        {pointer ? (
+        {pointer && (bubble || thinking) ? (
           <span
             aria-hidden="true"
             className="absolute -top-2 size-4 rotate-45 border-t border-l border-slate-600 bg-slate-900 transition-[left] duration-500"
             style={{ left: `calc(${(SHARK_IDS.indexOf(pointer) + 0.5) * 25}% - 8px)` }}
           />
         ) : null}
-        <div className="min-h-28 rounded-lg border border-slate-600 bg-slate-900 px-5 py-4">
+        {/* Hidden when nobody is speaking (e.g. on the offers stage once the announcements end). */}
+        <div className={`min-h-28 rounded-lg border border-slate-600 bg-slate-900 px-5 py-4 ${bubble || thinking ? "" : "hidden"}`}>
           {thinking && !line ? (
             <p className="flex items-center gap-3 text-slate-300">
               <span className={`font-semibold ${SHARKS[thinking].color.text}`}>{SHARKS[thinking].name}</span>
@@ -100,7 +101,7 @@ export function Stage({ sharks, line, shown, idle, thinking, deltas, round, onSk
                 {bubble.kind === "out" ? <span className="rounded-full bg-rose-400 px-2 py-0.5 text-xs font-bold text-slate-950">I&apos;m out</span> : null}
                 {line && onSkip ? (
                   <button type="button" onClick={onSkip} className={`${btn.ghost} ml-auto min-h-9 py-1 text-sm`}>
-                    Skip to the question
+                    Skip ahead
                   </button>
                 ) : null}
               </div>
